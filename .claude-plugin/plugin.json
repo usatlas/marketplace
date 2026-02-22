@@ -1,0 +1,24 @@
+{
+  "name": "analysis-facilities",
+  "description": "Skills for working with USATLAS Analysis Facilities including UChicago, BNL, and SLAC sites.",
+  "homepage": "https://usatlas.github.io/af-docs/",
+  "repository": "https://github.com/usatlas/af-docs",
+  "license": "MIT",
+  "keywords": [
+    "ATLAS",
+    "HEP",
+    "particle physics",
+    "HTCondor",
+    "batch jobs",
+    "JupyterLab",
+    "Rucio",
+    "XCache",
+    "ServiceX",
+    "Coffea Casa",
+    "Triton",
+    "machine learning",
+    "GPU",
+    "distributed computing",
+    "data analysis"
+  ]
+}

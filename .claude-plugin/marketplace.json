@@ -1,0 +1,32 @@
+{
+  "name": "analysis-facilities",
+  "owner": {
+    "name": "USATLAS",
+    "url": "https://github.com/usatlas"
+  },
+  "description": "Claude Code skills for USATLAS Members.",
+  "plugins": [
+    {
+      "name": "analysis-facilities",
+      "description": "Skills for working with USATLAS Analysis Facilities (UChicago, BNL, SLAC) providing workflows for HTCondor batch jobs, JupyterLab, XCache, Rucio, ServiceX, Coffea Casa, and Triton ML inference",
+      "source": "./",
+      "skills": ["uchicago-af"],
+      "keywords": [
+        "ATLAS",
+        "HEP",
+        "particle physics",
+        "HTCondor",
+        "batch jobs",
+        "JupyterLab",
+        "Rucio",
+        "XCache",
+        "ServiceX",
+        "Coffea Casa",
+        "Triton",
+        "machine learning",
+        "UChicago",
+        "analysis facility"
+      ]
+    }
+  ]
+}
