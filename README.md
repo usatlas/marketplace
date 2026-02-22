@@ -21,7 +21,7 @@ Then install the `analysis-facilities` plugin from the marketplace.
 If you have this repository cloned locally:
 
 ```bash
-/plugins marketplace add /path/to/af-docs/af-skills
+/plugins marketplace add /path/to/marketplace
 ```
 
 ## Plugin Structure
@@ -69,7 +69,8 @@ https://usatlas.readthedocs.io/projects/af-docs/
 This marketplace is maintained alongside the USATLAS Analysis Facilities
 documentation. To report issues or suggest improvements:
 
-- GitHub Issues: https://github.com/usatlas/af-docs/issues
+- GitHub Issues: https://github.com/usatlas/marketplace/issues
+- Documentation: https://github.com/usatlas/af-docs/issues
 - Email: atlas-us-chicago-tier3-admins@cern.ch (UChicago AF)
 
 ## License
