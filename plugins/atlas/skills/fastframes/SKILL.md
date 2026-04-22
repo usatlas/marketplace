@@ -1,10 +1,8 @@
 ---
 name: fastframes
 description: >-
-  Use when using FastFrames to process CP-algorithm-style NTuples with
-  RDataFrame: configuring FastFrames via YAML, understanding its columnar
-  processing model, running FastFrames locally, or reading FastFrames output
-  histograms with uproot or hist.
+  Use when you need a supported RDataFrame-based framework to process
+  CP-algorithm NTuples or TopCPToolkit outputs into analysis histograms.
 ---
 
 # FastFrames
@@ -26,7 +24,7 @@ outputs into histograms.
 
 ## Key Concepts
 
-```
+```text
 DAOD_PHYS / DAOD_PHYSLITE
     ↓ TopCPToolkit (runs in AnalysisBase/Athena)
 NTuples (ROOT, flat branches)
