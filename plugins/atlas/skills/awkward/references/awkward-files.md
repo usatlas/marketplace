@@ -4,7 +4,8 @@
 
 - Prefer `awkward`'s built-in I/O functions when available for your format.
 - Use `ak.to_parquet` and `ak.from_parquet` for Parquet.
-- Use `ak.to_json` and `ak.from_json` for JSON when needed (beware of large files).
+- Use `ak.to_json` and `ak.from_json` for JSON when needed (beware of large
+  files).
 
 ## Common patterns
 

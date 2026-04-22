@@ -1,19 +1,21 @@
 ---
 name: cabinetry
 description: >-
-    Use when building an ATLAS statistical analysis with cabinetry: writing
-    a cabinetry config file, building histogram templates from ROOT NTuples,
-    constructing a pyhf workspace, running a profile likelihood fit,
-    visualising pre/post-fit data-MC comparisons, producing pull plots and
-    NP rankings, or computing CLs exclusion limits via cabinetry's high-level
-    API.
+  Use when building an ATLAS statistical analysis with cabinetry: writing a
+  cabinetry config file, building histogram templates from ROOT NTuples,
+  constructing a pyhf workspace, running a profile likelihood fit, visualising
+  pre/post-fit data-MC comparisons, producing pull plots and NP rankings, or
+  computing CLs exclusion limits via cabinetry's high-level API.
 ---
 
 # cabinetry
 
 ## Overview
 
-cabinetry is a high-level Python library that sits above pyhf and automates the workflow from ROOT NTuples → histogram templates → pyhf workspace → fit results → plots. It is driven by a YAML/JSON config file and is the recommended end-to-end framework for new ATLAS analyses using the Python stack.
+cabinetry is a high-level Python library that sits above pyhf and automates the
+workflow from ROOT NTuples → histogram templates → pyhf workspace → fit results
+→ plots. It is driven by a YAML/JSON config file and is the recommended
+end-to-end framework for new ATLAS analyses using the Python stack.
 
 ## When to Use
 
@@ -40,7 +42,7 @@ NTuples (ROOT) → cabinetry templates → pyhf workspace → fit → plots
 General:
   HistogramFolder: "histograms/"
   InputPath: "ntuples/{SamplePath}"
-  
+
 Regions:
   - Name: "SR"
     Filter: "n_bjets >= 2 and met > 200e3"
@@ -78,6 +80,7 @@ Systematics:
 ## Canonical Patterns
 
 **Full workflow**:
+
 ```python
 import cabinetry
 
@@ -97,6 +100,7 @@ fit_results = cabinetry.fit.fit(model, data)
 ```
 
 **Visualisation**:
+
 ```python
 # Pre-fit data/MC
 cabinetry.visualize.data_mc(config, figure_folder="figures/prefit/")
@@ -113,6 +117,7 @@ cabinetry.visualize.ranking(ranking_results, figure_folder="figures/")
 ```
 
 **CLs upper limit**:
+
 ```python
 limit_results = cabinetry.fit.limit(model, data)
 print(f"Observed limit: {limit_results.observed_limit:.2f}")
@@ -120,6 +125,7 @@ print(f"Expected limit: {limit_results.expected_limit[2]:.2f}")  # median
 ```
 
 **Load a pre-built workspace directly** (skip template building):
+
 ```python
 import json, pyhf
 with open("workspace.json") as f:
@@ -130,24 +136,35 @@ fit_results = cabinetry.fit.fit(model, data)
 
 ## Config Tips
 
-- `NormFactor` on a sample inserts a free `normfactor` modifier — use for signal μ and CR-driven backgrounds
-- `Type: NormPlusShape` creates separate norm and shape modifiers — correct for most experimental systematics
-- `Type: Normalization` (with `Value`) creates a `normsys` modifier — for luminosity and cross-section uncertainties
-- Samples not listed under a Systematic get that systematic applied with zero effect — fine for backgrounds with no uncertainty
+- `NormFactor` on a sample inserts a free `normfactor` modifier — use for signal
+  μ and CR-driven backgrounds
+- `Type: NormPlusShape` creates separate norm and shape modifiers — correct for
+  most experimental systematics
+- `Type: Normalization` (with `Value`) creates a `normsys` modifier — for
+  luminosity and cross-section uncertainties
+- Samples not listed under a Systematic get that systematic applied with zero
+  effect — fine for backgrounds with no uncertainty
 - `AddStatError: true` (global option) adds Barlow-Beeston staterror to all bins
 
 ## Gotchas
 
-- **ROOT file variable names**: cabinetry reads branches by name; branch names must match what you put in `Variable` and `Filter`
-- **Units in cuts**: NTuples in MeV → write cuts in MeV (`met > 200e3`, not `> 200`)
-- **Missing NTuple files**: cabinetry raises at template-build time — check `SamplePath` glob patterns
-- **Pre-existing histograms**: If `HistogramFolder` has old files, `build()` will use them. Delete the folder to force a rebuild.
-- **Symmetric systematics**: If only `Up` is specified, cabinetry mirrors it for `Down` automatically
+- **ROOT file variable names**: cabinetry reads branches by name; branch names
+  must match what you put in `Variable` and `Filter`
+- **Units in cuts**: NTuples in MeV → write cuts in MeV (`met > 200e3`, not
+  `> 200`)
+- **Missing NTuple files**: cabinetry raises at template-build time — check
+  `SamplePath` glob patterns
+- **Pre-existing histograms**: If `HistogramFolder` has old files, `build()`
+  will use them. Delete the folder to force a rebuild.
+- **Symmetric systematics**: If only `Up` is specified, cabinetry mirrors it for
+  `Down` automatically
 
 ## Interop
 
-- **pyhf**: cabinetry workspaces are valid pyhf JSON — use pyhf directly for advanced patching or combination
-- **hist**: cabinetry can also accept pre-built `Hist` objects instead of NTuples via custom template providers
+- **pyhf**: cabinetry workspaces are valid pyhf JSON — use pyhf directly for
+  advanced patching or combination
+- **hist**: cabinetry can also accept pre-built `Hist` objects instead of
+  NTuples via custom template providers
 - **pyhs3**: save cabinetry workspaces with pyhs3 for schema-compliant archiving
 
 ## Docs

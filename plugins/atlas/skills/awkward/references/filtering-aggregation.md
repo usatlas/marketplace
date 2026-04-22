@@ -12,5 +12,6 @@
 - `ak.num`: count slots (like `len`), independent of empties.
 
 Notes:
+
 - There is no `ak.max` or `ak.min`; use Python's `max`/`min` if needed.
 - Do not pass `None` for `axis` in Awkward functions.

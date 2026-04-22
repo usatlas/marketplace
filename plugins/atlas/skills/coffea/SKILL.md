@@ -1,38 +1,45 @@
 ---
 name: coffea
 description: >-
-    Use when writing a columnar ATLAS analysis with coffea: defining a
-    NanoEvents or custom processor, running over multiple files with
-    dask-awkward or iterative executor, accumulating histograms with hist,
-    applying scale factors and systematic weights, or migrating a for-loop
-    event analysis to a coffea processor pattern.
+  Use when writing a columnar ATLAS analysis with coffea: defining a NanoEvents
+  or custom processor, running over multiple files with dask-awkward or
+  iterative executor, accumulating histograms with hist, applying scale factors
+  and systematic weights, or migrating a for-loop event analysis to a coffea
+  processor pattern.
 ---
 
 # coffea
 
 ## Overview
 
-coffea is a columnar analysis toolkit built on awkward-array and hist. It provides a `Processor` abstraction that separates analysis logic from execution: the same processor runs locally (iterative), in parallel on a laptop (futures), or on the grid (dask + Parsl/HTCondor). coffea is heavily used at CMS but is fully usable for ATLAS analyses — the key difference is that ATLAS NTuples are read with uproot, not the NanoAOD schema layer.
+coffea is a columnar analysis toolkit built on awkward-array and hist. It
+provides a `Processor` abstraction that separates analysis logic from execution:
+the same processor runs locally (iterative), in parallel on a laptop (futures),
+or on the grid (dask + Parsl/HTCondor). coffea is heavily used at CMS but is
+fully usable for ATLAS analyses — the key difference is that ATLAS NTuples are
+read with uproot, not the NanoAOD schema layer.
 
 ## When to Use
 
 - Writing a reproducible, batched analysis that must scale to many files
 - Accumulating histograms from multiple samples and systematics in a single pass
-- Analyses at Coffea-Casa or other ATLAS analysis facilities that pre-configure dask clusters
-- When you want the coffea `Processor` pattern to separate "what to compute" from "how to parallelize"
+- Analyses at Coffea-Casa or other ATLAS analysis facilities that pre-configure
+  dask clusters
+- When you want the coffea `Processor` pattern to separate "what to compute"
+  from "how to parallelize"
 
 ## Key Concepts
 
-| Concept | Notes |
-|---|---|
-| `Processor` | Class with `process(events)` → dict of accumulators |
-| `hist.Hist` | The standard histogram accumulator inside coffea processors |
-| `NanoEventsFactory` | Reads NanoAOD-style ROOT files with behavior mixins; not needed for flat ATLAS NTuples |
-| `uproot.dask()` | Produces dask-awkward arrays from ROOT files; feeds a dask executor |
-| `coffea.dataset_tools` | Helpers for building file sets and running with dask |
-| `runner` | Deprecated (v0.7); coffea v2025+ uses `apply_to_fileset` + dask directly |
-| `weight` / `Weights` | `coffea.analysis_tools.Weights` manages multiple scale factor weights |
-| `PackedSelection` | Bitwise selection mask; fast AND/OR over boolean arrays |
+| Concept                | Notes                                                                                  |
+| ---------------------- | -------------------------------------------------------------------------------------- |
+| `Processor`            | Class with `process(events)` → dict of accumulators                                    |
+| `hist.Hist`            | The standard histogram accumulator inside coffea processors                            |
+| `NanoEventsFactory`    | Reads NanoAOD-style ROOT files with behavior mixins; not needed for flat ATLAS NTuples |
+| `uproot.dask()`        | Produces dask-awkward arrays from ROOT files; feeds a dask executor                    |
+| `coffea.dataset_tools` | Helpers for building file sets and running with dask                                   |
+| `runner`               | Deprecated (v0.7); coffea v2025+ uses `apply_to_fileset` + dask directly               |
+| `weight` / `Weights`   | `coffea.analysis_tools.Weights` manages multiple scale factor weights                  |
+| `PackedSelection`      | Bitwise selection mask; fast AND/OR over boolean arrays                                |
 
 ## Canonical Patterns
 
@@ -180,31 +187,42 @@ class TwoRegionProcessor(ProcessorABC):
 
 ## Troubleshooting
 
-| Issue | Cause | Fix |
-|---|---|---|
+| Issue                                                | Cause                                   | Fix                                                         |
+| ---------------------------------------------------- | --------------------------------------- | ----------------------------------------------------------- |
 | `AttributeError: 'dict' has no attribute 'metadata'` | NanoEventsFactory used with flat NTuple | Use `schema=None` or `BaseSchema`; access branches directly |
-| `KeyError: treename` | Wrong tree name in fileset | Check with `uproot.open(file).keys()` |
-| Dask graph never computes | `dask.compute()` not called | Call `dask.compute(to_compute)` explicitly |
-| Histograms don't accumulate across files | Returning a new `hist.Hist` per chunk | Use `StrCategory(growth=True)` and rely on `accumulate` |
-| `None` values after `ak.firsts` | Events with zero jets | Wrap with `ak.fill_none(arr, default_value)` |
-| Memory spike on dask worker | `step_size` too large | Reduce `step_size` in `preprocess` |
-| `IterativeExecutor` is slow on many files | Serial execution | Switch to `FuturesExecutor(workers=4)` locally |
+| `KeyError: treename`                                 | Wrong tree name in fileset              | Check with `uproot.open(file).keys()`                       |
+| Dask graph never computes                            | `dask.compute()` not called             | Call `dask.compute(to_compute)` explicitly                  |
+| Histograms don't accumulate across files             | Returning a new `hist.Hist` per chunk   | Use `StrCategory(growth=True)` and rely on `accumulate`     |
+| `None` values after `ak.firsts`                      | Events with zero jets                   | Wrap with `ak.fill_none(arr, default_value)`                |
+| Memory spike on dask worker                          | `step_size` too large                   | Reduce `step_size` in `preprocess`                          |
+| `IterativeExecutor` is slow on many files            | Serial execution                        | Switch to `FuturesExecutor(workers=4)` locally              |
 
 ## Gotchas
 
-- **ATLAS NTuples are not NanoAOD**: set `schema=None` when using `Runner`, or pass `uproot_options` that skip schema detection. Branches are flat or jagged `vector<float>`, not behavior-augmented.
+- **ATLAS NTuples are not NanoAOD**: set `schema=None` when using `Runner`, or
+  pass `uproot_options` that skip schema detection. Branches are flat or jagged
+  `vector<float>`, not behavior-augmented.
 - **All ATLAS branches are in MeV**: divide by 1000 before GeV histograms.
-- **coffea v0.7 vs v2025+**: The `Runner`/`IterativeExecutor`/`FuturesExecutor` API changed significantly. v2025 uses `apply_to_fileset` + dask. Check which version is installed with `import coffea; print(coffea.__version__)`.
-- **`process()` must return a dict or a nested dict**: accumulators are merged across chunks by the framework.
-- **`postprocess()` is called once** after all chunks are merged — use it for normalization, not per-chunk computation.
+- **coffea v0.7 vs v2025+**: The `Runner`/`IterativeExecutor`/`FuturesExecutor`
+  API changed significantly. v2025 uses `apply_to_fileset` + dask. Check which
+  version is installed with `import coffea; print(coffea.__version__)`.
+- **`process()` must return a dict or a nested dict**: accumulators are merged
+  across chunks by the framework.
+- **`postprocess()` is called once** after all chunks are merged — use it for
+  normalization, not per-chunk computation.
 
 ## Interop
 
-- **uproot**: `uproot.dask()` produces dask-awkward arrays for coffea processors; `uproot.iterate` for non-dask mode.
-- **awkward**: All event data inside processors is `ak.Array`; use `ak.firsts`, `ak.pad_none`, `ak.fill_none` for jagged branches.
-- **hist**: The standard accumulator type; fill inside `process()`, merge automatically across chunks.
-- **vector**: `vector.register_awkward()` adds four-vector methods to awkward records before passing to a processor.
-- **Coffea-Casa**: ATLAS analysis facility at University of Chicago that pre-configures a dask cluster for ATLAS users.
+- **uproot**: `uproot.dask()` produces dask-awkward arrays for coffea
+  processors; `uproot.iterate` for non-dask mode.
+- **awkward**: All event data inside processors is `ak.Array`; use `ak.firsts`,
+  `ak.pad_none`, `ak.fill_none` for jagged branches.
+- **hist**: The standard accumulator type; fill inside `process()`, merge
+  automatically across chunks.
+- **vector**: `vector.register_awkward()` adds four-vector methods to awkward
+  records before passing to a processor.
+- **Coffea-Casa**: ATLAS analysis facility at University of Chicago that
+  pre-configures a dask cluster for ATLAS users.
 
 ## Docs
 

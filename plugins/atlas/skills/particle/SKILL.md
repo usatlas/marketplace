@@ -1,18 +1,20 @@
 ---
 name: particle
 description: >-
-    Use when looking up particle properties (mass, charge, PDG ID, lifetime,
-    width) from the PDG tables in Python: converting between particle names and
-    PDG IDs, filtering decay modes, checking if a particle is stable, or
-    working with Monte Carlo generator output where particle codes need to be
-    identified.
+  Use when looking up particle properties (mass, charge, PDG ID, lifetime,
+  width) from the PDG tables in Python: converting between particle names and
+  PDG IDs, filtering decay modes, checking if a particle is stable, or working
+  with Monte Carlo generator output where particle codes need to be identified.
 ---
 
 # particle
 
 ## Overview
 
-The `particle` library provides the full PDG particle table in Python. It wraps PDG IDs, masses, charges, lifetimes, decay modes, and particle names in a queryable object model. It is the standard Scikit-HEP tool for particle identification tasks that would otherwise require hardcoding PDG ID tables.
+The `particle` library provides the full PDG particle table in Python. It wraps
+PDG IDs, masses, charges, lifetimes, decay modes, and particle names in a
+queryable object model. It is the standard Scikit-HEP tool for particle
+identification tasks that would otherwise require hardcoding PDG ID tables.
 
 ## When to Use
 
@@ -92,14 +94,21 @@ def is_b_hadron(pdgid: int) -> bool:
 
 ## Gotchas
 
-- **Masses in MeV, not GeV**: `p.mass` returns MeV consistent with PDG tables — divide by 1000 for GeV.
-- **`pdgid` is not a plain int**: it's a `PDGID` object with `.is_meson`, `.is_baryon`, `.is_lepton` attributes. Use `int(p.pdgid)` if you need a plain integer.
-- **Unknown PDG IDs raise exceptions**: wrap lookups in `try/except` when processing Monte Carlo output, where generator-specific codes (e.g. `9999999`) may appear.
-- **Decay mode coverage is incomplete**: not all particles have decay modes in the PDG table.
+- **Masses in MeV, not GeV**: `p.mass` returns MeV consistent with PDG tables —
+  divide by 1000 for GeV.
+- **`pdgid` is not a plain int**: it's a `PDGID` object with `.is_meson`,
+  `.is_baryon`, `.is_lepton` attributes. Use `int(p.pdgid)` if you need a plain
+  integer.
+- **Unknown PDG IDs raise exceptions**: wrap lookups in `try/except` when
+  processing Monte Carlo output, where generator-specific codes (e.g. `9999999`)
+  may appear.
+- **Decay mode coverage is incomplete**: not all particles have decay modes in
+  the PDG table.
 
 ## Interop
 
-- **pyhepmc**: Extract PDG IDs from `HepMC3::GenParticle` truth records and identify them with `Particle`.
+- **pyhepmc**: Extract PDG IDs from `HepMC3::GenParticle` truth records and
+  identify them with `Particle`.
 - **decaylanguage**: Uses `particle` internally for decay descriptor parsing.
 - **hepunits**: Use alongside `particle` for unit-safe mass comparisons.
 

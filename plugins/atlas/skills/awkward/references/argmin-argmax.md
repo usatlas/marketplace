@@ -13,5 +13,6 @@ print(ak.flatten(array[max_values], axis=0))  # [7, None, 2, 8]
 ```
 
 After slicing with argmin/argmax:
+
 - Use `ak.flatten(..., axis=0)` to remove the extra list level, or
 - Use `ak.firsts` to extract the first element per list.

@@ -1,17 +1,21 @@
 ---
 name: pyhepmc
 description: >-
-    Use when reading or writing HepMC3 event records in Python: opening
-    HepMC2 or HepMC3 ASCII files from a Monte Carlo generator, iterating
-    over events, accessing truth particles and vertices, filtering by status
-    code or PDG ID, or writing modified events back to a HepMC file.
+  Use when reading or writing HepMC3 event records in Python: opening HepMC2 or
+  HepMC3 ASCII files from a Monte Carlo generator, iterating over events,
+  accessing truth particles and vertices, filtering by status code or PDG ID, or
+  writing modified events back to a HepMC file.
 ---
 
 # pyhepmc
 
 ## Overview
 
-pyhepmc provides Python bindings for the HepMC3 event record library. It reads HepMC2 and HepMC3 ASCII files produced by Monte Carlo generators (Pythia8, Sherpa, MadGraph, EvtGen) and exposes particles, vertices, and event metadata as Python objects. It is the standard tool for truth-level generator studies in the Scikit-HEP ecosystem.
+pyhepmc provides Python bindings for the HepMC3 event record library. It reads
+HepMC2 and HepMC3 ASCII files produced by Monte Carlo generators (Pythia8,
+Sherpa, MadGraph, EvtGen) and exposes particles, vertices, and event metadata as
+Python objects. It is the standard tool for truth-level generator studies in the
+Scikit-HEP ecosystem.
 
 ## When to Use
 
@@ -22,15 +26,15 @@ pyhepmc provides Python bindings for the HepMC3 event record library. It reads H
 
 ## Key Concepts
 
-| Concept | Notes |
-|---|---|
-| `GenEvent` | One event: particles + vertices + weights |
-| `GenParticle` | Four-vector + PDG ID + status code |
-| Status 1 | Final-state (stable) particles |
-| Status 2 | Decayed particles (intermediate) |
-| Status 3 | Parton-level / documentation particles |
-| `GenVertex` | Connects incoming and outgoing particles |
-| Weights | Named weight dictionary (e.g. scale variations) |
+| Concept       | Notes                                           |
+| ------------- | ----------------------------------------------- |
+| `GenEvent`    | One event: particles + vertices + weights       |
+| `GenParticle` | Four-vector + PDG ID + status code              |
+| Status 1      | Final-state (stable) particles                  |
+| Status 2      | Decayed particles (intermediate)                |
+| Status 3      | Parton-level / documentation particles          |
+| `GenVertex`   | Connects incoming and outgoing particles        |
+| Weights       | Named weight dictionary (e.g. scale variations) |
 
 ## Canonical Patterns
 
@@ -108,17 +112,25 @@ with pyhepmc.open("events.hepmc3") as f:
 
 ## Gotchas
 
-- **HepMC momentum units are GeV** (not MeV): pyhepmc follows HepMC3 conventions, so `p.momentum.e` is in GeV. This is opposite to ATLAS NTuple branches, which are in MeV.
-- **Status code conventions vary by generator**: status=1 for final-state is standard; beyond that, Pythia8 and Sherpa use generator-specific codes.
-- **Neutrinos pass isolation cuts**: remember to exclude neutrino PDG IDs (12, 14, 16) from visible-particle sums and jet clustering.
-- **HepMC2 vs HepMC3**: `pyhepmc.open` auto-detects the format. HepMC2 files have an `HepMC::IO_GenEvent` header; HepMC3 files start with `HepMC::Version`.
+- **HepMC momentum units are GeV** (not MeV): pyhepmc follows HepMC3
+  conventions, so `p.momentum.e` is in GeV. This is opposite to ATLAS NTuple
+  branches, which are in MeV.
+- **Status code conventions vary by generator**: status=1 for final-state is
+  standard; beyond that, Pythia8 and Sherpa use generator-specific codes.
+- **Neutrinos pass isolation cuts**: remember to exclude neutrino PDG IDs (12,
+  14, 16) from visible-particle sums and jet clustering.
+- **HepMC2 vs HepMC3**: `pyhepmc.open` auto-detects the format. HepMC2 files
+  have an `HepMC::IO_GenEvent` header; HepMC3 files start with `HepMC::Version`.
 
 ## Interop
 
-- **fastjet**: Extract final-state particles from `GenEvent`, build PseudoJets, cluster.
+- **fastjet**: Extract final-state particles from `GenEvent`, build PseudoJets,
+  cluster.
 - **particle**: Identify PDG IDs (`p.pid`) with `Particle.from_pdgid(p.pid)`.
-- **pylhe**: For parton-level LHE files; pyhepmc handles showered/hadronized events.
-- **awkward**: Convert final-state particle lists to awkward arrays for vectorized analysis.
+- **pylhe**: For parton-level LHE files; pyhepmc handles showered/hadronized
+  events.
+- **awkward**: Convert final-state particle lists to awkward arrays for
+  vectorized analysis.
 
 ## Docs
 

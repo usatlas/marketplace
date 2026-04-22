@@ -27,9 +27,9 @@ The root `skills/` directory is unused — all skills live under `plugins/`.
 
 ```yaml
 ---
-name: skill-name          # letters, numbers, hyphens only
+name: skill-name # letters, numbers, hyphens only
 description: >-
-    Use when <triggering condition 1>, <condition 2>, ...
+  Use when <triggering condition 1>, <condition 2>, ...
 ---
 ```
 
@@ -62,7 +62,7 @@ Example frontmatter:
 ---
 name: my-agent
 description: >-
-    Use when ...
+  Use when ...
 tools:
   - Read
   - Bash
@@ -91,9 +91,10 @@ When adding a plugin, create manifests for **all three tools** in parallel.
    `"name"`, `"description"`, `"source"` (`"./plugins/<plugin-name>"`),
    `"skills"`, and `"keywords"`.
 3. Create `plugins/<plugin-name>/.cursor-plugin/plugin.json` mirroring the
-   Claude plugin manifest but with `"displayName"`, `"author": {"name": "USATLAS"}`,
-   and path fields `"skills": "./skills/"` (and `"agents": "./agents/"` if the
-   plugin has agents). No `"commands"` or `"hooks"` fields unless needed.
+   Claude plugin manifest but with `"displayName"`,
+   `"author": {"name": "USATLAS"}`, and path fields `"skills": "./skills/"` (and
+   `"agents": "./agents/"` if the plugin has agents). No `"commands"` or
+   `"hooks"` fields unless needed.
 
 4. Add the new plugin's symlink instructions to `.codex/INSTALL.md`.
 
@@ -123,21 +124,21 @@ voms-proxy-init --voms atlas        # valid proxy required for rucio MCP
 
 The three servers:
 
-| Key | Launch | Notes |
-|---|---|---|
-| `rucio` | `pixi exec rucio-mcp serve --read-only` | RUCIO_ACCOUNT must be set |
-| `ami` | `pixi exec ami-mcp serve` | no extra env vars |
-| `atlasopenmagic` | `uvx atlasopenmagic-mcp serve` | no extra env vars |
+| Key              | Launch                                  | Notes                     |
+| ---------------- | --------------------------------------- | ------------------------- |
+| `rucio`          | `pixi exec rucio-mcp serve --read-only` | RUCIO_ACCOUNT must be set |
+| `ami`            | `pixi exec ami-mcp serve`               | no extra env vars         |
+| `atlasopenmagic` | `uvx atlasopenmagic-mcp serve`          | no extra env vars         |
 
 ## ATLAS software docs
 
 `atlas-software-docs/` is a git submodule cloned locally for fast `grep`-based
-structural orientation. **Never cite local paths in user-facing content.**
-All documentation references must point to the hosted site:
+structural orientation. **Never cite local paths in user-facing content.** All
+documentation references must point to the hosted site:
 `https://atlas-software.docs.cern.ch/`
 
-The `atlas-docs-expert` subagent implements the two-tier lookup:
-grep locally for page discovery → WebFetch the hosted URL for authoritative content.
+The `atlas-docs-expert` subagent implements the two-tier lookup: grep locally
+for page discovery → WebFetch the hosted URL for authoritative content.
 
 ## Pre-commit / formatting
 
@@ -146,8 +147,8 @@ pixi run pre-commit     # run all hooks on all files
 ```
 
 Hooks enforce: JSON/YAML validity, trailing whitespace, mixed line endings,
-Markdown prose wrapping (prettier, 80 cols), and spell-checking. The
-`codespell` dictionary `"-L hist,gaus"` whitelists HEP-specific words.
+Markdown prose wrapping (prettier, 80 cols), and spell-checking. The `codespell`
+dictionary `"-L hist,gaus"` whitelists HEP-specific words.
 
 ## Commit conventions
 
@@ -167,7 +168,7 @@ No `Co-Authored-By` lines in commit messages.
 ## Vendored content (IRIS-HEP)
 
 Skills adapted from the IRIS-HEP marketplace (Gordon Watts, Ben Galewsky) are
-listed in `plugins/atlas/VENDORED-LICENSES.md`. Individual skill files carry
-no attribution markers — the license file satisfies BSD 3-Clause requirements.
-When updating a vendored skill, rewrite from expert knowledge rather than
-copying upstream verbatim.
+listed in `plugins/atlas/VENDORED-LICENSES.md`. Individual skill files carry no
+attribution markers — the license file satisfies BSD 3-Clause requirements. When
+updating a vendored skill, rewrite from expert knowledge rather than copying
+upstream verbatim.

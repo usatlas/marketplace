@@ -1,22 +1,27 @@
 ---
 name: uproot
 description: >-
-    Use when reading or writing ROOT files in Python without a ROOT installation:
-    opening TTrees with uproot.open, reading branches as awkward or numpy arrays,
-    converting to pandas, iterating in batches over large files, writing new ROOT
-    files or appending histograms, or diagnosing common uproot errors (key not
-    found, cycle numbers, jagged branch shapes).
+  Use when reading or writing ROOT files in Python without a ROOT installation:
+  opening TTrees with uproot.open, reading branches as awkward or numpy arrays,
+  converting to pandas, iterating in batches over large files, writing new ROOT
+  files or appending histograms, or diagnosing common uproot errors (key not
+  found, cycle numbers, jagged branch shapes).
 ---
 
 # uproot
 
 ## Overview
 
-uproot reads and writes ROOT files in pure Python using NumPy and Awkward Array. It does not require a ROOT installation and integrates directly with the Scikit-HEP ecosystem (awkward, hist, vector). The primary use is extracting TTree branches into arrays for analysis; a secondary use is writing lightweight ROOT files containing histograms or flat NTuples.
+uproot reads and writes ROOT files in pure Python using NumPy and Awkward Array.
+It does not require a ROOT installation and integrates directly with the
+Scikit-HEP ecosystem (awkward, hist, vector). The primary use is extracting
+TTree branches into arrays for analysis; a secondary use is writing lightweight
+ROOT files containing histograms or flat NTuples.
 
 ## When to Use
 
-- Reading ATLAS NTuple output (TopCPToolkit, FastFrames, AnalysisTop) into Python
+- Reading ATLAS NTuple output (TopCPToolkit, FastFrames, AnalysisTop) into
+  Python
 - Inspecting a ROOT file's contents without invoking ROOT or C++
 - Batch-iterating over files too large to load into memory at once
 - Writing histogram output back to ROOT for TRExFitter or legacy tools
@@ -24,18 +29,18 @@ uproot reads and writes ROOT files in pure Python using NumPy and Awkward Array.
 
 ## Key Concepts
 
-| Concept | Notes |
-|---|---|
-| `uproot.open(path)` | Opens one file; returns a `ReadOnlyDirectory` |
-| `uproot.open("file.root:tree")` | Opens file and directly returns the named TTree |
-| `uproot.concatenate(files, filter_name=...)` | Reads multiple files at once into one array |
-| `uproot.iterate(files, ...)` | Yields batches (use for large datasets) |
-| `tree.keys()` | Lists branch names in the TTree |
-| `tree["branch"].array()` | Returns full branch as an awkward array |
-| `tree.arrays(["b1","b2"])` | Returns a dict-like awkward record array |
-| `entry_start` / `entry_stop` | Slice to a range of events |
-| Cycle numbers | `key;1` suffix — uproot uses the highest cycle by default |
-| `interpretation` | uproot auto-detects; override with `library=` |
+| Concept                                      | Notes                                                     |
+| -------------------------------------------- | --------------------------------------------------------- |
+| `uproot.open(path)`                          | Opens one file; returns a `ReadOnlyDirectory`             |
+| `uproot.open("file.root:tree")`              | Opens file and directly returns the named TTree           |
+| `uproot.concatenate(files, filter_name=...)` | Reads multiple files at once into one array               |
+| `uproot.iterate(files, ...)`                 | Yields batches (use for large datasets)                   |
+| `tree.keys()`                                | Lists branch names in the TTree                           |
+| `tree["branch"].array()`                     | Returns full branch as an awkward array                   |
+| `tree.arrays(["b1","b2"])`                   | Returns a dict-like awkward record array                  |
+| `entry_start` / `entry_stop`                 | Slice to a range of events                                |
+| Cycle numbers                                | `key;1` suffix — uproot uses the highest cycle by default |
+| `interpretation`                             | uproot auto-detects; override with `library=`             |
 
 ## Canonical Patterns
 
@@ -179,32 +184,43 @@ with uproot.recreate("hists.root") as f:
 
 ## Troubleshooting
 
-| Issue | Cause | Fix |
-|---|---|---|
-| `KeyError: "reco"` | Tree name wrong; file has cycle `reco;1` | `f.keys()` to inspect; or `f["reco;1"]` explicitly |
-| `IndexError` on `array[:, 0]` | Some events have zero jets | Replace with `ak.firsts(array)` |
-| `NotAnNumpyCompatible` | Branch is jagged (variable-length) | Use `library="ak"` (default) or iterate |
-| `MemoryError` | File too large for single load | Switch to `uproot.iterate` with `step_size` |
-| Wrong branch shape | Systematic tree (e.g. `reco_JES__1up`) has extra dimension | Read the correct tree by name |
-| Remote file stalls | XRootD not installed | `pip install uproot[xrootd]` or `fsspec-xrootd` |
-| `UnicodeDecodeError` | ROOT string branch with non-UTF8 content | Use `branch.array(interpretation=uproot.AsStrings(...))` |
-| `None` values in awkward | `ak.firsts` returns `None` for empty events | Use `mask = ~ak.is_none(arr)` before numpy conversion |
+| Issue                         | Cause                                                      | Fix                                                      |
+| ----------------------------- | ---------------------------------------------------------- | -------------------------------------------------------- |
+| `KeyError: "reco"`            | Tree name wrong; file has cycle `reco;1`                   | `f.keys()` to inspect; or `f["reco;1"]` explicitly       |
+| `IndexError` on `array[:, 0]` | Some events have zero jets                                 | Replace with `ak.firsts(array)`                          |
+| `NotAnNumpyCompatible`        | Branch is jagged (variable-length)                         | Use `library="ak"` (default) or iterate                  |
+| `MemoryError`                 | File too large for single load                             | Switch to `uproot.iterate` with `step_size`              |
+| Wrong branch shape            | Systematic tree (e.g. `reco_JES__1up`) has extra dimension | Read the correct tree by name                            |
+| Remote file stalls            | XRootD not installed                                       | `pip install uproot[xrootd]` or `fsspec-xrootd`          |
+| `UnicodeDecodeError`          | ROOT string branch with non-UTF8 content                   | Use `branch.array(interpretation=uproot.AsStrings(...))` |
+| `None` values in awkward      | `ak.firsts` returns `None` for empty events                | Use `mask = ~ak.is_none(arr)` before numpy conversion    |
 
 ## Gotchas
 
-- **All ATLAS branches are in MeV**: divide by 1000 before GeV-scale histograms or cuts.
-- **Systematic trees**: TopCPToolkit writes one TTree per systematic variation (e.g. `reco_JES__1up`). You must loop over tree names explicitly — there is no automatic loop.
-- **`ak.to_numpy` fails on None**: filter with `~ak.is_none()` or `ak.fill_none(arr, 0.0)` first.
-- **`tree.arrays()` reads all events by default**: for files with millions of events use `iterate` or `entry_start`/`entry_stop`.
-- **uproot writes simple flat NTuples only**: jagged-array TTrees require PyROOT or ROOT.
+- **All ATLAS branches are in MeV**: divide by 1000 before GeV-scale histograms
+  or cuts.
+- **Systematic trees**: TopCPToolkit writes one TTree per systematic variation
+  (e.g. `reco_JES__1up`). You must loop over tree names explicitly — there is no
+  automatic loop.
+- **`ak.to_numpy` fails on None**: filter with `~ak.is_none()` or
+  `ak.fill_none(arr, 0.0)` first.
+- **`tree.arrays()` reads all events by default**: for files with millions of
+  events use `iterate` or `entry_start`/`entry_stop`.
+- **uproot writes simple flat NTuples only**: jagged-array TTrees require PyROOT
+  or ROOT.
 
 ## Interop
 
-- **awkward**: `tree.arrays()` returns `ak.Array` by default; pass `library="np"` for flat branches.
-- **vector**: `vector.register_awkward()` adds Momentum4D behavior to awkward records named `{pt,eta,phi,mass}`.
-- **hist**: Fill `hist.Hist` objects from uproot arrays; uproot can also write `hist.Hist` objects to ROOT files.
-- **coffea**: `uproot.dask()` produces dask-awkward arrays for coffea NanoAOD-style processors.
-- **fsspec-xrootd**: Mount EOS or grid storage so that uproot `root://` paths work transparently.
+- **awkward**: `tree.arrays()` returns `ak.Array` by default; pass
+  `library="np"` for flat branches.
+- **vector**: `vector.register_awkward()` adds Momentum4D behavior to awkward
+  records named `{pt,eta,phi,mass}`.
+- **hist**: Fill `hist.Hist` objects from uproot arrays; uproot can also write
+  `hist.Hist` objects to ROOT files.
+- **coffea**: `uproot.dask()` produces dask-awkward arrays for coffea
+  NanoAOD-style processors.
+- **fsspec-xrootd**: Mount EOS or grid storage so that uproot `root://` paths
+  work transparently.
 
 ## Docs
 

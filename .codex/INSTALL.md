@@ -48,7 +48,8 @@ Enable USATLAS skills in Codex via native skill discovery.
 ls -la ~/.agents/skills/
 ```
 
-You should see three symlinks: `atlas`, `analysis-facilities`, `hep-python-tools`.
+You should see three symlinks: `atlas`, `analysis-facilities`,
+`hep-python-tools`.
 
 ## Updating
 

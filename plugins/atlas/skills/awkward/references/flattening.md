@@ -11,5 +11,6 @@ flat_all = ak.flatten(array, axis=None)
 ```
 
 Notes:
+
 - `axis=None` completely flattens the array.
 - `axis=1` requires at least one level of nesting.

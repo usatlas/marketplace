@@ -1,22 +1,27 @@
 ---
 name: decaylanguage
 description: >-
-    Use when working with decay chain descriptions in Python: parsing EvtGen
-    or DecFiles decay descriptors, constructing decay chains programmatically,
-    visualizing particle decay trees, or converting between decay descriptor
-    formats for use with generator studies.
+  Use when working with decay chain descriptions in Python: parsing EvtGen or
+  DecFiles decay descriptors, constructing decay chains programmatically,
+  visualizing particle decay trees, or converting between decay descriptor
+  formats for use with generator studies.
 ---
 
 # decaylanguage
 
 ## Overview
 
-decaylanguage is a Scikit-HEP library for working with particle decay descriptors. It parses EvtGen `.dec` files, the Belle II DecFiles format, and decay chain strings into Python objects. It is used in generator-level studies and decay chain validation, particularly for B-physics and charm analyses where complex multi-body decays must be described and inspected.
+decaylanguage is a Scikit-HEP library for working with particle decay
+descriptors. It parses EvtGen `.dec` files, the Belle II DecFiles format, and
+decay chain strings into Python objects. It is used in generator-level studies
+and decay chain validation, particularly for B-physics and charm analyses where
+complex multi-body decays must be described and inspected.
 
 ## When to Use
 
 - Parsing EvtGen `.dec` files to inspect or modify decay branching fractions
-- Constructing a decay chain description programmatically (e.g. for generator job options)
+- Constructing a decay chain description programmatically (e.g. for generator
+  job options)
 - Visualizing a decay tree as a graph for documentation or cross-checks
 - Converting decay descriptors for input to EvtGen, Pythia, or other generators
 
@@ -73,14 +78,20 @@ descriptor = "[B0 -> (D- -> K+ pi- pi-) pi+]cc"
 
 ## Gotchas
 
-- **Requires graphviz** for visualization: `pip install graphviz` and the `graphviz` system binary must be in `PATH`.
-- **EvtGen model names are not validated**: decaylanguage parses the syntax; it does not check whether the model name is a valid EvtGen model.
-- **Branching fractions are not automatically normalized**: if you modify a `.dec` file, ensure the sum of BFs for each particle equals 1.0 (or the generator will complain).
+- **Requires graphviz** for visualization: `pip install graphviz` and the
+  `graphviz` system binary must be in `PATH`.
+- **EvtGen model names are not validated**: decaylanguage parses the syntax; it
+  does not check whether the model name is a valid EvtGen model.
+- **Branching fractions are not automatically normalized**: if you modify a
+  `.dec` file, ensure the sum of BFs for each particle equals 1.0 (or the
+  generator will complain).
 
 ## Interop
 
-- **particle**: `decaylanguage` uses `particle` internally to resolve PDG IDs from names.
-- **pyhepmc**: Use `decaylanguage` to verify decay chain structure against pyhepmc truth records.
+- **particle**: `decaylanguage` uses `particle` internally to resolve PDG IDs
+  from names.
+- **pyhepmc**: Use `decaylanguage` to verify decay chain structure against
+  pyhepmc truth records.
 
 ## Docs
 

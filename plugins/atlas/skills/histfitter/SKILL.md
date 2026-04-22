@@ -1,19 +1,22 @@
 ---
 name: histfitter
 description: >-
-    Use when setting up or running a HistFitter-based statistical analysis:
-    writing a HistFitter configuration Python script, defining channels,
-    samples, and systematics, running the workspace generation and fit,
-    producing exclusion contours, or migrating a HistFitter analysis to pyhf.
-    HistFitter is a ROOT-based framework — prefer pyhf/cabinetry for new
-    analyses.
+  Use when setting up or running a HistFitter-based statistical analysis:
+  writing a HistFitter configuration Python script, defining channels, samples,
+  and systematics, running the workspace generation and fit, producing exclusion
+  contours, or migrating a HistFitter analysis to pyhf. HistFitter is a
+  ROOT-based framework — prefer pyhf/cabinetry for new analyses.
 ---
 
 # HistFitter
 
 ## Overview
 
-HistFitter is a ROOT/RooFit-based framework for HistFactory profile likelihood fits, widely used in ATLAS SUSY and Exotics analyses. Configuration is written as a Python script defining channels (regions), samples, and systematics. For new analyses, prefer pyhf + cabinetry; use HistFitter only when required by your physics group or for legacy analyses.
+HistFitter is a ROOT/RooFit-based framework for HistFactory profile likelihood
+fits, widely used in ATLAS SUSY and Exotics analyses. Configuration is written
+as a Python script defining channels (regions), samples, and systematics. For
+new analyses, prefer pyhf + cabinetry; use HistFitter only when required by your
+physics group or for legacy analyses.
 
 ## When to Use
 
@@ -94,23 +97,23 @@ HistFitter.py -r config.py
 
 ## Key Commands Summary
 
-| Flag | Action |
-|---|---|
-| `-w` | Write workspace (RooWorkspace .root file) |
-| `-f` | Fit (profile likelihood minimisation) |
-| `-p` | Compute p-values and CLs for each point |
-| `-d` | Draw plots (pre/post-fit) |
-| `-r` | Produce exclusion contours |
+| Flag | Action                                      |
+| ---- | ------------------------------------------- |
+| `-w` | Write workspace (RooWorkspace .root file)   |
+| `-f` | Fit (profile likelihood minimisation)       |
+| `-p` | Compute p-values and CLs for each point     |
+| `-d` | Draw plots (pre/post-fit)                   |
+| `-r` | Produce exclusion contours                  |
 | `-t` | Toys for CLs (slow — use for final results) |
 
 ## Systematic Types
 
-| HistFitter type | Equivalent pyhf modifier |
-|---|---|
+| HistFitter type  | Equivalent pyhf modifier       |
+| ---------------- | ------------------------------ |
 | `userOverallSys` | `normsys` (normalization-only) |
-| `userHistoSys` | `histosys` (shape + norm) |
-| `normFactor` | `normfactor` (free) |
-| `stat` (auto) | `staterror` |
+| `userHistoSys`   | `histosys` (shape + norm)      |
+| `normFactor`     | `normfactor` (free)            |
+| `stat` (auto)    | `staterror`                    |
 
 ## Migrating to pyhf
 
@@ -131,16 +134,22 @@ Then validate with pyhf and use cabinetry for future modifications.
 
 ## Gotchas
 
-- **ROOT version dependency**: HistFitter is tied to specific ROOT versions; use the same Athena release your group uses
-- **`statErrThreshold`**: Controls Barlow-Beeston; set too low and you get too many NPs; too high and you lose MC stat information
-- **Signal injection**: Signal samples are zeroed in background-only fit by default — check your config uses the correct fit type
-- **Contour production**: Requires running over a grid of signal points; each point needs its own `-p` run
+- **ROOT version dependency**: HistFitter is tied to specific ROOT versions; use
+  the same Athena release your group uses
+- **`statErrThreshold`**: Controls Barlow-Beeston; set too low and you get too
+  many NPs; too high and you lose MC stat information
+- **Signal injection**: Signal samples are zeroed in background-only fit by
+  default — check your config uses the correct fit type
+- **Contour production**: Requires running over a grid of signal points; each
+  point needs its own `-p` run
 
 ## Interop
 
-- **pyhf**: `pyhf xml2json` converts HistFactory XML output to pyhf-compatible JSON
+- **pyhf**: `pyhf xml2json` converts HistFactory XML output to pyhf-compatible
+  JSON
 - **TRExFitter**: Can produce HistFactory XML that HistFitter can read
-- **Rucio/AMI**: Use `atlas-data-explorer` to find NTuple containers before configuring
+- **Rucio/AMI**: Use `atlas-data-explorer` to find NTuple containers before
+  configuring
 
 ## Docs
 

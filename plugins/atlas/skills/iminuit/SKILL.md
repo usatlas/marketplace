@@ -1,17 +1,22 @@
 ---
 name: iminuit
 description: >-
-    Use when performing a maximum-likelihood or least-squares fit in Python
-    with iminuit: defining a cost function, setting initial parameter values
-    and limits, running MIGRAD or MINOS, reading fit results and covariance,
-    profiling a parameter, or comparing iminuit to pyhf for binned fits.
+  Use when performing a maximum-likelihood or least-squares fit in Python with
+  iminuit: defining a cost function, setting initial parameter values and
+  limits, running MIGRAD or MINOS, reading fit results and covariance, profiling
+  a parameter, or comparing iminuit to pyhf for binned fits.
 ---
 
 # iminuit
 
 ## Overview
 
-iminuit is a Python interface to MINUIT2, the battle-tested minimizer from CERN. It finds parameter values that minimize a scalar cost function (negative log-likelihood, chi-squared, etc.) and estimates uncertainties via the Hessian (HESSE) or exact likelihood profiling (MINOS). In HEP it is used for unbinned fits, template fits, and any minimization where pyhf's HistFactory model is not needed.
+iminuit is a Python interface to MINUIT2, the battle-tested minimizer from CERN.
+It finds parameter values that minimize a scalar cost function (negative
+log-likelihood, chi-squared, etc.) and estimates uncertainties via the Hessian
+(HESSE) or exact likelihood profiling (MINOS). In HEP it is used for unbinned
+fits, template fits, and any minimization where pyhf's HistFactory model is not
+needed.
 
 ## When to Use
 
@@ -86,8 +91,8 @@ print(m)                # prints parameter table with values, errors, limits
 
 ```python
 m.minos()               # run MINOS for all parameters
-print(m.merrors["mu"])  # MnAsymErrors object
-print(m.merrors["mu"].lower, m.merrors["mu"].upper)
+print(m.mirrors["mu"])  # MnAsymErrors object
+print(m.mirrors["mu"].lower, m.mirrors["mu"].upper)
 ```
 
 ### Parameter fixing and scanning
@@ -102,17 +107,25 @@ x, y, ok = m.mnprofile("mu", size=30, bound=3)  # ±3σ range
 
 ## Gotchas
 
-- **Always call `hesse()` after `migrad()`**: `migrad()` computes the Hessian internally, but calling `hesse()` explicitly ensures `m.accurate` is set and errors are trustworthy.
-- **MINOS is slow for many parameters**: fix nuisance parameters or restrict `parameters=["poi"]` to run MINOS only on the POI.
-- **Initial values matter**: MIGRAD is a local minimizer; bad starting points lead to wrong minima. Scan or grid-search if uncertain.
-- **`iminuit.cost` requires numpy ufunc-compatible PDFs**: ensure your PDF operates element-wise on arrays, not scalars.
+- **Always call `hesse()` after `migrad()`**: `migrad()` computes the Hessian
+  internally, but calling `hesse()` explicitly ensures `m.accurate` is set and
+  errors are trustworthy.
+- **MINOS is slow for many parameters**: fix nuisance parameters or restrict
+  `parameters=["poi"]` to run MINOS only on the POI.
+- **Initial values matter**: MIGRAD is a local minimizer; bad starting points
+  lead to wrong minima. Scan or grid-search if uncertain.
+- **`iminuit.cost` requires numpy ufunc-compatible PDFs**: ensure your PDF
+  operates element-wise on arrays, not scalars.
 - **Units**: iminuit has no units — be consistent throughout the cost function.
 
 ## Interop
 
-- **hist**: Build `hist.Hist` objects for binned fits; `hist.Hist.values()` and `.axes[0].centers` provide arrays for `BinnedNLL`.
-- **pyhf**: For HistFactory-structured analyses use pyhf; use iminuit for custom or unbinned models.
-- **numpy / scipy**: iminuit replaces `scipy.optimize.minimize` for likelihood fits with proper uncertainty estimation.
+- **hist**: Build `hist.Hist` objects for binned fits; `hist.Hist.values()` and
+  `.axes[0].centers` provide arrays for `BinnedNLL`.
+- **pyhf**: For HistFactory-structured analyses use pyhf; use iminuit for custom
+  or unbinned models.
+- **numpy / scipy**: iminuit replaces `scipy.optimize.minimize` for likelihood
+  fits with proper uncertainty estimation.
 
 ## Docs
 

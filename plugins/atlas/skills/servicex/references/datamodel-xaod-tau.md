@@ -1,6 +1,7 @@
 # xAOD Taus
 
-Load `references/datamodel-xaod-objects.md` alongside this file for shared object access patterns.
+Load `references/datamodel-xaod-objects.md` alongside this file for shared
+object access patterns.
 
 Tau jets use a different accessor name:
 

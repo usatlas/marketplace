@@ -2,7 +2,8 @@
 
 ## IRIS-HEP Marketplace
 
-The following skills were vendored from the [IRIS-HEP marketplace](https://github.com/iris-hep/iris-hep-marketplace):
+The following skills were vendored from the
+[IRIS-HEP marketplace](https://github.com/iris-hep/iris-hep-marketplace):
 
 - `skills/cli-creator/`
 - `skills/standalone-script/`

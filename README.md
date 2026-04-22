@@ -20,13 +20,13 @@ Then install whichever plugins you need from the marketplace browser.
 
 ### `analysis-facilities`
 
-Skills for USATLAS Analysis Facilities (UChicago AF, BNL AF, SLAC AF).
+Skills for USATLAS Analysis Facilities (UChicago AF, BNL AF, SLACK AF).
 
-| Skill | Description |
-|---|---|
+| Skill         | Description                                                                                 |
+| ------------- | ------------------------------------------------------------------------------------------- |
 | `uchicago-af` | HTCondor batch, JupyterLab, XCache, Rucio, ServiceX, Coffea-Casa, Triton at af.uchicago.edu |
 
-More facility skills (BNL, SLAC) coming soon.
+More facility skills (BNL, SLACK) coming soon.
 
 ---
 
@@ -36,33 +36,33 @@ ATLAS analysis plugin covering the full workflow from raw data to publication.
 
 **Subagents** (invoked automatically or via `Agent(subagent_type=...)`):
 
-| Subagent | Purpose |
-|---|---|
-| `atlas-analysis-architect` | Designs end-to-end analysis pipelines; produces a structured specification |
-| `atlas-analysis-coder` | Writes Python analysis code (uproot, ServiceX, coffea, hist) |
-| `atlas-docs-expert` | Answers ATLAS software questions; cites hosted docs at atlas-software.docs.cern.ch |
-| `atlas-stats-expert` | Statistical model design: pyhf/cabinetry workspaces, TRExFitter configs, limits |
-| `atlas-data-explorer` | Dataset and file discovery via Rucio, AMI, and ATLAS Open Data MCPs |
+| Subagent                   | Purpose                                                                            |
+| -------------------------- | ---------------------------------------------------------------------------------- |
+| `atlas-analysis-architect` | Designs end-to-end analysis pipelines; produces a structured specification         |
+| `atlas-analysis-coder`     | Writes Python analysis code (uproot, ServiceX, coffea, hist)                       |
+| `atlas-docs-expert`        | Answers ATLAS software questions; cites hosted docs at atlas-software.docs.cern.ch |
+| `atlas-stats-expert`       | Statistical model design: pyhf/cabinetry workspaces, TRExFitter configs, limits    |
+| `atlas-data-explorer`      | Dataset and file discovery via Rucio, AMI, and ATLAS Open Data MCPs                |
 
 **Skills:**
 
-| Category | Skills |
-|---|---|
-| Orientation | `atlas-software` |
-| Statistics | `pyhf`, `cabinetry`, `pyhs3`, `histfitter`, `trexfitter`, `roounfold` |
-| Frameworks | `topcptoolkit`, `fastframes` |
-| Data access | `servicex`, `analysis-spec-builder`, `fsspec-xrootd` |
-| Core tools | `uproot`, `awkward`, `coffea`, `hist`, `vector` |
-| Scikit-HEP | `iminuit`, `fastjet`, `particle`, `hepunits`, `decaylanguage`, `pyhepmc`, `pylhe` |
-| Interop | `cpp-bindings` |
+| Category    | Skills                                                                            |
+| ----------- | --------------------------------------------------------------------------------- |
+| Orientation | `atlas-software`                                                                  |
+| Statistics  | `pyhf`, `cabinetry`, `pyhs3`, `histfitter`, `trexfitter`, `roounfold`             |
+| Frameworks  | `topcptoolkit`, `fastframes`                                                      |
+| Data access | `servicex`, `analysis-spec-builder`, `fsspec-xrootd`                              |
+| Core tools  | `uproot`, `awkward`, `coffea`, `hist`, `vector`                                   |
+| Scikit-HEP  | `iminuit`, `fastjet`, `particle`, `hepunits`, `decaylanguage`, `pyhepmc`, `pylhe` |
+| Interop     | `cpp-bindings`                                                                    |
 
 **MCP servers** (configured in `plugins/atlas/.mcp.json`):
 
-| Server | Launch command | Purpose |
-|---|---|---|
-| `rucio` | `pixi exec rucio-mcp serve --read-only` | Dataset and replica discovery |
-| `ami` | `pixi exec ami-mcp serve` | AMI metadata (cross-sections, tags) |
-| `atlasopenmagic` | `uvx atlasopenmagic-mcp serve` | ATLAS Open Data catalog |
+| Server           | Launch command                          | Purpose                             |
+| ---------------- | --------------------------------------- | ----------------------------------- |
+| `rucio`          | `pixi exec rucio-mcp serve --read-only` | Dataset and replica discovery       |
+| `ami`            | `pixi exec ami-mcp serve`               | AMI metadata (cross-sections, tags) |
+| `atlasopenmagic` | `uvx atlasopenmagic-mcp serve`          | ATLAS Open Data catalog             |
 
 **Required environment variables for Rucio MCP:**
 
@@ -78,9 +78,9 @@ voms-proxy-init --voms atlas             # obtain a valid proxy first
 
 Generic Python tooling skills for HEP workflows.
 
-| Skill | Description |
-|---|---|
-| `cli-creator` | Typer CLI scripts with modern `Annotated` syntax |
+| Skill               | Description                                                     |
+| ------------------- | --------------------------------------------------------------- |
+| `cli-creator`       | Typer CLI scripts with modern `Annotated` syntax                |
 | `standalone-script` | PEP 723 inline-metadata scripts runnable with `uv run --script` |
 
 ---

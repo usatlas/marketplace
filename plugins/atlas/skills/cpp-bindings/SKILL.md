@@ -1,31 +1,37 @@
 ---
 name: cpp-bindings
 description: >-
-    Use when writing Python bindings for C++ HEP code with nanobind or
-    pybind11: exposing a C++ class or function to Python, binding STL
-    containers (vector, map), handling numpy/awkward array interop, choosing
-    between nanobind and pybind11, or setting up a CMake build that produces
-    a Python extension module.
+  Use when writing Python bindings for C++ HEP code with nanobind or pybind11:
+  exposing a C++ class or function to Python, binding STL containers (vector,
+  map), handling numpy/awkward array interop, choosing between nanobind and
+  pybind11, or setting up a CMake build that produces a Python extension module.
 ---
 
 # C++ Python Bindings (nanobind / pybind11)
 
 ## Overview
 
-nanobind and pybind11 are C++ header-only libraries for creating Python extension modules from C++ code. pybind11 is the established standard; nanobind is a leaner, faster successor from the same author (Wenzel Jakob) designed for Python 3.8+ and offering smaller binary size and faster compile times. In HEP, bindings are used to expose ROOT-based code, custom reconstruction algorithms, or legacy C++ analysis code to Python without rewriting.
+nanobind and pybind11 are C++ header-only libraries for creating Python
+extension modules from C++ code. pybind11 is the established standard; nanobind
+is a leaner, faster successor from the same author (Wenzel Jakob) designed for
+Python 3.8+ and offering smaller binary size and faster compile times. In HEP,
+bindings are used to expose ROOT-based code, custom reconstruction algorithms,
+or legacy C++ analysis code to Python without rewriting.
 
 ## Choosing Between nanobind and pybind11
 
-| Feature | nanobind | pybind11 |
-|---|---|---|
-| Compile time | Faster (30–50%) | Slower |
-| Binary size | Smaller | Larger |
-| STL bindings | Opaque by default | Transparent |
-| ABI stability | Guaranteed between nanobind versions | No guarantee |
-| Maturity | Newer (2022+) | Very mature (2015+) |
-| Documentation | Growing | Comprehensive |
+| Feature       | nanobind                             | pybind11            |
+| ------------- | ------------------------------------ | ------------------- |
+| Compile time  | Faster (30–50%)                      | Slower              |
+| Binary size   | Smaller                              | Larger              |
+| STL bindings  | Opaque by default                    | Transparent         |
+| ABI stability | Guaranteed between nanobind versions | No guarantee        |
+| Maturity      | Newer (2022+)                        | Very mature (2015+) |
+| Documentation | Growing                              | Comprehensive       |
 
-**Recommendation**: Use **nanobind** for new projects. Use **pybind11** when integrating with existing pybind11-based code or when you need the larger ecosystem of pybind11 extensions.
+**Recommendation**: Use **nanobind** for new projects. Use **pybind11** when
+integrating with existing pybind11-based code or when you need the larger
+ecosystem of pybind11 extensions.
 
 ## CMake Setup
 
@@ -153,19 +159,32 @@ PYBIND11_MODULE(myhep_ext, m) {
 
 ## Gotchas
 
-- **GIL (Global Interpreter Lock)**: For CPU-bound C++ functions that don't touch Python objects, release the GIL with `nb::gil_scoped_release` to allow parallel Python threads.
-- **Lifetime management**: Python's garbage collector doesn't know about C++ object lifetimes. Use `nb::keep_alive` or `py::keep_alive` policies for objects that hold references.
-- **STL opaque types in nanobind**: nanobind does NOT auto-convert `std::vector` to Python lists by default (unlike pybind11). Include `<nanobind/stl/vector.h>` to enable conversion.
-- **ROOT dictionary conflicts**: When linking against ROOT, ROOT's auto-generated dictionaries may conflict with pybind11/nanobind. Use a separate shared library to isolate ROOT from the Python extension.
-- **ABI mismatch**: The Python extension must be compiled against the same Python version and ABI as the interpreter. Use `scikit-build-core` or `meson-python` to manage this.
+- **GIL (Global Interpreter Lock)**: For CPU-bound C++ functions that don't
+  touch Python objects, release the GIL with `nb::gil_scoped_release` to allow
+  parallel Python threads.
+- **Lifetime management**: Python's garbage collector doesn't know about C++
+  object lifetimes. Use `nb::keep_alive` or `py::keep_alive` policies for
+  objects that hold references.
+- **STL opaque types in nanobind**: nanobind does NOT auto-convert `std::vector`
+  to Python lists by default (unlike pybind11). Include
+  `<nanobind/stl/vector.h>` to enable conversion.
+- **ROOT dictionary conflicts**: When linking against ROOT, ROOT's
+  auto-generated dictionaries may conflict with pybind11/nanobind. Use a
+  separate shared library to isolate ROOT from the Python extension.
+- **ABI mismatch**: The Python extension must be compiled against the same
+  Python version and ABI as the interpreter. Use `scikit-build-core` or
+  `meson-python` to manage this.
 
 ## Interop
 
-- **numpy**: `<nanobind/ndarray.h>` (nanobind) or `<pybind11/numpy.h>` (pybind11) for zero-copy array passing.
-- **awkward**: awkward's `ak.from_buffers` / `ak.to_buffers` can wrap C++ arrays; combine with nanobind ndarray for zero-copy workflows.
-- **CMake + scikit-build-core**: The recommended build backend for Python extensions that use CMake.
+- **numpy**: `<nanobind/ndarray.h>` (nanobind) or `<pybind11/numpy.h>`
+  (pybind11) for zero-copy array passing.
+- **awkward**: awkward's `ak.from_buffers` / `ak.to_buffers` can wrap C++
+  arrays; combine with nanobind ndarray for zero-copy workflows.
+- **CMake + scikit-build-core**: The recommended build backend for Python
+  extensions that use CMake.
 
 ## Docs
 
-nanobind: https://nanobind.readthedocs.io/  
-pybind11: https://pybind11.readthedocs.io/
+nanobind: https://nanobind.readthedocs.io/ pybind11:
+https://pybind11.readthedocs.io/

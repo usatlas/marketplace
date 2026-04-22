@@ -1,37 +1,43 @@
 ---
 name: hepunits
 description: >-
-    Use when writing unit-safe HEP code in Python: converting between MeV and
-    GeV, checking that a cut threshold or histogram range uses the right unit,
-    or making unit constants explicit instead of hardcoding 1000 or 1e3
-    throughout analysis code.
+  Use when writing unit-safe HEP code in Python: converting between MeV and GeV,
+  checking that a cut threshold or histogram range uses the right unit, or
+  making unit constants explicit instead of hardcoding 1000 or 1e3 throughout
+  analysis code.
 ---
 
 # hepunits
 
 ## Overview
 
-hepunits provides a set of physical unit constants (MeV, GeV, TeV, mm, ns, etc.) as plain Python floats, following the CLHEP/Geant4 convention where the base units are MeV, mm, and ns. Multiplying by a unit constant converts a value to the system base; dividing by a unit constant converts out. It is a lightweight way to write self-documenting, unit-safe analysis code without a full unit library.
+hepunits provides a set of physical unit constants (MeV, GeV, TeV, mm, ns, etc.)
+as plain Python floats, following the CLHEP/Geant4 convention where the base
+units are MeV, mm, and ns. Multiplying by a unit constant converts a value to
+the system base; dividing by a unit constant converts out. It is a lightweight
+way to write self-documenting, unit-safe analysis code without a full unit
+library.
 
 ## When to Use
 
-- Writing cuts, histogram ranges, or mass comparisons that need to be readable and unit-safe
+- Writing cuts, histogram ranges, or mass comparisons that need to be readable
+  and unit-safe
 - Documenting whether a number is in MeV or GeV without relying on comments
 - Normalizing generator-level or reco-level values to a common unit system
 
 ## Key Concepts
 
-| Base unit | Value |
-|---|---|
-| `MeV` | 1.0 (base energy unit) |
-| `GeV` | 1000.0 |
-| `TeV` | 1_000_000.0 |
-| `keV` | 0.001 |
-| `mm` | 1.0 (base length) |
-| `cm` | 10.0 |
-| `m` | 1000.0 |
-| `ns` | 1.0 (base time) |
-| `ps` | 0.001 |
+| Base unit | Value                  |
+| --------- | ---------------------- |
+| `MeV`     | 1.0 (base energy unit) |
+| `GeV`     | 1000.0                 |
+| `TeV`     | 1_000_000.0            |
+| `keV`     | 0.001                  |
+| `mm`      | 1.0 (base length)      |
+| `cm`      | 10.0                   |
+| `m`       | 1000.0                 |
+| `ns`      | 1.0 (base time)        |
+| `ps`      | 0.001                  |
 
 ## Canonical Patterns
 
@@ -85,14 +91,20 @@ mask = (inv_mass > window_lo) & (inv_mass < window_hi)
 
 ## Gotchas
 
-- **hepunits base unit is MeV, not GeV**: `1 * GeV == 1000.0`. When filling histograms always decide on one unit system and convert explicitly.
-- **Not a quantity system**: hepunits constants are plain floats — there is no dimension checking. If you mix up multiplication and division, nothing will raise an error.
-- **ATLAS NTuples store energies in MeV**: dividing by `GeV` converts to GeV; multiplying by `GeV` goes the wrong direction.
+- **hepunits base unit is MeV, not GeV**: `1 * GeV == 1000.0`. When filling
+  histograms always decide on one unit system and convert explicitly.
+- **Not a quantity system**: hepunits constants are plain floats — there is no
+  dimension checking. If you mix up multiplication and division, nothing will
+  raise an error.
+- **ATLAS NTuples store energies in MeV**: dividing by `GeV` converts to GeV;
+  multiplying by `GeV` goes the wrong direction.
 
 ## Interop
 
-- **particle**: `Particle.mass` returns MeV, consistent with hepunits base units.
-- **vector / awkward**: No built-in integration; apply unit conversions before constructing four-vectors.
+- **particle**: `Particle.mass` returns MeV, consistent with hepunits base
+  units.
+- **vector / awkward**: No built-in integration; apply unit conversions before
+  constructing four-vectors.
 
 ## Docs
 

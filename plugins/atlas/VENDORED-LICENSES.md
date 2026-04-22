@@ -2,8 +2,9 @@
 
 ## IRIS-HEP Marketplace
 
-The following skills were vendored from the [IRIS-HEP marketplace](https://github.com/iris-hep/iris-hep-marketplace)
-and adapted for the ATLAS plugin:
+The following skills were vendored from the
+[IRIS-HEP marketplace](https://github.com/iris-hep/iris-hep-marketplace) and
+adapted for the ATLAS plugin:
 
 - `skills/analysis-spec-builder/`
 - `skills/awkward/` (originally `awkward-array`)
@@ -14,7 +15,8 @@ and adapted for the ATLAS plugin:
 The following agents were adapted from iris-hep-marketplace:
 
 - `agents/atlas-analysis-architect.md` (adapted from `atlas-analysis-planner`)
-- `agents/atlas-analysis-coder.md` (adapted from `atlas-data-plotter`, substantially rewritten)
+- `agents/atlas-analysis-coder.md` (adapted from `atlas-data-plotter`,
+  substantially rewritten)
 
 The following command was adapted from iris-hep-marketplace:
 

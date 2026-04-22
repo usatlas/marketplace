@@ -1,36 +1,41 @@
 ---
 name: fastjet
 description: >-
-    Use when running jet clustering in Python with fastjet or pyjet: calling
-    anti-kt or Cambridge/Aachen algorithms on particle four-vectors, accessing
-    jet constituents, computing jet substructure variables (tau_N, softdrop),
-    or clustering jets from generator-level events read with pyhepmc or pylhe.
+  Use when running jet clustering in Python with fastjet or pyjet: calling
+  anti-kt or Cambridge/Aachen algorithms on particle four-vectors, accessing jet
+  constituents, computing jet substructure variables (tau_N, softdrop), or
+  clustering jets from generator-level events read with pyhepmc or pylhe.
 ---
 
 # fastjet
 
 ## Overview
 
-fastjet is the standard jet-finding library in HEP. The Python bindings (`fastjet` PyPI package, also known as `pyjet` in older versions) expose the anti-kt, Cambridge/Aachen, and kt clustering algorithms. In ATLAS physics analyses the main use is truth-level jet clustering for generator studies or jet substructure calculations on particle-level events.
+fastjet is the standard jet-finding library in HEP. The Python bindings
+(`fastjet` PyPI package, also known as `pyjet` in older versions) expose the
+anti-kt, Cambridge/Aachen, and kt clustering algorithms. In ATLAS physics
+analyses the main use is truth-level jet clustering for generator studies or jet
+substructure calculations on particle-level events.
 
 ## When to Use
 
 - Clustering particle-level or parton-level events from a Monte Carlo generator
-- Computing jet substructure variables (N-subjettiness, soft drop) for truth jets
+- Computing jet substructure variables (N-subjettiness, soft drop) for truth
+  jets
 - Validating detector-level jets against truth clustering
 - Grooming jets for boosted object analyses
 
 ## Key Concepts
 
-| Concept | Notes |
-|---|---|
-| `fastjet.ClusterSequence` | Core clustering object; constructed from PseudoJets + JetDefinition |
-| `fastjet.PseudoJet` | Four-vector container (px, py, pz, E) |
-| `fastjet.JetDefinition` | Algorithm + R parameter, e.g. `anti_kt` with R=0.4 |
-| `fastjet.ClusterSequenceArea` | Adds jet area computation (needed for pileup subtraction) |
-| `fastjet.Selector` | Filter jets by pT, eta, etc. |
-| Jet constituents | `jet.constituents()` returns list of PseudoJets |
-| User index | `pseudo_jet.set_user_index(i)` links back to the original particle |
+| Concept                       | Notes                                                               |
+| ----------------------------- | ------------------------------------------------------------------- |
+| `fastjet.ClusterSequence`     | Core clustering object; constructed from PseudoJets + JetDefinition |
+| `fastjet.PseudoJet`           | Four-vector container (px, py, pz, E)                               |
+| `fastjet.JetDefinition`       | Algorithm + R parameter, e.g. `anti_kt` with R=0.4                  |
+| `fastjet.ClusterSequenceArea` | Adds jet area computation (needed for pileup subtraction)           |
+| `fastjet.Selector`            | Filter jets by pT, eta, etc.                                        |
+| Jet constituents              | `jet.constituents()` returns list of PseudoJets                     |
+| User index                    | `pseudo_jet.set_user_index(i)` links back to the original particle  |
 
 ## Canonical Patterns
 
@@ -107,19 +112,27 @@ for j in cs_area.inclusive_jets(ptmin=25.0):
 
 ## Gotchas
 
-- **Units**: fastjet has no built-in unit system — ensure all four-vectors use the same units (usually GeV).
-- **`phi()` range**: fastjet returns phi in `[0, 2π)`; some downstream code expects `(-π, π]`. Use `fj.PseudoJet.phi_std()` or subtract `2π` if needed.
-- **pyjet vs fastjet**: the older `pyjet` package uses `numpy` structured arrays; the newer `fastjet` package (from Scikit-HEP) uses `PseudoJet` objects and is the recommended path.
-- **fjcontrib availability**: substructure tools (`Nsubjettiness`, `SoftDrop`) require the `fastjet` package built with contrib support, or a separate `fjcontrib` install.
-- **No automatic batching**: fastjet processes one event at a time; loop over events explicitly.
+- **Units**: fastjet has no built-in unit system — ensure all four-vectors use
+  the same units (usually GeV).
+- **`phi()` range**: fastjet returns phi in `[0, 2π)`; some downstream code
+  expects `(-π, π]`. Use `fj.PseudoJet.phi_std()` or subtract `2π` if needed.
+- **pyjet vs fastjet**: the older `pyjet` package uses `numpy` structured
+  arrays; the newer `fastjet` package (from Scikit-HEP) uses `PseudoJet` objects
+  and is the recommended path.
+- **fjcontrib availability**: substructure tools (`Nsubjettiness`, `SoftDrop`)
+  require the `fastjet` package built with contrib support, or a separate
+  `fjcontrib` install.
+- **No automatic batching**: fastjet processes one event at a time; loop over
+  events explicitly.
 
 ## Interop
 
-- **pyhepmc**: Read HepMC3 events, extract final-state particles, build PseudoJets.
+- **pyhepmc**: Read HepMC3 events, extract final-state particles, build
+  PseudoJets.
 - **pylhe**: Read LHE parton-level events for parton-jet matching studies.
-- **vector / awkward**: Convert awkward four-vector arrays to PseudoJets event-by-event.
+- **vector / awkward**: Convert awkward four-vector arrays to PseudoJets
+  event-by-event.
 
 ## Docs
 
-https://fastjet.fr/  
-Python bindings: https://scikit-hep.org/fastjet/
+https://fastjet.fr/ Python bindings: https://scikit-hep.org/fastjet/

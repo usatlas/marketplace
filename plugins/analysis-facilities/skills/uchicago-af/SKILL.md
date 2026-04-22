@@ -1,11 +1,11 @@
 ---
 name: uchicago-af
 description: >-
-    Use when working with the UChicago ATLAS Analysis Facility, submitting
-    HTCondor batch jobs at UChicago, accessing JupyterLab at af.uchicago.edu,
-    using XCache or Rucio for ATLAS data at UChicago, deploying ML models on
-    Triton at UChicago AF, setting up ServiceX or Coffea Casa, or
-    troubleshooting SSH access to login.af.uchicago.edu
+  Use when working with the UChicago ATLAS Analysis Facility, submitting
+  HTCondor batch jobs at UChicago, accessing JupyterLab at af.uchicago.edu,
+  using XCache or Rucio for ATLAS data at UChicago, deploying ML models on
+  Triton at UChicago AF, setting up ServiceX or Coffea Casa, or troubleshooting
+  SSH access to login.af.uchicago.edu
 ---
 
 # UChicago ATLAS Analysis Facility Workflow
@@ -51,15 +51,15 @@ Triton). It is part of the MWT2 Tier-2 center supporting US ATLAS computing.
 1. **Request Account**: Email `atlas-us-chicago-tier3-admins@cern.ch` with your
    CERN username and home institute
 2. **SSH Key Setup**: Generate an ed25519 or ecdsa key (RSA keys are rejected):
-    ```bash
-    ssh-keygen -t ed25519 -C "your_email@example.com"
-    ```
-    Upload the public key to your CERN account settings
+   ```bash
+   ssh-keygen -t ed25519 -C "your_email@example.com"
+   ```
+   Upload the public key to your CERN account settings
 3. **First Login**: SSH to `login.af.uchicago.edu`:
-    ```bash
-    ssh <username>@login.af.uchicago.edu
-    ```
-    Initial login may take ~15 minutes for home directory sync
+   ```bash
+   ssh <username>@login.af.uchicago.edu
+   ```
+   Initial login may take ~15 minutes for home directory sync
 4. **Verify Access**: Check that `/home/<username>`, `/data/<username>`, and
    `/scratch/<username>` exist
 
@@ -252,15 +252,15 @@ Two ServiceX instances for ATLAS data delivery:
 
 1. Register with Globus at the respective endpoint
 2. Create `servicex.yaml` config:
-    ```yaml
-    api_endpoints:
-        - name: uchicago-uproot
-          endpoint: https://uproot-atlas.servicex.af.uchicago.edu
-          token: <your_token>
-        - name: uchicago-xaod
-          endpoint: https://xaod.servicex.af.uchicago.edu
-          token: <your_token>
-    ```
+   ```yaml
+   api_endpoints:
+     - name: uchicago-uproot
+       endpoint: https://uproot-atlas.servicex.af.uchicago.edu
+       token: <your_token>
+     - name: uchicago-xaod
+       endpoint: https://xaod.servicex.af.uchicago.edu
+       token: <your_token>
+   ```
 
 ## Coffea Casa
 
