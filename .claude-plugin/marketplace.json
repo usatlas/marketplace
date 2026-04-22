@@ -55,6 +55,22 @@
         "hist",
         "vector"
       ]
+    },
+    {
+      "name": "hep-python-tools",
+      "description": "Generic Python tooling skills used across HEP workflows: Typer CLIs and PEP-723 standalone scripts.",
+      "source": "./plugins/hep-python-tools",
+      "skills": [],
+      "keywords": [
+        "Python",
+        "Typer",
+        "CLI",
+        "uv",
+        "PEP 723",
+        "Hatch",
+        "pixi",
+        "HEP"
+      ]
     }
   ]
 }
