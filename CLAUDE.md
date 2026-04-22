@@ -5,11 +5,13 @@
 ```
 plugins/
   <plugin-name>/
-    .claude-plugin/plugin.json   # plugin manifest
+    .claude-plugin/plugin.json   # Claude Code plugin manifest
+    .cursor-plugin/plugin.json   # Cursor plugin manifest
     .mcp.json                    # MCP server config (atlas only)
     agents/<name>.md             # subagent definitions
     skills/<name>/SKILL.md       # skill definitions
-.claude-plugin/marketplace.json  # registry of all plugins
+.claude-plugin/marketplace.json  # Claude Code registry of all plugins
+.codex/INSTALL.md                # Codex native skill discovery instructions
 ```
 
 The root `skills/` directory is unused — all skills live under `plugins/`.
@@ -72,6 +74,8 @@ color: purple
 
 ## Adding a plugin
 
+When adding a plugin, create manifests for **all three tools** in parallel.
+
 1. Create `plugins/<plugin-name>/.claude-plugin/plugin.json`:
    ```json
    {
@@ -86,7 +90,14 @@ color: purple
 2. Add an entry to `.claude-plugin/marketplace.json` `"plugins"` array with
    `"name"`, `"description"`, `"source"` (`"./plugins/<plugin-name>"`),
    `"skills"`, and `"keywords"`.
-3. Create skill directories as described above.
+3. Create `plugins/<plugin-name>/.cursor-plugin/plugin.json` mirroring the
+   Claude plugin manifest but with `"displayName"`, `"author": {"name": "USATLAS"}`,
+   and path fields `"skills": "./skills/"` (and `"agents": "./agents/"` if the
+   plugin has agents). No `"commands"` or `"hooks"` fields unless needed.
+
+4. Add the new plugin's symlink instructions to `.codex/INSTALL.md`.
+
+5. Create skill directories as described above.
 
 ## Editing marketplace.json
 
