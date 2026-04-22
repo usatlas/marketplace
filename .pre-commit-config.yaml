@@ -36,7 +36,7 @@ repos:
     hooks:
       - id: codespell
         files: ^.*\.(py|md|rst)$
-        args: ["-w", "-L", "hist,gaus"]
+        args: ["-w", "-L", "hist,gaus,merrors"]
 
   - repo: https://github.com/rbubley/mirrors-prettier
     rev: "v3.8.1"
