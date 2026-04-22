@@ -30,13 +30,13 @@ All three are configured in `pyproject.toml` (ruff, mypy) and
 
 ## Key Concepts
 
-| Tool         | Role                                           | Config location           |
-| ------------ | ---------------------------------------------- | ------------------------- |
-| pre-commit   | Orchestrates all hooks; runs in isolated envs  | `.pre-commit-config.yaml` |
-| ruff-format  | Auto-formatter (Black-compatible, 30× faster)  | `[tool.ruff]` in pyproject.toml |
-| ruff-check   | Linter; replaces flake8, isort, pyupgrade, etc | `[tool.ruff.lint]` in pyproject.toml |
-| mypy         | Static type checker                            | `[tool.mypy]` in pyproject.toml |
-| codespell    | Spell checker for code and docs                | `.pre-commit-config.yaml` |
+| Tool        | Role                                           | Config location                      |
+| ----------- | ---------------------------------------------- | ------------------------------------ |
+| pre-commit  | Orchestrates all hooks; runs in isolated envs  | `.pre-commit-config.yaml`            |
+| ruff-format | Auto-formatter (Black-compatible, 30× faster)  | `[tool.ruff]` in pyproject.toml      |
+| ruff-check  | Linter; replaces flake8, isort, pyupgrade, etc | `[tool.ruff.lint]` in pyproject.toml |
+| mypy        | Static type checker                            | `[tool.mypy]` in pyproject.toml      |
+| codespell   | Spell checker for code and docs                | `.pre-commit-config.yaml`            |
 
 **Hook execution order matters**: put auto-fixers (ruff-format, ruff-check
 `--fix`) _before_ linters that may fail on unfixed code.
@@ -145,13 +145,13 @@ pre-commit autoupdate
 - **mypy needs stubs for external packages**: most HEP libraries (awkward,
   uproot, hist) lack complete type stubs — add `ignore_missing_imports = true`
   per package.
-- **`--fix` in ruff-check is safe**: it makes changes that you review via `git
-  diff`; `--show-fixes` explains what it changed.
+- **`--fix` in ruff-check is safe**: it makes changes that you review via
+  `git diff`; `--show-fixes` explains what it changed.
 - **pre-commit.ci**: free service that auto-runs hooks on every PR and updates
   `rev:` pins weekly — worth enabling at pre-commit.ci for shared projects.
-- **HEP-specific linting suppressions**: magic number comparisons
-  (`PLR2004`) frequently false-positive on physics cuts like `pt > 30`; add to
-  `ignore` or suppress per line with `# noqa: PLR2004`.
+- **HEP-specific linting suppressions**: magic number comparisons (`PLR2004`)
+  frequently false-positive on physics cuts like `pt > 30`; add to `ignore` or
+  suppress per line with `# noqa: PLR2004`.
 - **codespell false positives**: HEP terms like `hist`, `gaus`, `Eta` may be
   flagged. Suppress with `[tool.codespell] ignore-words-list = ["hist", "gaus"]`
   in `pyproject.toml`.

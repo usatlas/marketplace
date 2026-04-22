@@ -2,9 +2,9 @@
 name: python-packaging
 description: >-
   Use when creating a new Python package, adding pyproject.toml to an existing
-  project, choosing a build backend, setting up src layout, configuring VCS-based
-  versioning, or managing a development environment with pixi or uv for a HEP
-  Python project.
+  project, choosing a build backend, setting up src layout, configuring
+  VCS-based versioning, or managing a development environment with pixi or uv
+  for a HEP Python project.
 ---
 
 # Python Packaging
@@ -30,14 +30,14 @@ encode these recommendations. Use them as a reference for new projects.
 
 ## Key Concepts
 
-| Concept            | Details                                                          |
-| ------------------ | ---------------------------------------------------------------- |
-| `pyproject.toml`   | Single config file; replaces `setup.py`, `setup.cfg`, `MANIFEST.in` |
-| Build backend      | Hatchling is recommended; flit-core and uv_build also work well   |
-| src layout         | `src/<package>/` prevents accidental local-import bugs            |
-| `requires-python`  | Set minimum; **never** set an upper cap                           |
-| VCS versioning     | `hatch-vcs` reads git tags; no manual version bumps              |
-| pixi               | Preferred for lockfile-based reproducible environments            |
+| Concept           | Details                                                             |
+| ----------------- | ------------------------------------------------------------------- |
+| `pyproject.toml`  | Single config file; replaces `setup.py`, `setup.cfg`, `MANIFEST.in` |
+| Build backend     | Hatchling is recommended; flit-core and uv_build also work well     |
+| src layout        | `src/<package>/` prevents accidental local-import bugs              |
+| `requires-python` | Set minimum; **never** set an upper cap                             |
+| VCS versioning    | `hatch-vcs` reads git tags; no manual version bumps                 |
+| pixi              | Preferred for lockfile-based reproducible environments              |
 
 ### pyproject.toml metadata (`[project]`)
 
@@ -147,8 +147,8 @@ Run with `uv run pytest` or `uv sync --group dev`.
 
 - **Never use `setup.py` or `setup.cfg`** for new projects — those are
   setuptools-specific legacy files. Modern backends don't use them.
-- **No upper cap on `requires-python`**: `>=3.11` is correct; `>=3.11,<4` is
-  not — upper caps break installation for future Python versions.
+- **No upper cap on `requires-python`**: `>=3.11` is correct; `>=3.11,<4` is not
+  — upper caps break installation for future Python versions.
 - **src layout is required** to avoid testing the local source instead of the
   installed package; without it, `import my_hep_tool` silently picks up the
   un-installed tree.
@@ -171,6 +171,7 @@ Run with `uv run pytest` or `uv sync --group dev`.
 
 - Scientific Python packaging guide:
   https://learn.scientific-python.org/development/guides/packaging-simple/
-- PyPA packaging tutorial: https://packaging.python.org/tutorials/packaging-projects/
+- PyPA packaging tutorial:
+  https://packaging.python.org/tutorials/packaging-projects/
 - Hatchling: https://hatch.pypa.io/latest/
 - pixi: https://pixi.sh/

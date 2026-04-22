@@ -2,9 +2,9 @@
 name: python-testing
 description: >-
   Use when writing or configuring tests for a HEP Python project with pytest:
-  setting up pyproject.toml test configuration, writing fixtures and parametrized
-  tests, handling numerical tolerances for physics quantities, setting up code
-  coverage, or choosing between unit and integration tests.
+  setting up pyproject.toml test configuration, writing fixtures and
+  parametrized tests, handling numerical tolerances for physics quantities,
+  setting up code coverage, or choosing between unit and integration tests.
 ---
 
 # Python Testing with pytest
@@ -27,14 +27,14 @@ results), and **testing the installed package** (src layout requirement).
 
 ## Key Concepts
 
-| Concept              | Notes                                                              |
-| -------------------- | ------------------------------------------------------------------ |
-| Test discovery       | Files named `test_*.py`; functions named `test_*`                 |
-| Fixtures             | Shared setup/teardown; defined in `conftest.py` or test files      |
-| Parametrize          | Run one test with many input cases via `@pytest.mark.parametrize`  |
-| `pytest.approx`      | Float/array comparison with tolerance; prefer over `==` for floats |
-| `filterwarnings`     | `"error"` turns warnings into failures — catch issues early        |
-| `src` layout         | Tests run against the **installed** package, not the local source  |
+| Concept          | Notes                                                              |
+| ---------------- | ------------------------------------------------------------------ |
+| Test discovery   | Files named `test_*.py`; functions named `test_*`                  |
+| Fixtures         | Shared setup/teardown; defined in `conftest.py` or test files      |
+| Parametrize      | Run one test with many input cases via `@pytest.mark.parametrize`  |
+| `pytest.approx`  | Float/array comparison with tolerance; prefer over `==` for floats |
+| `filterwarnings` | `"error"` turns warnings into failures — catch issues early        |
+| `src` layout     | Tests run against the **installed** package, not the local source  |
 
 ### pytest configuration in `pyproject.toml`
 
@@ -159,13 +159,13 @@ exclude_also = ["if TYPE_CHECKING:"]
 - **Never use `==` for floats**: physics calculations accumulate floating-point
   error; always use `pytest.approx` or `np.testing.assert_allclose`.
 - **Test the installed package, not local source**: with src layout, run
-  `pip install -e .` (or `pixi install`) before `pytest`; otherwise you may
-  test stale or missing files.
+  `pip install -e .` (or `pixi install`) before `pytest`; otherwise you may test
+  stale or missing files.
 - **`filterwarnings = ["error"]` is strict**: you will catch upstream
   deprecations immediately. Add exemptions only for known false-positives:
   `"ignore::DeprecationWarning:some_package"`.
-- **Do not place `__init__.py` in `tests/`**: it confuses package discovery
-  and is unnecessary.
+- **Do not place `__init__.py` in `tests/`**: it confuses package discovery and
+  is unnecessary.
 - **Separation of unit and integration tests**: keep tests that hit real files,
   real ROOT files, or the grid in a separate file (e.g., `test_integration.py`)
   and mark them with `@pytest.mark.slow` so they can be skipped in fast CI.
