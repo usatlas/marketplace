@@ -32,9 +32,11 @@ NTuples (ROOT, flat branches)
 Histograms → fit
 ```
 
-FastFrames takes CPalgs output (like that from TopCPToolkit or EasyJet) and processes into histograms or ntuples.
+FastFrames takes CPalgs output (like that from TopCPToolkit or EasyJet) and
+processes into histograms or ntuples.
 
 ## Canonical Patterns
+
 ### YAML Configuration
 
 ```yaml
@@ -46,8 +48,8 @@ general:
   default_sumweights: "NOSYS"
   default_event_weights: "weight_mc_NOSYS *globalTriggerEffSF_NOSYS"
   xsection_files:
-  - campaigns: ["mc20a", "mc20d", "mc20e"]
-    files: ["test/data/PMGxsecDB_mc16.txt"]
+    - campaigns: ["mc20a", "mc20d", "mc20e"]
+      files: ["test/data/PMGxsecDB_mc16.txt"]
   automatic_systematics: True
   nominal_only: False
   number_of_cpus: 4
@@ -72,14 +74,14 @@ regions:
           max: 300
           number_of_bins: 10
       - name: "met_met"
-        title : "histo title;X axis title;Y axis title"
+        title: "histo title;X axis title;Y axis title"
         definition: "met_met_NOSYS/1e3"
         type: "double"
         is_nominal_only: True
         binning:
-          bin_edges: [0,20,60,80,140,250]
+          bin_edges: [0, 20, 60, 80, 140, 250]
       - name: "met_phi"
-        title : "histo title;X axis title;Y axis title"
+        title: "histo title;X axis title;Y axis title"
         definition: "met_phi_NOSYS"
         type: "float"
         binning:
@@ -98,7 +100,7 @@ truth_processing:
         truth: "Ttbar_MC_t_afterFSR_pt"
     variables:
       - name: "Ttbar_MC_t_afterFSR_pt"
-        definition:  "Ttbar_MC_t_afterFSR_pt/1e3"
+        definition: "Ttbar_MC_t_afterFSR_pt/1e3"
         type: "double"
         binning:
           min: 0
@@ -127,13 +129,15 @@ systematics:
 ### Running FastFrames
 
 ```bash
-# setup
+# option 1: conda-forge (pixi / conda)
+pixi add fastframes
+FastFrames.py --config config.yml
+
+# option 2: build from source inside AnalysisBase
 asetup AnalysisBase,25.2.X
 cmake -S fastframes -B build
 cmake --build build
 source build/setup.sh
-
-# run
 FastFrames.py --config config.yml
 ```
 
@@ -156,7 +160,8 @@ with uproot.open("output/ttbar_FS.root") as f:
 
 ### Systematic Handling
 
-FastFrames can automatically read systematics from the input files when `automatic_systematics` is `True`.
+FastFrames can automatically read systematics from the input files when
+`automatic_systematics` is `True`.
 
 FastFrames can also handle manually defined systematics in the YAML config.
 
