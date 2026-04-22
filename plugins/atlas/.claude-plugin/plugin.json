@@ -1,0 +1,32 @@
+{
+  "name": "atlas",
+  "description": "ATLAS analysis plugin: grid/catalog MCPs (Rucio, AMI, ATLAS Open Data), statistics (pyhf, cabinetry, HistFitter, TRExFitter, RooUnfold, pyhs3), analysis frameworks (TopCPToolkit, FastFrames, ServiceX), Scikit-HEP tools, and ATLAS software orientation.",
+  "homepage": "https://atlas-software.docs.cern.ch/",
+  "repository": "https://github.com/usatlas/marketplace",
+  "license": "MIT",
+  "keywords": [
+    "ATLAS",
+    "HEP",
+    "particle physics",
+    "Rucio",
+    "AMI",
+    "ATLAS Open Data",
+    "ServiceX",
+    "pyhf",
+    "cabinetry",
+    "HistFitter",
+    "TRExFitter",
+    "RooUnfold",
+    "pyhs3",
+    "TopCPToolkit",
+    "FastFrames",
+    "Scikit-HEP",
+    "uproot",
+    "awkward",
+    "coffea",
+    "hist",
+    "vector",
+    "iminuit",
+    "fastjet"
+  ]
+}

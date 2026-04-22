@@ -1,0 +1,20 @@
+{
+  "mcpServers": {
+    "rucio": {
+      "command": "pixi",
+      "args": ["exec", "rucio-mcp", "serve", "--read-only"],
+      "env": {
+        "RUCIO_ACCOUNT": "${RUCIO_ACCOUNT}",
+        "RUCIO_AUTH_TYPE": "${RUCIO_AUTH_TYPE:-x509_proxy}"
+      }
+    },
+    "ami": {
+      "command": "pixi",
+      "args": ["exec", "ami-mcp", "serve"]
+    },
+    "atlasopenmagic": {
+      "command": "uvx",
+      "args": ["atlasopenmagic-mcp", "serve"]
+    }
+  }
+}

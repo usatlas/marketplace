@@ -1,15 +1,16 @@
 {
-  "name": "analysis-facilities",
+  "name": "usatlas-marketplace",
   "owner": {
     "name": "USATLAS",
     "url": "https://github.com/usatlas"
   },
-  "description": "Claude Code skills for USATLAS Members.",
+  "description": "Claude Code plugins for ATLAS physics analysis at US ATLAS analysis facilities.",
   "plugins": [
     {
       "name": "analysis-facilities",
       "description": "Skills for working with USATLAS Analysis Facilities (UChicago, BNL, SLAC) providing workflows for HTCondor batch jobs, JupyterLab, XCache, Rucio, ServiceX, Coffea Casa, and Triton ML inference",
-      "source": "./",
+      "source": "./plugins/analysis-facilities",
+      "version": "1.0.0",
       "skills": ["uchicago-af"],
       "keywords": [
         "ATLAS",
@@ -26,6 +27,89 @@
         "machine learning",
         "UChicago",
         "analysis facility"
+      ]
+    },
+    {
+      "name": "atlas",
+      "description": "ATLAS analysis plugin: grid/catalog MCPs (Rucio, AMI, ATLAS Open Data), statistics (pyhf, cabinetry, HistFitter, TRExFitter, RooUnfold, pyhs3), analysis frameworks (TopCPToolkit, FastFrames, ServiceX), and Scikit-HEP tools.",
+      "source": "./plugins/atlas",
+      "version": "1.0.0",
+      "skills": [
+        "atlas-software",
+        "pyhf",
+        "cabinetry",
+        "pyhs3",
+        "histfitter",
+        "trexfitter",
+        "roounfold",
+        "topcptoolkit",
+        "fastframes",
+        "servicex",
+        "analysis-spec-builder",
+        "uproot",
+        "awkward",
+        "coffea",
+        "hist",
+        "vector",
+        "iminuit",
+        "fastjet",
+        "particle",
+        "hepunits",
+        "decaylanguage",
+        "pyhepmc",
+        "pylhe",
+        "fsspec-xrootd",
+        "cpp-bindings"
+      ],
+      "keywords": [
+        "ATLAS",
+        "HEP",
+        "particle physics",
+        "Rucio",
+        "AMI",
+        "ATLAS Open Data",
+        "ServiceX",
+        "pyhf",
+        "cabinetry",
+        "HistFitter",
+        "TRExFitter",
+        "RooUnfold",
+        "TopCPToolkit",
+        "FastFrames",
+        "Scikit-HEP",
+        "uproot",
+        "awkward",
+        "coffea",
+        "hist",
+        "vector"
+      ]
+    },
+    {
+      "name": "hep-python-tools",
+      "description": "Generic Python tooling skills used across HEP workflows: Typer CLIs, PEP-723 standalone scripts, packaging, code quality, and testing.",
+      "source": "./plugins/hep-python-tools",
+      "version": "1.0.0",
+      "skills": [
+        "cli-creator",
+        "standalone-script",
+        "python-packaging",
+        "code-quality-tools",
+        "python-testing"
+      ],
+      "keywords": [
+        "Python",
+        "Typer",
+        "CLI",
+        "uv",
+        "PEP 723",
+        "Hatch",
+        "pixi",
+        "HEP",
+        "packaging",
+        "pytest",
+        "ruff",
+        "pre-commit",
+        "mypy"
       ]
     }
   ]
