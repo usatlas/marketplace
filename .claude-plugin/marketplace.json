@@ -86,10 +86,16 @@
     },
     {
       "name": "hep-python-tools",
-      "description": "Generic Python tooling skills used across HEP workflows: Typer CLIs and PEP-723 standalone scripts.",
+      "description": "Generic Python tooling skills used across HEP workflows: Typer CLIs, PEP-723 standalone scripts, packaging, code quality, and testing.",
       "source": "./plugins/hep-python-tools",
       "version": "1.0.0",
-      "skills": ["cli-creator", "standalone-script"],
+      "skills": [
+        "cli-creator",
+        "standalone-script",
+        "python-packaging",
+        "code-quality-tools",
+        "python-testing"
+      ],
       "keywords": [
         "Python",
         "Typer",
@@ -98,7 +104,12 @@
         "PEP 723",
         "Hatch",
         "pixi",
-        "HEP"
+        "HEP",
+        "packaging",
+        "pytest",
+        "ruff",
+        "pre-commit",
+        "mypy"
       ]
     }
   ]
