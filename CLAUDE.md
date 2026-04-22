@@ -2,7 +2,7 @@
 
 ## Repository layout
 
-```
+```text
 plugins/
   <plugin-name>/
     .claude-plugin/plugin.json   # Claude Code plugin manifest
@@ -154,7 +154,7 @@ dictionary `"-L hist,gaus"` whitelists HEP-specific words.
 
 Conventional Commits format:
 
-```
+```text
 feat(atlas): add <skill-name> skill
 feat(atlas,hep-python-tools): ...
 fix(<plugin>): ...

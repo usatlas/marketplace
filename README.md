@@ -87,7 +87,7 @@ Generic Python tooling skills for HEP workflows.
 
 ## Repository Layout
 
-```
+```text
 plugins/
   analysis-facilities/
     .claude-plugin/plugin.json

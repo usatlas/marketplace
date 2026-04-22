@@ -12,7 +12,7 @@ The following skills were vendored from the
 
 **License:** BSD 3-Clause License
 
-```
+```text
 BSD 3-Clause License
 
 Copyright (c) 2025, IRIS-HEP

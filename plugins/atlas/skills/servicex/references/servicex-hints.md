@@ -129,7 +129,7 @@ jet_pts = all_jets_pts_awk["jet_pt_fetch"]
    there will be only one).
 
    ```python
-   file_list = [str(p) for p in all_jet_pts_delivered['jet_pt_fetch']
+   file_list = [str(p) for p in all_jet_pts_delivered['jet_pt_fetch']]
    ```
 
 ## Base Query
@@ -190,15 +190,16 @@ those object. The second builds the return data and any necessary calculations.
 ```python
 query = (FuncADLQueryPHYSLITE()
     .Select(lambda e: {
-        'ele': e.Electrons().Select(lambda e: e.pt()/1000 > 30),
-        'mu': e.Muons().Select(lambda m: abs(m.eta()) < 2.5)
-    }))
+        'ele': e.Electrons().Where(lambda e: e.pt()/1000 > 30),
+        'mu': e.Muons().Where(lambda m: abs(m.eta()) < 2.5)
+    })
     .Select(lambda pairs: {
         'ele_pt':  pairs.ele.Select(lambda ele: ele.pt()/1000),
-        'ele_eta': pairs.ele.Select(lambda ele: ele.eta())
+        'ele_eta': pairs.ele.Select(lambda ele: ele.eta()),
         'mu_pt': pairs.mu.Select(lambda mu: mu.pt()/1000),
         'mu_eta': pairs.mu.Select(lambda mu: mu.eta())
     })
+)
 ```
 
 Note:

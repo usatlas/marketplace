@@ -17,7 +17,7 @@ Whenever you use these tool helpers, copy `xaod_hints.py` from the skill assets
 into the user's package source directory so imports work:
 
 ```bash
-cp /home/gwatts/code/llm/skill-test/.codex/skills/servicex/assets/xaod_hints.py /path/to/your/package/
+cp ./assets/xaod_hints.py /path/to/your/package/
 ```
 
 ## BTaggingSelectionTool: getting jet b-tagging results
@@ -51,7 +51,7 @@ from xaod_hints import make_a_tool, make_tool_accessor
 
 # Define the tool. This passes `init_lines` for Run 3.
 query_base, tag_tool_info = make_a_tool(
-    physlite,
+    query,
     "{tool_name}",
     "BTaggingSelectionTool",
     include_files=["xAODBTaggingEfficiency/BTaggingSelectionTool.h"],
@@ -103,6 +103,7 @@ query = (query_base
 Make sure to use `base_query` here: the `make_a_tool` must have been called on
 the query first.
 
-You must uncomment one set or the other of the initialization lines in the code.
-Look for the comment about uncommenting the proper code. It will not work
-otherwise.
+Uncomment the OpenData initialization block (the three lines labeled "Uncomment
+the next 3 lines if you are running on ATLAS OpenData only") when processing
+OpenData; leave that block commented for standard ATLAS data. The first and last
+`init_lines` entries always apply regardless of data type.

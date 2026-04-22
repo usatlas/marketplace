@@ -27,7 +27,47 @@ publications that use a ROOT-based fit.
 - When you need HistFactory XML/ROOT output (e.g., for combination with other
   analyses)
 
-## Config File Structure
+## Key Concepts
+
+### Histogram Input Convention
+
+When `ReadFrom: HIST`, TRExFitter looks for:
+
+```text
+{HistoPath}/{Sample}_{Region}.root
+```
+
+Each ROOT file contains the `HistoName` histogram for nominal and each
+systematic variation:
+
+```text
+histograms/ttbar_SR.root          → h_meff (nominal)
+histograms/ttbar_JES_up_SR.root   → h_meff (JES up variation)
+```
+
+### Systematic Types
+
+| TRExFitter Type | Effect                                            |
+| --------------- | ------------------------------------------------- |
+| `OVERALL`       | Normalization-only, log-normal prior              |
+| `HISTO`         | Shape+norm from ±1σ histogram templates           |
+| `SHAPE`         | Shape-only (no normalization change)              |
+| `STAT`          | MC statistical uncertainty (auto, Barlow-Beeston) |
+
+### Key Config Parameters
+
+| Parameter        | Values                 | Notes                                |
+| ---------------- | ---------------------- | ------------------------------------ |
+| `FitType`        | `SPLUSB`, `BONLY`      | SPLUSB for exclusion/measurement     |
+| `FitRegion`      | `CRSR`, `CRONLY`       | CR-only fit for background estimate  |
+| `ReadFrom`       | `HIST`, `NTUP`         | HIST reads pre-made ROOT histograms  |
+| `POIAsimov`      | `0`, `1`               | Asimov μ for expected limits         |
+| `StatOnly`       | `TRUE`/`FALSE`         | Stat-only fit for cross-checks       |
+| `Symmetrisation` | `TWOSIDED`, `ONESIDED` | How to handle asymmetric systematics |
+
+## Canonical Patterns
+
+### Config File Structure
 
 TRExFitter config is a plain text file with key-value blocks:
 
@@ -109,7 +149,7 @@ NormFactor: "mu_ttbar"
   Samples: ttbar
 ```
 
-## Running TRExFitter
+### Running TRExFitter
 
 ```bash
 # Step n: Normalise histograms and prepare inputs
@@ -137,43 +177,7 @@ trex-fitter l config.config
 trex-fitter nwfdprl config.config
 ```
 
-## Histogram Input Convention
-
-When `ReadFrom: HIST`, TRExFitter looks for:
-
-```
-{HistoPath}/{Sample}_{Region}.root
-```
-
-Each ROOT file contains the `HistoName` histogram for nominal and each
-systematic variation:
-
-```
-histograms/ttbar_SR.root          → h_meff (nominal)
-histograms/ttbar_JES_up_SR.root   → h_meff (JES up variation)
-```
-
-## Systematic Types
-
-| TRExFitter Type | Effect                                            |
-| --------------- | ------------------------------------------------- |
-| `OVERALL`       | Normalization-only, log-normal prior              |
-| `HISTO`         | Shape+norm from ±1σ histogram templates           |
-| `SHAPE`         | Shape-only (no normalization change)              |
-| `STAT`          | MC statistical uncertainty (auto, Barlow-Beeston) |
-
-## Key Config Parameters
-
-| Parameter        | Values                 | Notes                                |
-| ---------------- | ---------------------- | ------------------------------------ |
-| `FitType`        | `SPLUSB`, `BONLY`      | SPLUSB for exclusion/measurement     |
-| `FitRegion`      | `CRSR`, `CRONLY`       | CR-only fit for background estimate  |
-| `ReadFrom`       | `HIST`, `NTUP`         | HIST reads pre-made ROOT histograms  |
-| `POIAsimov`      | `0`, `1`               | Asimov μ for expected limits         |
-| `StatOnly`       | `TRUE`/`FALSE`         | Stat-only fit for cross-checks       |
-| `Symmetrisation` | `TWOSIDED`, `ONESIDED` | How to handle asymmetric systematics |
-
-## Exporting to pyhf
+### Exporting to pyhf
 
 TRExFitter can produce HistFactory XML for conversion:
 

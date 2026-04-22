@@ -85,7 +85,7 @@ directory), invoke `hep-python-tools:cli-creator` for a proper Typer interface.
 
 **Validation output**: After filling each histogram print:
 
-```
+```text
 METRIC: <name> entries=<N> mean=<M:.3f> std=<S:.3f>
 ```
 

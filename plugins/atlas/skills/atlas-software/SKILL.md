@@ -18,7 +18,16 @@ the authoritative source is the hosted documentation at
 `atlas-docs-expert` subagent which searches the docs and fetches current
 content.
 
-## Major Concepts and Hosted Links
+## When to Use
+
+- Questions about the Athena framework, event data model (xAOD), or CP
+  algorithms
+- Navigating derivation formats (DAOD_PHYS, DAOD_PHYSLITE) and their differences
+- Setting up or understanding CMake builds for ATLAS packages
+- Choosing an analysis release (AnalysisBase vs AthAnalysis) or CVMFS setup
+- Any question about ATLAS-internal software infrastructure or ASG tools
+
+## Key Concepts
 
 ### Athena Framework
 
@@ -98,7 +107,7 @@ Dual-use tools that work both in Athena and standalone.
 - FastFrames: RDataFrame-based → `atlas:fastframes`
 - coffea + uproot: no Athena dependency → `atlas:coffea`, `atlas:uproot`
 
-## When to Go Deeper
+## Canonical Patterns
 
 For any topic above, delegate to the **`atlas-docs-expert` subagent**:
 
@@ -106,7 +115,7 @@ For any topic above, delegate to the **`atlas-docs-expert` subagent**:
 - Fetches current content from the hosted site
 - Provides specific code examples from the official docs
 
-## Common Entry Points
+Common routing table:
 
 | Question type                                       | Start here                                               |
 | --------------------------------------------------- | -------------------------------------------------------- |
@@ -116,3 +125,22 @@ For any topic above, delegate to the **`atlas-docs-expert` subagent**:
 | "What framework for my analysis?"                   | `atlas:topcptoolkit`, `atlas:fastframes`, `atlas:coffea` |
 | "How do I find my dataset?"                         | `atlas-data-explorer`                                    |
 | "How do I fit my workspace?"                        | `atlas-stats-expert`                                     |
+
+## Gotchas
+
+- **All ATLAS energy/momentum values are in MeV**: branches like `jet_pt`,
+  `met_met` use MeV — divide by 1000 for GeV-scale comparisons.
+- **PHYSLITE vs PHYS collection names differ**: `AnalysisJets` (PHYSLITE) vs
+  `AntiKt4EMPFlowJets` (PHYS) — match your config to the input DAOD type.
+
+## Interop
+
+- **atlas-docs-expert**: subagent for deep documentation lookup — use for any
+  specific API, class, or configuration question
+- **atlas:topcptoolkit**, **atlas:fastframes**, **atlas:coffea**: downstream
+  analysis framework skills
+- **atlas-data-explorer**: for finding datasets via Rucio/AMI
+
+## Docs
+
+https://atlas-software.docs.cern.ch/

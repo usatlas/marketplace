@@ -24,9 +24,9 @@ end-to-end framework for new ATLAS analyses using the Python stack.
 - Automating template building across many samples and regions
 - Wrapping pyhf with a config-driven interface that non-experts can use
 
-## Workflow
+## Key Concepts
 
-```
+```text
 NTuples (ROOT) → cabinetry templates → pyhf workspace → fit → plots
 ```
 
@@ -36,7 +36,7 @@ NTuples (ROOT) → cabinetry templates → pyhf workspace → fit → plots
 4. `cabinetry.fit.fit(model, data)` — profile likelihood fit
 5. `cabinetry.visualize.*` — plots
 
-## Config Structure
+### Config Structure
 
 ```yaml
 General:
@@ -134,7 +134,7 @@ model, data = cabinetry.model_utils.model_and_data(ws)
 fit_results = cabinetry.fit.fit(model, data)
 ```
 
-## Config Tips
+### Config Tips
 
 - `NormFactor` on a sample inserts a free `normfactor` modifier — use for signal
   μ and CR-driven backgrounds

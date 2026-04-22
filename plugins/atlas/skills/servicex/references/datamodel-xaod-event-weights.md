@@ -4,8 +4,8 @@ Unless otherwise requested by the user, use the following guidelines to
 determine how to do event weighting:
 
 - **Single MC or Data Dataset**: Apply only the MC event weight.
-- **Multiple MC Datasets**: Apply the MC event weight and the cross section
-  scaling. If the cross section values aren't available for any one sample, then
+- **Multiple MC Datasets**: Apply the MC event weight and the cross-section
+  scaling. If the cross-section values aren't available for any one sample, then
   don't apply it for any samples (and make sure to tell the user in the notes
   you are missing that information). The normal way to plot this is with a
   stacked histogram.
@@ -37,20 +37,20 @@ query = (FuncADLQueryPHYSLITE()
 ## Data
 
 When including data we need to calculate the luminosity of the data we are
-including and rescale any MC to that. The proper way is not current available in
-this system. For now, scale the luminosity for a particular run by the number of
-events you are looking at (you'll have to count the number of events).
+including and rescale any MC to that. The proper way is not currently available
+in this system. For now, scale the luminosity for a particular run by the number
+of events you are looking at (you'll have to count the number of events).
 
-The dataset will contain a tag detailing which run you are looking at. We are
-using an estimate of the number of events - 10^9 per year.
+The dataset will contain a tag detailing which run you are looking at. The
+values below are rough estimates of recorded physics events; treat them as
+order-of-magnitude approximations rather than precise counts.
 
-| Dataset        | Number of Events | Total Luminosity    |
-| -------------- | ---------------- | ------------------- |
-| data24_13p6TeV | 200000000000000  | 52.4 femto-barns^-1 |
-| data22_13p6TeV | 200000000000000  | 52.4 femto-barns^-1 |
-| data23_13p6TeV | 200000000000000  | 52.4 femto-barns^-1 |
-| data24_13p6TeV | 200000000000000  | 52.4 femto-barns^-1 |
-| data25_13p6TeV | 150000000000000  | 39.3 femto-barns^-1 |
+| Dataset        | Number of Events (approx.) | Total Luminosity (approx.) |
+| -------------- | -------------------------- | -------------------------- |
+| data22_13p6TeV | 200000000000000            | 52.4 fb^-1                 |
+| data23_13p6TeV | 200000000000000            | 52.4 fb^-1                 |
+| data24_13p6TeV | 200000000000000            | 52.4 fb^-1                 |
+| data25_13p6TeV | 150000000000000            | 39.3 fb^-1                 |
 
 ## Cross-section Scaling and MC
 
@@ -66,8 +66,10 @@ Each event in a sample is scaled by a constant scale factor:
   must be taken as the sum over all events in the file - before any cuts. Gather
   the `mcEventWeight(0)` for all events in the file.
 
-The cross-section table is below, organized by run number and name. Every ATLAS
-sample is unique by run number, which is in the name of the dataset. For
+The cross-section table is below, organized by run number and name. **Note:
+cross-section values are in mixed units (pico-barn, nano-barn, femto-barn) —
+convert all values to a consistent unit (e.g. pb) before computing `sf`.** Every
+ATLAS sample is unique by run number, which is in the name of the dataset. For
 example,
 "mc23_13p6TeV:mc23_13p6TeV.801167.Py8EG_A14NNPDF23LO_jj_JZ2.deriv.DAOD_PHYSLITE.e8514_e8528_a911_s4114_r15224_r15225_p6697"
 is an MC dataset with run number 801167 and name Py8EG_A14NNPDF23LO_jj_JZ2 (or

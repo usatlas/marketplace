@@ -100,10 +100,10 @@ if __name__ == "__main__":
 uv run --script my_analysis.py data.root --output jet_pt.pdf
 ```
 
-**For testing with fewer files**:
+**For testing with a specific tree**:
 
 ```bash
-uv run --script my_analysis.py data.root --nfiles 1
+uv run --script my_analysis.py data.root --tree reco
 ```
 
 ## Pinning Dependencies

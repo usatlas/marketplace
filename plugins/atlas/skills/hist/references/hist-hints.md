@@ -44,7 +44,7 @@ no attribute XXX")
 h.fill(x=[3, 5, 2], y=[1, 4, 6])
 ```
 
-Note that `.fill` returns `None`.
+Note that `.fill` returns the histogram object (self), enabling method chaining.
 
 ## Viewing histogram counts and errors
 
@@ -94,9 +94,9 @@ h_sig = histogram[:, "4j2b", "ttbar", "nominal"]
 
 ## Plotting a 1D histogram with mplhep style
 
-Use the `fix, ax = plt.subplots()` to create the plots. Use the default
-`figsize` unless otherwise instructed (e.g. don't specify it). DO NOT Specify a
-`figsize`! Leave it at the default!
+Use `fig, ax = plt.subplots()` to create the plots. Use the default `figsize`
+unless otherwise instructed — do not specify a `figsize`; leave it at the
+default.
 
 ```python
 import matplotlib.pyplot as plt
@@ -145,6 +145,6 @@ plt.close(fig)
 - Keep histogram titles short - otherwise they are larger than the histogram
   itself. For example, don't include the dataset name in the overall plot title
   (e.g. `plt.title` or `ax.set_title`).
-  - Good: "Jet $p_T$
+  - Good: "Jet $p_T$"
   - Bad: "Jet $p_T$ in Data18 With Eta Cut"
 - Place extra information in the legend or write it on the plot somewhere.

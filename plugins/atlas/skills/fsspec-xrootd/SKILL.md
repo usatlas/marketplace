@@ -130,6 +130,8 @@ arrays = uproot.concatenate(
   `step_size` or use an EOS-local analysis facility.
 - **`FileNotFoundError` on valid path**: trailing slash or case sensitivity —
   verify with `fs.ls()`.
+- **ATLAS energy/momentum values are in MeV**: fields like `jet_pt`, `met_met`
+  come from ATLAS NTuples in MeV — divide by 1000 before GeV-scale comparisons.
 
 ## Interop
 

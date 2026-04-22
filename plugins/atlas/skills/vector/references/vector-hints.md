@@ -30,8 +30,9 @@ events = ak.Array({
 ```
 
 - Use `Momentum3D` for spatial calculations like deltaR.
-- Use `Momentum4D` for invariant mass or boosts.
-- Alternate field sets like `px`, `py`, `pz`, `E` also work.
+- Prefer `Momentum4D` when computing invariant mass or performing boosts.
+- Alternatively, provide fields `px`, `py`, `pz`, `E` — vector infers
+  coordinates from standard field names.
 
 ## deltaR Between Collections
 

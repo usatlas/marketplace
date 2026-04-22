@@ -26,7 +26,7 @@ The following command was adapted from iris-hep-marketplace:
 
 **License:** BSD 3-Clause License
 
-```
+```text
 BSD 3-Clause License
 
 Copyright (c) 2025, IRIS-HEP

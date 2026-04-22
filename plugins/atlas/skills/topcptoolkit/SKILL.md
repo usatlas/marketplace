@@ -25,9 +25,9 @@ DAOD → NTuple production.
 - Top quark, ttbar, single-top, and related SM analyses
 - When you want a supported, group-endorsed framework rather than a custom setup
 
-## Workflow
+## Key Concepts
 
-```
+```text
 DAOD_PHYS / DAOD_PHYSLITE
     ↓ TopCPToolkit (runs in AnalysisBase/Athena)
 NTuples (ROOT, flat branches)
@@ -35,7 +35,26 @@ NTuples (ROOT, flat branches)
 Histograms → fit
 ```
 
-## YAML Configuration
+TCT produces ROOT TTrees with branches named following the convention in your
+`OutputBranches` config. Typical branch structure (one entry per event):
+
+| Branch             | Type            | Unit | Notes                       |
+| ------------------ | --------------- | ---- | --------------------------- |
+| `jet_pt`           | `vector<float>` | MeV  | Calibrated jet pTs          |
+| `jet_eta`          | `vector<float>` | —    |                             |
+| `jet_phi`          | `vector<float>` | rad  |                             |
+| `jet_e`            | `vector<float>` | MeV  |                             |
+| `jet_btag_dl1dv01` | `vector<float>` | —    | DL1dv01 discriminant        |
+| `el_pt`            | `vector<float>` | MeV  |                             |
+| `mu_pt`            | `vector<float>` | MeV  |                             |
+| `met_met`          | `float`         | MeV  |                             |
+| `weight_mc`        | `float`         | —    | MC × filter × k-factor      |
+| `weight_pileup`    | `float`         | —    | Pile-up reweighting SF      |
+| `weight_bTagSF_77` | `float`         | —    | Combined b-tag SF at 77% WP |
+
+## Canonical Patterns
+
+### YAML Configuration
 
 TopCPToolkit is driven by a YAML config file:
 
@@ -96,7 +115,7 @@ algSeq:
       - weight_bTagSF_77
 ```
 
-## Running TopCPToolkit
+### Running TopCPToolkit
 
 **Locally**:
 
@@ -120,26 +139,7 @@ prun --exec "python TopCPToolkit/python/runTopCPToolkit.py --config %IN --output
      --outDS user.me.output.ntuple
 ```
 
-## Output NTuple Structure
-
-TCT produces ROOT TTrees with branches named following the convention in your
-`OutputBranches` config. Typical branch structure (one entry per event):
-
-| Branch             | Type            | Unit | Notes                       |
-| ------------------ | --------------- | ---- | --------------------------- |
-| `jet_pt`           | `vector<float>` | MeV  | Calibrated jet pTs          |
-| `jet_eta`          | `vector<float>` | —    |                             |
-| `jet_phi`          | `vector<float>` | rad  |                             |
-| `jet_e`            | `vector<float>` | MeV  |                             |
-| `jet_btag_dl1dv01` | `vector<float>` | —    | DL1dv01 discriminant        |
-| `el_pt`            | `vector<float>` | MeV  |                             |
-| `mu_pt`            | `vector<float>` | MeV  |                             |
-| `met_met`          | `float`         | MeV  |                             |
-| `weight_mc`        | `float`         | —    | MC × filter × k-factor      |
-| `weight_pileup`    | `float`         | —    | Pile-up reweighting SF      |
-| `weight_bTagSF_77` | `float`         | —    | Combined b-tag SF at 77% WP |
-
-## Reading TCT Output with uproot
+### Reading TCT Output with uproot
 
 ```python
 import uproot, awkward as ak, vector
