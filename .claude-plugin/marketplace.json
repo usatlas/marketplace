@@ -32,7 +32,15 @@
       "name": "atlas",
       "description": "ATLAS analysis plugin: grid/catalog MCPs (Rucio, AMI, ATLAS Open Data), statistics (pyhf, cabinetry, HistFitter, TRExFitter, RooUnfold, pyhs3), analysis frameworks (TopCPToolkit, FastFrames, ServiceX), and Scikit-HEP tools.",
       "source": "./plugins/atlas",
-      "skills": [],
+      "skills": [
+        "atlas-software",
+        "pyhf", "cabinetry", "pyhs3", "histfitter", "trexfitter", "roounfold",
+        "topcptoolkit", "fastframes",
+        "servicex", "analysis-spec-builder",
+        "uproot", "awkward", "coffea", "hist", "vector",
+        "iminuit", "fastjet", "particle", "hepunits", "decaylanguage",
+        "pyhepmc", "pylhe", "fsspec-xrootd", "cpp-bindings"
+      ],
       "keywords": [
         "ATLAS",
         "HEP",
@@ -60,7 +68,7 @@
       "name": "hep-python-tools",
       "description": "Generic Python tooling skills used across HEP workflows: Typer CLIs and PEP-723 standalone scripts.",
       "source": "./plugins/hep-python-tools",
-      "skills": [],
+      "skills": ["cli-creator", "standalone-script"],
       "keywords": [
         "Python",
         "Typer",
