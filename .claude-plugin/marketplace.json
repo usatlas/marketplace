@@ -10,6 +10,7 @@
       "name": "analysis-facilities",
       "description": "Skills for working with USATLAS Analysis Facilities (UChicago, BNL, SLAC) providing workflows for HTCondor batch jobs, JupyterLab, XCache, Rucio, ServiceX, Coffea Casa, and Triton ML inference",
       "source": "./plugins/analysis-facilities",
+      "version": "1.0.0",
       "skills": ["uchicago-af"],
       "keywords": [
         "ATLAS",
@@ -32,6 +33,7 @@
       "name": "atlas",
       "description": "ATLAS analysis plugin: grid/catalog MCPs (Rucio, AMI, ATLAS Open Data), statistics (pyhf, cabinetry, HistFitter, TRExFitter, RooUnfold, pyhs3), analysis frameworks (TopCPToolkit, FastFrames, ServiceX), and Scikit-HEP tools.",
       "source": "./plugins/atlas",
+      "version": "1.0.0",
       "skills": [
         "atlas-software",
         "pyhf", "cabinetry", "pyhs3", "histfitter", "trexfitter", "roounfold",
@@ -68,6 +70,7 @@
       "name": "hep-python-tools",
       "description": "Generic Python tooling skills used across HEP workflows: Typer CLIs and PEP-723 standalone scripts.",
       "source": "./plugins/hep-python-tools",
+      "version": "1.0.0",
       "skills": ["cli-creator", "standalone-script"],
       "keywords": [
         "Python",
