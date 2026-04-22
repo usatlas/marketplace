@@ -27,6 +27,34 @@
         "UChicago",
         "analysis facility"
       ]
+    },
+    {
+      "name": "atlas",
+      "description": "ATLAS analysis plugin: grid/catalog MCPs (Rucio, AMI, ATLAS Open Data), statistics (pyhf, cabinetry, HistFitter, TRExFitter, RooUnfold, pyhs3), analysis frameworks (TopCPToolkit, FastFrames, ServiceX), and Scikit-HEP tools.",
+      "source": "./plugins/atlas",
+      "skills": [],
+      "keywords": [
+        "ATLAS",
+        "HEP",
+        "particle physics",
+        "Rucio",
+        "AMI",
+        "ATLAS Open Data",
+        "ServiceX",
+        "pyhf",
+        "cabinetry",
+        "HistFitter",
+        "TRExFitter",
+        "RooUnfold",
+        "TopCPToolkit",
+        "FastFrames",
+        "Scikit-HEP",
+        "uproot",
+        "awkward",
+        "coffea",
+        "hist",
+        "vector"
+      ]
     }
   ]
 }
