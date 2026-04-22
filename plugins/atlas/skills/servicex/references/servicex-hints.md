@@ -108,8 +108,8 @@ There are two ways to access the output of the `deliver` function.
    quick studies, etc., this works very well and is quite easy.
 
    a. Make sure the `servicex_analysis_utilities` package is included in the
-      project's dependencies.
-   b. The following code will turn the output above into a single awkward array:
+   project's dependencies. b. The following code will turn the output above into
+   a single awkward array:
 
    ```python
    from servicex_analysis_utils import to_awk
@@ -201,8 +201,8 @@ query = (FuncADLQueryPHYSLITE()
 
 Note:
 
-- Any collections or items you want to access in the second select statement must
-  be passed through from the first.
+- Any collections or items you want to access in the second select statement
+  must be passed through from the first.
 
 ## Errors
 
