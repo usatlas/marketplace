@@ -36,7 +36,7 @@ tools, and anything you want to share as a single file.
 | `uv run --script <file>`          | Installs deps and runs in one step                         |
 | `uv run --script --frozen <file>` | Skip re-resolution (faster for CI)                         |
 
-## Canonical Pattern
+## Canonical Patterns
 
 ```python
 # /// script
@@ -106,7 +106,7 @@ uv run --script my_analysis.py data.root --output jet_pt.pdf
 uv run --script my_analysis.py data.root --tree reco
 ```
 
-## Pinning Dependencies
+### Pinning Dependencies
 
 For reproducibility in scripts that will be shared or run in CI:
 

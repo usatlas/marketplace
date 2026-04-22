@@ -17,8 +17,9 @@ dedicated build backend (hatchling, flit, uv_build, etc.). The src layout
 projects should use **pixi** (preferred) or **uv**.
 
 The Scientific Python community maintains a template (
-`github.com/scientific-python/cookie`) and checker (`sp-repo-review`) that
-encode these recommendations. Use them as a reference for new projects.
+[scientific-python/cookie](https://github.com/scientific-python/cookie)) and
+checker ([sp-repo-review](https://github.com/scientific-python/sp-repo-review))
+that encode these recommendations. Use them as a reference for new projects.
 
 ## When to Use
 
@@ -163,9 +164,12 @@ Run with `uv run pytest` or `uv sync --group dev`.
   (e.g., ROOT) dependencies via conda-forge
 - **uv**: lightweight alternative to pixi for pure-Python projects
 - **nox**: task runner for CI matrix tests; see
-  `github.com/scikit-hep/hist/blob/main/noxfile.py` for a HEP example
-- **scientific-python/cookie**: template with all conventions pre-configured
-- **sp-repo-review**: audit an existing repo against the guidelines
+  [scikit-hep/hist noxfile.py](https://github.com/scikit-hep/hist/blob/main/noxfile.py)
+  for a HEP example
+- **scientific-python/cookie**: template with all conventions pre-configured;
+  see <https://github.com/scientific-python/cookie>
+- **sp-repo-review**: audit an existing repo against the guidelines; see
+  <https://github.com/scientific-python/sp-repo-review>
 
 ## Docs
 

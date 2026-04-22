@@ -98,9 +98,10 @@ Usage of `jet_is_tagged` in `func_adl` is straight forward:
 ```python
 query = (query_base
     .Select(lambda e: e.Jets().Select(lambda j: jet_is_tagged(j)))
+)
 ```
 
-Make sure to use `base_query` here: the `make_a_tool` must have been called on
+Make sure to use `query_base` here: the `make_a_tool` must have been called on
 the query first.
 
 Uncomment the OpenData initialization block (the three lines labeled "Uncomment

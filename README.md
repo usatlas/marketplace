@@ -78,10 +78,13 @@ voms-proxy-init --voms atlas             # obtain a valid proxy first
 
 Generic Python tooling skills for HEP workflows.
 
-| Skill               | Description                                                     |
-| ------------------- | --------------------------------------------------------------- |
-| `cli-creator`       | Typer CLI scripts with modern `Annotated` syntax                |
-| `standalone-script` | PEP 723 inline-metadata scripts runnable with `uv run --script` |
+| Skill                | Description                                                              |
+| -------------------- | ------------------------------------------------------------------------ |
+| `cli-creator`        | Typer CLI scripts with modern `Annotated` syntax                         |
+| `standalone-script`  | PEP 723 inline-metadata scripts runnable with `uv run --script`          |
+| `python-packaging`   | pyproject.toml, src layout, VCS versioning, pixi/uv environment setup    |
+| `code-quality-tools` | pre-commit hooks, ruff linting/formatting, mypy static type checking     |
+| `python-testing`     | pytest fixtures, parametrization, numerical tolerances, coverage for HEP |
 
 ---
 
@@ -100,7 +103,7 @@ plugins/
     VENDORED-LICENSES.md       # BSD 3-Clause attribution for upstream content
   hep-python-tools/
     .claude-plugin/plugin.json
-    skills/                    # 2 skills
+    skills/                    # 5 skills
 .claude-plugin/marketplace.json
 ```
 

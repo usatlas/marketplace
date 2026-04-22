@@ -58,10 +58,9 @@ base_query = FuncADLQueryPHYSLITE()
 # Query: get all jet pT
 jet_pts_query = (base_query
     .Select(lambda evt: {"jets": evt.Jets()})
-    .Select(lambda collections: collections.jets.Select(lambda jet:
-    {
+    .Select(lambda collections: {"jets": collections.jets.Select(lambda jet: {
         "jet_pt": jet.pt() / 1000.0,
-    })
+    })})
 )
 
 # Do the fetch

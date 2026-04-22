@@ -56,7 +56,7 @@ def make_a_tool(
                 f'{tool_name}(new {tool_type} ("{tool_name}"))'
             ],
             "initialize_lines": [
-                line.format(tool_name=tool_name) for line in init_lines
+                line.replace("{tool_name}", tool_name) for line in init_lines
             ],
             "link_libraries": link_libraries,
         }
@@ -108,7 +108,7 @@ def make_tool_accessor(
                 "name": function_name,
                 "code": [
                     f"{return_type_cpp} result;",
-                    *[line.format(tool_name=t_info.name) for line in source_code],
+                    *[line.replace("{tool_name}", t_info.name) for line in source_code],
                 ],
                 "result": "result",
                 "include_files": [],
