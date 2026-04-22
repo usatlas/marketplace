@@ -67,7 +67,7 @@ pseudojets = [fj.PseudoJet(px[i], py[i], pz[i], E[i]) for i in range(len(px))]
 jet_def = fj.JetDefinition(fj.antikt_algorithm, 0.4)
 cs = fj.ClusterSequence(pseudojets, jet_def)
 
-jets = fj.sorted_by_pt(cs.inclusive_jets(ptmin=25.0))   # pT > 25 GeV
+jets = fj.sorted_by_pt(cs.inclusive_jets(ptmin=25.0))   # 25 GeV (use 25000.0 MeV for ATLAS)
 
 for j in jets:
     print(f"pT={j.pt():.1f} GeV  eta={j.eta():.2f}  phi={j.phi():.2f}")
@@ -92,7 +92,7 @@ particles = ak.Array([
 jetdef = fastjet.JetDefinition(fastjet.antikt_algorithm, 0.4)
 cluster = fastjet.ClusterSequence(particles, jetdef)
 
-jets = cluster.inclusive_jets(min_pt=25.0)  # MomentumArray4D — ak.Array
+jets = cluster.inclusive_jets(min_pt=25.0)  # MomentumArray4D; 25 GeV (use 25000.0 MeV for ATLAS)
 print(jets.pt, jets.eta, jets.phi)
 ```
 
@@ -116,7 +116,7 @@ events = ak.Array([
 jetdef = fastjet.JetDefinition(fastjet.antikt_algorithm, 0.4)
 cluster = fastjet.ClusterSequence(events, jetdef)
 
-jets = cluster.inclusive_jets(min_pt=25.0)  # jagged: [[jets_ev0], [jets_ev1]]
+jets = cluster.inclusive_jets(min_pt=25.0)  # jagged: [[jets_ev0], [jets_ev1]]; 25 GeV (use 25000.0 MeV for ATLAS)
 print(ak.num(jets, axis=1))   # number of jets per event
 print(jets.pt)                # pT of all jets, jagged
 ```
@@ -140,14 +140,14 @@ events = ak.Array(
 
 jetdef = fastjet.JetDefinition(fastjet.antikt_algorithm, 0.4)
 cluster = fastjet.ClusterSequence(events, jetdef)
-jets = cluster.inclusive_jets(min_pt=25.0)
+jets = cluster.inclusive_jets(min_pt=25.0)  # 25 GeV (use 25000.0 MeV for ATLAS)
 ```
 
 ### Columnar interface — accessing constituents without a Python loop
 
 ```python
 # constituents() returns a jagged array: [event][jet] → ak.Array of particles
-constituents = cluster.constituents(min_pt=25.0)
+constituents = cluster.constituents(min_pt=25.0)  # 25 GeV (use 25000.0 MeV for ATLAS)
 # constituents[event_i][jet_j] is an ak.Array of the contributing particles
 # e.g. sum constituent pT:
 print(ak.sum(constituents.pt, axis=-1))
@@ -182,7 +182,7 @@ groomed_jets = [sd(j) for j in jets]
 ```python
 ghost_area = fj.AreaDefinition(fj.active_area, fj.GhostedAreaSpec(5.0))
 cs_area = fj.ClusterSequenceArea(pseudojets, jet_def, ghost_area)
-for j in cs_area.inclusive_jets(ptmin=25.0):
+for j in cs_area.inclusive_jets(ptmin=25.0):  # 25 GeV (use 25000.0 MeV for ATLAS)
     print(f"area = {j.area():.3f}")
 ```
 
