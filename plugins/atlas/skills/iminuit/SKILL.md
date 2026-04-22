@@ -26,6 +26,21 @@ needed.
 - Cross-checks and quick fits outside a full statistical framework
 - Profiling or scanning a likelihood without a full workspace
 
+## Key Concepts
+
+| Concept              | Notes                                                                |
+| -------------------- | -------------------------------------------------------------------- |
+| `Minuit(cost, **p0)` | Construct minimizer with cost function and initial parameter values  |
+| `m.migrad()`         | Run MIGRAD minimization — always call first                          |
+| `m.hesse()`          | Compute symmetric errors from Hessian — call after MIGRAD            |
+| `m.minos()`          | Asymmetric errors via likelihood profiling — slow but exact          |
+| `m.values`           | Dict-like access to best-fit parameter values                        |
+| `m.errors`           | Symmetric 1σ uncertainties (from HESSE)                              |
+| `m.merrors`          | Asymmetric MINOS uncertainties (`m.merrors["param"].lower/upper`)    |
+| `m.covariance`       | Covariance matrix as numpy array                                     |
+| `UnbinnedNLL`        | Negative log-likelihood for unbinned data                            |
+| `ExtendedBinnedNLL`  | Extended Poisson NLL for binned data; model returns `(n_total, pdf)` |
+
 ## Canonical Patterns
 
 ### Unbinned negative log-likelihood (NLL)
@@ -91,8 +106,8 @@ print(m)                # prints parameter table with values, errors, limits
 
 ```python
 m.minos()               # run MINOS for all parameters
-print(m.mirrors["mu"])  # MnAsymErrors object
-print(m.mirrors["mu"].lower, m.mirrors["mu"].upper)
+print(m.merrors["mu"])  # MnAsymErrors object
+print(m.merrors["mu"].lower, m.merrors["mu"].upper)
 ```
 
 ### Parameter fixing and scanning

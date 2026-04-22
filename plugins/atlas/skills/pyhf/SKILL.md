@@ -178,10 +178,10 @@ spec = {
     "channels": [
         {"name": "SR", "samples": [
             {"name": "sig", "data": [5., 8., 4.],
-             "modifiers": [{"name": "mu", "type": "normfactor", "data": null}]},
+             "modifiers": [{"name": "mu", "type": "normfactor", "data": None}]},
             {"name": "bkg", "data": [50., 60., 30.],
              "modifiers": [
-                 {"name": "mu_bkg", "type": "normfactor", "data": null},
+                 {"name": "mu_bkg", "type": "normfactor", "data": None},
                  {"name": "lumi", "type": "normsys", "data": {"hi": 1.015, "lo": 0.985}},
                  {"name": "staterror_SR", "type": "staterror", "data": [2.2, 2.4, 1.7]}
              ]}
@@ -189,7 +189,7 @@ spec = {
         {"name": "CR", "samples": [
             {"name": "bkg", "data": [200., 190., 180.],
              "modifiers": [
-                 {"name": "mu_bkg", "type": "normfactor", "data": null},
+                 {"name": "mu_bkg", "type": "normfactor", "data": None},
                  {"name": "lumi", "type": "normsys", "data": {"hi": 1.015, "lo": 0.985}},
                  {"name": "staterror_CR", "type": "staterror", "data": [4.5, 4.4, 4.2]}
              ]}

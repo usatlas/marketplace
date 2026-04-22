@@ -26,18 +26,23 @@ or token (WLCG Bearer Token), just as the `xrdcp` command-line tool would.
 - Passing `root://` URIs from `rucio list-file-replicas` output directly to
   uproot
 
-## Setup
+## Key Concepts
+
+| Concept                | Notes                                                                |
+| ---------------------- | -------------------------------------------------------------------- |
+| `fsspec_xrootd` import | Must be imported before `uproot.open`; registers `root://` scheme    |
+| `root://` URI          | XRootD path: `root://eosatlas.cern.ch//eos/atlas/...`                |
+| Two packages required  | `pip install fsspec-xrootd xrootd` — both must be present            |
+| X.509 proxy            | `voms-proxy-init --voms atlas` before opening remote files           |
+| WLCG Bearer Token      | Alternative to X.509: `export BEARER_TOKEN=$(cat /tmp/bt_u$(id -u))` |
+| `fsspec.filesystem()`  | Direct filesystem object for listing directories                     |
+
+Install:
 
 ```bash
-# Install
-pip install fsspec-xrootd
-# or
-uv add fsspec-xrootd
+pip install fsspec-xrootd xrootd   # both packages required
 
-# Requires a valid X.509 proxy (or WLCG Bearer Token)
-voms-proxy-init --voms atlas
-# or
-export BEARER_TOKEN=$(cat /tmp/bt_u$(id -u))
+voms-proxy-init --voms atlas        # or set BEARER_TOKEN
 ```
 
 ## Canonical Patterns
@@ -103,28 +108,28 @@ arrays = uproot.concatenate(
 )
 ```
 
-## Troubleshooting
-
-| Issue                              | Cause                                | Fix                                                                         |
-| ---------------------------------- | ------------------------------------ | --------------------------------------------------------------------------- |
-| `[ERROR] AuthorizationFailed`      | Expired or missing proxy             | `voms-proxy-info --all`; re-run `voms-proxy-init --voms atlas`              |
-| `[ERROR] No servers are available` | Wrong hostname or EOS endpoint down  | Check `xrdfs root://eosatlas.cern.ch/ ping`                                 |
-| `Module 'XRootD' not found`        | XRootD Python bindings not installed | `pip install xrootd` (separate package from fsspec-xrootd)                  |
-| Slow reads                         | Reading many small chunks over WAN   | Increase uproot `step_size`; use local cache or EOS-local analysis facility |
-| `FileNotFoundError` on valid path  | Trailing slash or case sensitivity   | Check path with `fs.ls()`                                                   |
-
 ## Gotchas
 
 - **Two packages required**: `fsspec-xrootd` (fsspec plugin) and `xrootd`
   (Python bindings for the XRootD C++ library). Both must be installed.
+- **`import fsspec_xrootd` must happen before `uproot.open`**: the import
+  registers the `root://` scheme handler.
 - **Proxy lifetime**: Grid proxies expire after 12–24 hours; VOMS-extended
   proxies after 96 hours. Running long coffea jobs overnight may hit proxy
   expiry.
 - **EOS quota and rate limits**: EOS has per-user open-file and bandwidth
   limits; for large-scale processing use Rucio to stage files to a local
   filesystem or use an analysis facility with EOS access.
-- **`import fsspec_xrootd` must happen before `uproot.open`**: the import
-  registers the `root://` scheme handler.
+- **`[ERROR] AuthorizationFailed`**: proxy expired or missing — run
+  `voms-proxy-info --all` and `voms-proxy-init --voms atlas`.
+- **`[ERROR] No servers are available`**: wrong hostname or endpoint down —
+  check with `xrdfs root://eosatlas.cern.ch/ ping`.
+- **`Module 'XRootD' not found`**: `xrootd` Python bindings not installed —
+  `pip install xrootd`.
+- **Slow reads**: reading many small chunks over WAN — increase uproot
+  `step_size` or use an EOS-local analysis facility.
+- **`FileNotFoundError` on valid path**: trailing slash or case sensitivity —
+  verify with `fs.ls()`.
 
 ## Interop
 

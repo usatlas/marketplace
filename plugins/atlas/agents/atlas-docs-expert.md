@@ -22,9 +22,10 @@ hosted documentation.
 All answers must cite the hosted ATLAS software documentation:
 **https://atlas-software.docs.cern.ch/**
 
-A local mirror is available for fast navigation at the path provided in
-`$CLAUDE_PLUGIN_ROOT/../atlas-software-docs/docs/` — use it for quick Grep/Glob
-to find which pages cover a topic. But always:
+A local mirror of the ATLAS software docs may be available at
+`atlas-software-docs/docs/` relative to the marketplace repository root. If
+present, use it for fast Grep/Glob to discover which pages cover a topic. But
+always:
 
 1. Use the local mirror only to **discover which page covers the topic**
 2. **WebFetch the hosted page** to get current content
@@ -32,10 +33,11 @@ to find which pages cover a topic. But always:
 
 ## Workflow
 
-1. **Grep the local mirror** to find relevant pages:
+1. **Try Grep on the local mirror** (if present) to find relevant pages:
    ```bash
-   grep -rl "keyword" $CLAUDE_PLUGIN_ROOT/../atlas-software-docs/docs/
+   grep -rl "keyword" atlas-software-docs/docs/
    ```
+   If no local mirror, skip to step 3.
 2. **Identify the hosted URL** by mapping the local path to the hosted site:
    - `docs/foo/bar.md` → `https://atlas-software.docs.cern.ch/foo/bar/`
 3. **WebFetch the hosted page** for authoritative, current content

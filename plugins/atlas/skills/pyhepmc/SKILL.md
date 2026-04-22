@@ -83,8 +83,8 @@ with pyhepmc.open("events.hepmc3") as f:
     for event in f:
         pjs = [
             fj.PseudoJet(p.momentum.px, p.momentum.py, p.momentum.pz, p.momentum.e)
-            for p in event.particles if p.status == 1 and abs(p.pid) != 12
-            # exclude neutrinos (12, 14, 16) from clustering
+            for p in event.particles
+            if p.status == 1 and abs(p.pid) not in (12, 14, 16)
         ]
         cs = fj.ClusterSequence(pjs, fj.JetDefinition(fj.antikt_algorithm, 0.4))
         jets = fj.sorted_by_pt(cs.inclusive_jets(ptmin=20.0))

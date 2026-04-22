@@ -18,7 +18,7 @@ Python 3.8+ and offering smaller binary size and faster compile times. In HEP,
 bindings are used to expose ROOT-based code, custom reconstruction algorithms,
 or legacy C++ analysis code to Python without rewriting.
 
-## Choosing Between nanobind and pybind11
+## Key Concepts
 
 | Feature       | nanobind                             | pybind11            |
 | ------------- | ------------------------------------ | ------------------- |
@@ -33,9 +33,9 @@ or legacy C++ analysis code to Python without rewriting.
 integrating with existing pybind11-based code or when you need the larger
 ecosystem of pybind11 extensions.
 
-## CMake Setup
+## Canonical Patterns
 
-### nanobind
+### CMake setup (nanobind)
 
 ```cmake
 cmake_minimum_required(VERSION 3.15)
@@ -48,15 +48,13 @@ nanobind_add_module(myhep_ext myhep.cpp)
 target_link_libraries(myhep_ext PRIVATE MyHEPLib)
 ```
 
-### pybind11
+### CMake setup (pybind11)
 
 ```cmake
 find_package(pybind11 CONFIG REQUIRED)
 pybind11_add_module(myhep_ext myhep.cpp)
 target_link_libraries(myhep_ext PRIVATE MyHEPLib)
 ```
-
-## Canonical Patterns
 
 ### Bind a simple function (nanobind)
 

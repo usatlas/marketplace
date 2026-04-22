@@ -75,7 +75,7 @@ h2d, reco_edges, truth_edges = np.histogram2d(
 **Bayesian unfolding (recommended)**:
 
 ```python
-unfold = RooUnfold.RooUnfoldBayes(response, measured_hist, n_iterations=4)
+unfold = RooUnfold.RooUnfoldBayes(response, measured_hist, 4)
 unfolded = unfold.Hunfold()   # ROOT TH1 with unfolded distribution
 unfolded_errors = unfold.Eunfold()  # covariance matrix
 ```
@@ -83,7 +83,7 @@ unfolded_errors = unfold.Eunfold()  # covariance matrix
 **SVD unfolding**:
 
 ```python
-unfold = RooUnfold.RooUnfoldSvd(response, measured_hist, k_reg=4)
+unfold = RooUnfold.RooUnfoldSvd(response, measured_hist, 4)
 unfolded = unfold.Hunfold()
 ```
 
@@ -113,7 +113,7 @@ for syst_name in systematics:
 
 ```python
 # Build response from half the MC, unfold the other half's reco distribution
-unfold_closure = RooUnfold.RooUnfoldBayes(response, mc_reco_hist, n_iterations=4)
+unfold_closure = RooUnfold.RooUnfoldBayes(response, mc_reco_hist, 4)
 unfolded_closure = unfold_closure.Hunfold()
 # Compare to mc_truth_hist — should agree within statistical uncertainty
 ```

@@ -23,6 +23,20 @@ identification tasks that would otherwise require hardcoding PDG ID tables.
 - Filtering generator-level events by particle type or stability
 - Checking antiparticle relations and charge conjugation
 
+## Key Concepts
+
+| Concept                    | Notes                                                       |
+| -------------------------- | ----------------------------------------------------------- |
+| `Particle.from_pdgid(id)`  | Look up by integer PDG ID (e.g. 211 = π+)                   |
+| `Particle.from_name(name)` | Look up by name string (e.g. "K+", "B0")                    |
+| `Particle.findall(fn)`     | Filter PDG table; accepts a lambda or a name-glob string    |
+| `p.mass`                   | Mass in MeV (float) — divide by 1000 for GeV                |
+| `p.charge`                 | Charge in units of e (float)                                |
+| `p.lifetime`               | Lifetime in ns; `inf` for stable particles                  |
+| `p.is_stable`              | True if lifetime is effectively infinite                    |
+| `p.pdgid`                  | `PDGID` object with `.is_meson`, `.is_baryon`, `.is_lepton` |
+| `p.invert()`               | Returns the antiparticle                                    |
+
 ## Canonical Patterns
 
 ### Look up by PDG ID

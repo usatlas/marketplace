@@ -17,8 +17,8 @@ def make_a_tool(
     tool_name: str,
     tool_type: str,
     include_files: Optional[List[str]],
-    link_libraries: List[str] = [],
-    init_lines: List[str] = [],
+    link_libraries: Optional[List[str]] = None,
+    init_lines: Optional[List[str]] = None,
 ) -> Tuple[ObjectStream[T], ToolInfo]:
     """
     Injects C++ code into the query to initialize a tool of the specified type.
@@ -43,6 +43,8 @@ def make_a_tool(
             - A ToolInfo object containing the tool's name. Pass this to `make_tool_accessor`
     """
     # Define the C++ for the tool initialization
+    link_libraries = [] if link_libraries is None else link_libraries
+    init_lines = [] if init_lines is None else init_lines
 
     query_base = query.MetaData(
         {
@@ -105,7 +107,7 @@ def make_tool_accessor(
                 "metadata_type": "add_cpp_function",
                 "name": function_name,
                 "code": [
-                    "double result;",
+                    f"{return_type_cpp} result;",
                     *[line.format(tool_name=t_info.name) for line in source_code],
                 ],
                 "result": "result",
@@ -125,7 +127,18 @@ def make_tool_accessor(
         """
         ...
 
+    _ALLOWED_RETURN_TYPES: dict = {
+        "float": float,
+        "int": int,
+        "bool": bool,
+        "str": str,
+    }
+    if return_type_python not in _ALLOWED_RETURN_TYPES:
+        raise ValueError(
+            f"Unsupported return_type_python {return_type_python!r}. "
+            f"Allowed values: {list(_ALLOWED_RETURN_TYPES)}"
+        )
     tool_call.__name__ = function_name
-    tool_call.__annotations__["return"] = eval(return_type_python)
+    tool_call.__annotations__["return"] = _ALLOWED_RETURN_TYPES[return_type_python]
 
     return func_adl_callable(tool_callback)(tool_call)
