@@ -1,53 +1,116 @@
 ---
 name: servicex
-description: Write ServiceX queries in func_adl against ATLAS xAOD data (PHYSLITE/PHYS) and provide guidance for dataset selection, filtering, and deliver usage. Use when asked to build, edit, or debug ServiceX/func_adl queries, ATLAS xAOD skims, or rucio dataset fetches.
-attribution: "Vendored from IRIS-HEP marketplace (BSD 3-Clause). Original authors: Gordon Watts, Ben Galewsky. See VENDORED-LICENSES.md."
+description: >-
+    Use when querying ATLAS xAOD data remotely via ServiceX: writing
+    func_adl queries against DAOD_PHYS or DAOD_PHYSLITE, selecting datasets
+    by Rucio name or AMI tag, delivering data as awkward arrays, debugging
+    ServiceX cache or backend issues, or choosing between PHYSLITE and PHYS
+    backends for an analysis.
 ---
 
 # ServiceX
 
 ## Overview
 
-Provide concise, correct func_adl query patterns for ServiceX on ATLAS xAOD, with best practices for selections, outputs, and deliver usage.
+ServiceX is a data delivery service for ATLAS: you submit a `func_adl` query against a dataset (identified by Rucio name), and ServiceX runs the selection on CERN infrastructure and streams results back as awkward arrays. It eliminates the need to download full xAOD files for analysis.
 
-## Workflow
+## When to Use
 
-1. Identify the dataset type and base query.
-   - Use `FuncADLQueryPHYSLITE` for PHYSLITE or OpenData.
-   - Use `FuncADLQueryPHYS` for PHYS or other derivations.
-2. Build a top-level `Select` that gathers all required collections and singletons.
-   - Apply object-level filters with nested `.Where` inside this `Select`.
-   - Do not pick columns yet.
-3. Apply event-level filtering with a top-level `.Where` after the collections `Select`.
-4. Create a final top-level `Select` that returns a single dictionary of output columns.
-   - Convert units to standard LHC units (GeV, meters, etc.).
-   - Never return a nested dictionary.
-5. Use `deliver` once with `NFiles=1` by default and appropriate dataset source(s).
-6. Make sure that the layout of the data that will be returned is remembered - downstream tasks that want to work with the data will need to understand it.
+- Extracting columns from DAOD_PHYS or DAOD_PHYSLITE without downloading full xAOD
+- Iterating quickly on object selection before committing to a full NTuple production
+- Analysis facility workflows where ATLAS grid access is not available locally
+- ATLAS Open Data workflows (atlasopenmagic-mcp provides the dataset containers)
 
-## Core Rules
+## Key Concepts
 
-- Prefer two top-level `Select` calls: collections first, output columns second.
-- Filter objects with nested `.Where`; filter events with a top-level `.Where`.
-- Use a single final `Select` that returns a dictionary of outputs.
-- Do not use `awkward` functions inside ServiceX queries.
-- Use `dataset.Rucio` for rucio DIDs and `dataset.FileList` for URL lists.
-- Always set `NFiles=1` by default.
-- For fetches where cache bypass matters, use `ignore_local_cache=True` in `deliver`.
-- If a transform fails and logs are required, respond with `HELP USER`.
-- Ensure `func_adl_servicex_xaodr25` is listed as a dependency in the active project and installed in the current virtual environment before running or generating code that uses it.
-- In standalone-script metadata, declare `jinja2` explicitly if the environment requires it for `func_adl_servicex_xaodr25` usage.
+| Concept | Notes |
+|---|---|
+| `servicex.deliver(query)` | Main entry point — returns dict of `{sample_name: ak.Array}` |
+| `func_adl` | Query DSL: `from_xaod("EventInfo").Select(...)` |
+| PHYSLITE | Slimmed derivation — preferred; smaller, most CP-recommended variables |
+| PHYS | Full DAOD — use when PHYSLITE lacks required variables |
+| `ignore_cache=True` | Forces re-delivery; use when debugging stale results |
+| `max_files=N` | Limit files for quick tests — always use `max_files=1` in development |
 
-## References
+## Canonical Patterns
 
-- Load `references/servicex-hints.md` for overall ServiceX query patterns, synchronous delivery patterns, best practices, and error handling.
-- Load `references/servicex-async-hints.md` only when async behavior is explicitly requested (`deliver_async`, async timeout handling, or version-compat async behavior).
-- Load only the relevant xAOD data model topic file(s) to keep context small. Naming convention: `references/datamodel-xaod-*.md`.
-- xAOD topics:
-  - `references/datamodel-xaod-units.md` (standard ATLAS units (energy, etc))
-  - `references/datamodel-xaod-objects.md` (jets, electrons, muons)
-  - `references/datamodel-xaod-tau.md`
-  - `references/datamodel-xaod-missing-et.md`
-  - `references/datamodel-xaod-tools-btagging.md`
-  - `references/datamodel-xaod-event-weights.md`
-  - `references/datamodel-xaod-tlorentzvector.md`
+**Minimal complete example — fetch jet pT from PHYSLITE**:
+```python
+import servicex
+from func_adl_servicex import ServiceXSourceXAOD
+
+dataset = "user.atlas:mc20a_DAOD_PHYSLITE_ttbar"   # Rucio dataset name
+
+query = (
+    ServiceXSourceXAOD(dataset, backend_name="xaod_uproot")
+    .SelectMany("lambda e: e.Jets('AnalysisJets')")
+    .Select("lambda j: {'pt': j.pt(), 'eta': j.eta(), 'phi': j.phi(), 'm': j.m()}")
+    .AsPandasDF()   # or .AsAwkwardArray()
+)
+
+result = servicex.deliver(query, max_files=1)
+```
+
+**Async delivery for multiple samples**:
+```python
+import servicex, asyncio
+
+queries = {"signal": query_sig, "ttbar": query_ttbar}
+results = asyncio.run(servicex.deliver_async(queries, max_files=5))
+```
+
+**Control number of files from a Typer CLI**:
+```python
+import typer
+app = typer.Typer()
+
+@app.command()
+def main(nfiles: int = typer.Option(0, help="Max files (0 = all)")):
+    result = servicex.deliver(query, max_files=nfiles or None)
+```
+
+**Force fresh delivery (bypass cache)**:
+```python
+result = servicex.deliver(query, ignore_cache=True)
+```
+
+## PHYSLITE vs PHYS
+
+| Feature | PHYSLITE | PHYS |
+|---|---|---|
+| Size | ~10× smaller | Full derivation |
+| Object collections | `AnalysisJets`, `AnalysisElectrons`, etc. | `AntiKt4EMPFlowJets`, `Electrons`, etc. |
+| CP recommendations | Default CP tools configured | Requires manual tool setup |
+| Availability | Most mc20/mc23 campaigns | All campaigns |
+
+When in doubt, start with PHYSLITE and switch to PHYS only if a required variable is missing.
+
+## xAOD Object Names (PHYSLITE)
+
+| Object | Collection name |
+|---|---|
+| Jets | `AnalysisJets` |
+| Electrons | `AnalysisElectrons` |
+| Muons | `AnalysisMuons` |
+| Taus | `AnalysisTauJets` |
+| MET | `AnalysisMET_Core` |
+| Photons | `AnalysisPhotons` |
+
+## Gotchas
+
+- **Cache is aggressive**: If you fix a bug in your query but get the same result, add `ignore_cache=True`.
+- **PHYSLITE vs PHYS collection names differ**: `AnalysisJets` (PHYSLITE) vs `AntiKt4EMPFlowJets` (PHYS). Using the wrong name returns an empty result silently.
+- **`max_files=0` vs `max_files=None`**: Behavior varies by ServiceX version — always use an explicit positive integer for testing or `None` for full dataset.
+- **Backend selection**: The `backend_name` must match what's configured for your ServiceX instance. ATLAS instances typically have `xaod_uproot` and `xaod_cpp`.
+- **Units**: ServiceX returns values in the xAOD native units — pT in MeV. Divide by 1000 before analysis.
+
+## Interop
+
+- **awkward**: `.AsAwkwardArray()` returns `ak.Array` directly — preferred over `.AsPandasDF()` for HEP workflows
+- **Rucio/AMI**: Use `ami-mcp` or `rucio-mcp` to find dataset containers before querying
+- **atlasopenmagic-mcp**: Use to get ATLAS Open Data dataset identifiers for ServiceX queries
+- **uproot**: For local ROOT files, uproot is simpler and faster — ServiceX only makes sense for remote xAOD
+
+## Docs
+
+https://servicex.readthedocs.io/en/latest/

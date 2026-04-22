@@ -14,7 +14,7 @@ and adapted for the ATLAS plugin:
 The following agents were adapted from iris-hep-marketplace:
 
 - `agents/atlas-analysis-architect.md` (adapted from `atlas-analysis-planner`)
-- `agents/atlas-data-plotter.md`
+- `agents/atlas-analysis-coder.md` (adapted from `atlas-data-plotter`, substantially rewritten)
 
 The following command was adapted from iris-hep-marketplace:
 

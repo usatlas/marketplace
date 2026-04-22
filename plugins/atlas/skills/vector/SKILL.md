@@ -1,78 +1,97 @@
 ---
 name: vector
-description: Use when working in Python with scikit-hep vector and Awkward Array to build vector records, register behaviors, compute deltaR or invariant masses, combine or boost vectors, or access vector properties from ak.zip records of type (Momentum3D/Momentum4D/Vector4D). Vector is only useful if you are also using Awkward.
-attribution: "Vendored from IRIS-HEP marketplace (BSD 3-Clause). Original authors: Gordon Watts, Ben Galewsky. See VENDORED-LICENSES.md."
+description: >-
+    Use when computing 4-vector quantities in Python: invariant mass,
+    deltaR, transverse momentum, boost, or any Lorentz vector arithmetic
+    over collections of particles. Also use when registering scikit-hep
+    vector behaviors on awkward-array records so that ak.zip objects gain
+    Momentum4D methods, or when constructing vector objects from (pt, phi,
+    eta, mass) or (px, py, pz, energy) field conventions.
 ---
 
-# Vector Awkward
+# Vector
 
 ## Overview
 
-Create Awkward Arrays that behave like vector objects and use vector methods without writing custom kinematic math. Use these steps to register behaviors, build records with the right field names, and perform common HEP operations like deltaR and invariant mass.
+The `vector` library provides Lorentz vector arithmetic for NumPy arrays, awkward-array records, and scalar objects. The key design: register behaviors on `ak.Array` records once, then use physics methods (`.deltaR()`, `.mass`, `.boost(...)`) directly without manual kinematic math.
 
-## Quick Start
+## When to Use
 
-1. Register vector behaviors once per session:
+- Computing invariant mass or transverse mass of particle combinations
+- Computing deltaR between two objects for overlap removal or matching
+- Boosting to the rest frame of a parent particle
+- Any operation that would otherwise require manual `px = pt * cos(phi)` etc.
 
+## Key Concepts
+
+| Concept | Notes |
+|---|---|
+| `vector.register_awkward()` | One-time call; mutates global behavior dict — call at module level |
+| Field name conventions | `pt/phi/eta/mass` OR `px/py/pz/energy` — vector auto-detects |
+| `Momentum4D` | The most common type for HEP 4-vectors |
+| `.deltaR(other)` | ΔR = √(Δη² + Δφ²) — available as method after behavior registration |
+| `.mass` property | Invariant mass from E²-p² = m² |
+
+## Canonical Patterns
+
+**Register behaviors (do once at module top)**:
 ```python
 import vector
 vector.register_awkward()
 ```
 
-1. Build vector records with standard field names and a vector type name:
-
+**Build a Momentum4D record array from NTuple columns**:
 ```python
 import awkward as ak
-
-events = ak.Array({
-    "electron": ak.zip(
-        {"pt": [50.0, 30.2], "eta": [1.4, -0.8], "phi": [2.1, 0.5], "mass": [0.0005, 0.0005]},
-        with_name="Momentum4D",
-    )
-})
+jets = ak.zip(
+    {"pt": events["jet_pt"], "phi": events["jet_phi"],
+     "eta": events["jet_eta"], "mass": events["jet_m"]},
+    with_name="Momentum4D",
+)
+# Now jets.deltaR(other), jets.mass, jets.px, etc. all work
 ```
 
-## Build Vector Records
-
-- Use `ak.zip(..., with_name="Momentum3D")` for 3D operations like deltaR.
-- Use `ak.zip(..., with_name="Momentum4D")` for 4D operations like invariant mass or boosts.
-- Prefer standard names like `pt/eta/phi/mass` or `px/py/pz/E` so vector can infer coordinate systems.
-- Call `vector.register_awkward()` before accessing vector properties or methods.
-
-## Access Vector Properties
-
+**Invariant mass of all jet pairs**:
 ```python
-particles = ak.zip({"px": px, "py": py, "pz": pz, "E": E}, with_name="Vector4D")
-particles.pt
-particles.phi
-particles.eta
-particles.mass
+combos = ak.combinations(jets, 2, axis=1)
+j1, j2 = ak.unzip(combos)
+mjj = (j1 + j2).mass / 1000  # MeV → GeV
 ```
 
-## Common Operations
-
-Calculate deltaR between two collections:
-
+**deltaR between every electron–jet pair (for overlap removal)**:
 ```python
-pairs = ak.cartesian([events.electron, events.muon])
-electrons, muons = ak.unzip(pairs)
-dR = electrons.deltaR(muons)
+pairs = ak.cartesian({"e": electrons, "j": jets}, axis=1)
+dr = pairs.e.deltaR(pairs.j)
+non_overlapping = jets[~ak.any(dr < 0.4, axis=1)]  # remove jets near any electron
 ```
 
-Combine 4-vectors and compute invariant mass:
-
+**Boost to rest frame of a parent**:
 ```python
-first_e, second_e = ak.unzip(ak.combinations(events.electron, 2))
-inv_mass = (first_e + second_e).mass
+# parent must be a vector object
+boosted = daughter.boost(-parent.to_beta3())
 ```
 
-Boost to a parent rest frame:
-
+**Pure NumPy (no awkward)** — for scalar or fixed-shape arrays:
 ```python
-parent = particle1 + particle2
-particle1_rf = particle1.boostCM_of_p4(parent)
+v = vector.obj(pt=30.0, phi=0.5, eta=1.2, mass=0.105)  # muon
+print(v.px, v.py, v.pz, v.energy)
 ```
 
-## Reference Material
+## Gotchas
 
-Load `references/vector-hints.md` for more examples, method notes, and advanced snippets.
+- **`register_awkward()` before any vector access**: Calling `.deltaR()` on an `ak.Array` without prior registration raises `AttributeError`. If you see this, you forgot the registration call.
+- **Field names must match exactly**: `energy` not `E`, `mass` not `m`. Vector picks the convention from the field names — mixing `pt/phi/eta/energy` is fine; mixing `pt` and `px` is not.
+- **Units are your responsibility**: Vector does no unit conversion. If pT is in MeV, masses and energies are in MeV throughout. Divide by 1000 explicitly before presenting in GeV.
+- **`with_name` is required for ak.zip** to get behavior: `ak.zip({...}, with_name="Momentum4D")`. Without it, records are plain dicts.
+- **Addition of 4-vectors**: `j1 + j2` returns a new `Momentum4D` vector — invariant mass is then `(j1 + j2).mass`.
+
+## Interop
+
+- **awkward**: Required — `register_awkward()` enables methods on `ak.Array` records
+- **uproot**: Fields read from ROOT files usually need renaming to match vector conventions
+- **hist**: Compute quantities with vector, then flatten and fill `Hist`
+- **numpy**: `vector.array(...)` creates NumPy-backed vectors for fixed-shape data
+
+## Docs
+
+https://vector.readthedocs.io/en/latest/

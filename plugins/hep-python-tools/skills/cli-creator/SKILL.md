@@ -1,73 +1,118 @@
 ---
 name: cli-creator
-description: Create or extend Python command-line interfaces using Typer and wire them into pyproject.toml entry points. Use when asked to add a new CLI, add a subcommand, or expose a console script for a Python package, especially when pyproject.toml needs [project.scripts] updates or an empty directory needs full project initialization.
-attribution: "Vendored from IRIS-HEP marketplace (BSD 3-Clause). Original authors: Gordon Watts, Ben Galewsky. See VENDORED-LICENSES.md."
+description: >-
+    Use when building a Python command-line interface with Typer: adding
+    arguments and options to a script, creating subcommands, wiring an
+    entry point into pyproject.toml, validating CLI inputs with callbacks,
+    or adding a CLI layer to an existing analysis script or HEP workflow.
 ---
 
-# Cli Creator
+# CLI Creator
 
 ## Overview
 
-Create a Python CLI module and expose it via pyproject.toml console scripts while matching existing project conventions.
+Typer builds Python CLIs from type-annotated functions with minimal boilerplate. It auto-generates `--help`, handles type coercion, and integrates with Rich for pretty output. For HEP analysis scripts, use Typer for any script that takes more than one or two parameters.
 
-## Workflow
+## When to Use
 
-### 0) Initialize an empty directory (only when no package exists)
+- Adding a proper CLI to an analysis script (dataset name, nfiles, output dir, etc.)
+- Creating multi-subcommand tools (e.g., `myscript process`, `myscript plot`)
+- Exposing a package entry point in `pyproject.toml`
+- Replacing `argparse` or manual `sys.argv` parsing
+- Combining with PEP 723 standalone scripts (invoke `hep-python-tools:standalone-script`)
 
-- If the working directory is empty or lacks a Python package, bootstrap a new project:
-  - Create a Python 3.13 virtual environment with uv (default).
-  - Install Hatch in the venv.
-  - Use Hatch to create an empty package; set the package name to the CLI name.
-  - Ensure `pyproject.toml` is created by Hatch and reflects the package name.
-- After initialization, continue with the workflow below.
+## Key Concepts
 
-Commands to run (replace `my-cli` with the desired name):
+| Concept | Notes |
+|---|---|
+| `typer.Argument` | Positional — required unless `default=...` |
+| `typer.Option` | Keyword (`--name`) — always has a default |
+| `Annotated[T, typer.Option(...)]` | **Modern syntax** (Typer ≥ 0.9) — preferred |
+| `pathlib.Path` | Use as type annotation for file/dir args — Typer validates existence |
+| `typer.Typer()` + `app()` | Multi-command entry point |
 
-```bash
-uv venv --python 3.13 .venv
-source .venv/bin/activate
-uv pip install hatch
-hatch new my-cli
+## Canonical Patterns
+
+**Single-command script (most common in analysis)**:
+```python
+# /// script
+# requires-python = ">=3.11"
+# dependencies = ["typer", "rich"]
+# ///
+from __future__ import annotations
+from pathlib import Path
+from typing import Annotated
+import typer
+
+app = typer.Typer()
+
+@app.command()
+def main(
+    dataset: Annotated[str, typer.Argument(help="Rucio dataset name")],
+    output: Annotated[Path, typer.Option(help="Output directory")] = Path("output"),
+    nfiles: Annotated[int, typer.Option(help="Max files (0 = all)")] = 1,
+    verbose: Annotated[bool, typer.Option("--verbose/--no-verbose")] = False,
+) -> None:
+    """Process ATLAS data from DATASET and write histograms to OUTPUT."""
+    output.mkdir(parents=True, exist_ok=True)
+    if verbose:
+        typer.echo(f"Processing {dataset}, max_files={nfiles or 'all'}")
+    # ... analysis code ...
+
+if __name__ == "__main__":
+    app()
 ```
 
-### 1) Inspect project layout
+**Multi-command tool**:
+```python
+app = typer.Typer()
 
-- Read `pyproject.toml` to detect packaging style ([project], [tool.poetry], [tool.hatch], existing scripts).
-- Locate the package layout (`src/` vs flat) and any existing CLI modules or patterns.
+@app.command()
+def process(dataset: str, output: Path = Path(".")):
+    """Run the analysis and write NTuples."""
+    ...
 
-### 2) Choose a CLI framework
+@app.command()
+def plot(input_dir: Path, output: Path = Path("plots")):
+    """Read NTuples and produce plots."""
+    ...
+```
 
-- Use Typer. Reuse existing Typer patterns in the repo when present.
+**pyproject.toml entry point**:
+```toml
+[project.scripts]
+my-analysis = "my_package.cli:app"
+```
 
-### 3) Gather command structure
+**Optional path argument with existence check**:
+```python
+input_file: Annotated[Path, typer.Argument(exists=True, file_okay=True, dir_okay=False)]
+```
 
-- Ask for the top-level command name and at least one subcommand name.
-- Prefer a concrete example command line (e.g., `atlas-trigger dataset list`) to infer subcommands and nesting.
-- If the user only provides one subcommand, still structure the CLI with that subcommand.
-- Ask whether the command handlers should delegate to another module for the "meat" of the logic.
-- If the user wants delegation, import the target module inside the command function so `--help` remains fast.
+**Enum for restricted choices**:
+```python
+from enum import Enum
+class Backend(str, Enum):
+    xaod = "xaod"
+    uproot = "uproot"
 
-### 4) Implement the CLI module
+backend: Annotated[Backend, typer.Option()] = Backend.xaod
+```
 
-- Create a module under the package that defines a `main()` entry point (returning an exit code).
-- Keep side effects out of module import; parsing and execution should happen in `main()`.
-- For Typer, define `app = typer.Typer()` and invoke `app()` inside `main()` or use `typer.run(main)` for single-command CLIs.
-- Implement the requested command(s) with dummy handlers that print `hello from <command>` using the full command path (e.g., `hello from atlas-trigger dataset list`).
+## Gotchas
 
-### 5) Wire the console script
+- **Use `Annotated[T, typer.Option(...)]` not `= typer.Option(...)`**: The old signature still works but is deprecated in Typer ≥ 0.9 and will be removed.
+- **`bool` flags auto-generate pairs**: `Annotated[bool, typer.Option("--flag/--no-flag")]` creates two flags. If you only write `bool` with no `Option(...)`, Typer makes `--flag` only (sets True if present).
+- **`Path` validation happens at parse time**: If you annotate with `Path` and add `exists=True`, Typer validates before your function runs — handy but may surprise you in tests.
+- **`app()` not `typer.run(fn)`**: For multi-command tools, always define a `Typer()` app. `typer.run()` is only for single-function one-liners.
+- **Rich output**: `typer.echo()` wraps `print()`; for richer output use `from rich import print` or `typer.style()`.
 
-- For PEP 621 projects, add under `[project.scripts]`:
-  - `my-cli = "package.module:main"`
-- Preserve existing formatting, ordering, and naming conventions.
+## Interop
 
-### 6) Validate behavior
+- **standalone-script**: Combine the PEP 723 header with a Typer app for self-contained analysis scripts that anyone can run with `uv run --script`
+- **pixi / hatch**: Entry points declared in `pyproject.toml` are available after `pixi install` or `hatch env create`
+- **Rich**: Typer uses Rich under the hood; `from rich.progress import track` adds progress bars with no extra config
 
-- Ensure Typer is listed as a dependency in `pyproject.toml` (add it if missing).
-- Add or update CLI tests to match existing patterns.
-- Run a quick sanity check such as `python -m package --help` and the example command to verify the dummy output.
+## Docs
 
-## Example Triggers
-
-- "Create a new CLI called `acme` and add it to pyproject.toml."
-- "Add a `status` subcommand to the existing CLI and wire it up."
-- "Expose `package.cli:main` as a console script in this project."
+https://typer.tiangolo.com/
