@@ -19,8 +19,8 @@ The root `skills/` directory is unused — all skills live under `plugins/`.
 ## Adding a skill
 
 1. Create `plugins/<plugin>/skills/<skill-name>/SKILL.md`.
-2. Add `"<skill-name>"` to `"skills"` array in `.claude-plugin/marketplace.json`
-   under the correct plugin entry. The array order is the display order.
+2. No changes to `marketplace.json` are needed — skills are discovered
+   automatically from the `"skills": "./skills/"` path declared per plugin.
 3. Run `pixi run pre-commit` to catch JSON/YAML/Markdown formatting issues.
 
 **Skill frontmatter rules (strictly enforced by Claude Code):**
@@ -102,15 +102,10 @@ When adding a plugin, create manifests for **all three tools** in parallel.
 
 ## Editing marketplace.json
 
-After any skill add/remove, verify the `"skills"` array matches the actual
-`plugins/<plugin>/skills/` directory contents:
-
-```bash
-# Quick parity check for the atlas plugin
-diff \
-  <(python3 -c "import json; [print(s) for s in json.load(open('.claude-plugin/marketplace.json'))['plugins'][1]['skills']]") \
-  <(ls plugins/atlas/skills/ | sort)
-```
+Skills are auto-discovered via `"skills": "./skills/"` in each plugin entry — no
+manual list to maintain. After adding or removing a skill directory, run
+`claude plugin validate .claude-plugin/marketplace.json` to confirm the manifest
+is still valid.
 
 ## MCP servers (atlas plugin only)
 
