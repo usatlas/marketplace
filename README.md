@@ -20,13 +20,13 @@ Then install whichever plugins you need from the marketplace browser.
 
 ### `analysis-facilities`
 
-Skills for USATLAS Analysis Facilities (UChicago AF, BNL AF, SLACK AF).
+Skills for USATLAS Analysis Facilities (UChicago AF, BNL AF, SLAC AF).
 
 | Skill         | Description                                                                                 |
 | ------------- | ------------------------------------------------------------------------------------------- |
 | `uchicago-af` | HTCondor batch, JupyterLab, XCache, Rucio, ServiceX, Coffea-Casa, Triton at af.uchicago.edu |
 
-More facility skills (BNL, SLACK) coming soon.
+More facility skills (BNL, SLAC) coming soon.
 
 ---
 
