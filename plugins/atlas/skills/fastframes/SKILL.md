@@ -15,16 +15,29 @@ FastFrames is a histogramming and ntuple reprocessing framework built on ROOT's
 RDataFrame. It processes NTuples produced by the standard CP algorithm stack in
 a columnar, lazy-evaluation model that is faster than event-loop approaches for
 many workflows. FastFrames automatically handles cross-section weighting,
-systematic variations, and profile-likelihood unfolding. It officially supported
-by the ATLAS AMG and is the recommended method to process TopCPToolkit outputs
-into histograms.
+systematic variations, and profile-likelihood unfolding. It is officially
+supported by the ATLAS AMG and is the recommended method to process TopCPToolkit
+outputs into histograms.
 
 ## When to Use
 
-- When you need process TopCPToolkit outputs
+- When you need to process TopCPToolkit outputs
 - When you want a supported framework for processing CP algorithm outputs
 
-## YAML Configuration
+## Key Concepts
+
+```
+DAOD_PHYS / DAOD_PHYSLITE
+    ↓ TopCPToolkit (runs in AnalysisBase/Athena)
+NTuples (ROOT, flat branches)
+    ↓ FastFrames / coffea
+Histograms → fit
+```
+
+FastFrames takes CPalgs output (like that from TopCPToolkit or EasyJet) and processes into histograms or ntuples.
+
+## Canonical Patterns
+### YAML Configuration
 
 ```yaml
 # config.yml
@@ -113,7 +126,7 @@ systematics:
       sum_weights_up: "GEN_0p5muF_0p5muR_NNPDF31_NLO_0118"
 ```
 
-## Running FastFrames
+### Running FastFrames
 
 ```bash
 # setup
@@ -126,7 +139,7 @@ source build/setup.sh
 FastFrames.py --config config.yml
 ```
 
-## Reading FastFrames Output
+### Reading FastFrames Output
 
 FastFrames produces ROOT files with histograms. Read with uproot:
 
@@ -143,11 +156,11 @@ with uproot.open("output/ttbar_FS.root") as f:
     h.view()[:] = h_root.values()
 ```
 
-## Systematic Handling
+### Systematic Handling
 
-FastFrames can automatically read systematics from a the input files when `automatic_systematics` is `True`.
+FastFrames can automatically read systematics from the input files when `automatic_systematics` is `True`.
 
-FastFrames can also manually handle manually defined systematics in the YAML config.
+FastFrames can also handle manually defined systematics in the YAML config.
 
 ## Gotchas
 
