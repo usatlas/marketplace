@@ -30,20 +30,20 @@ read with uproot, not the NanoAOD schema layer.
 
 ## Key Concepts
 
-| Concept                | Notes                                                                                                     |
-| ---------------------- | --------------------------------------------------------------------------------------------------------- |
-| `Processor`            | Class with `process(events)` → dict of accumulators                                                       |
-| `hist.Hist`            | The standard histogram accumulator inside coffea processors                                               |
-| `NanoEventsFactory`    | Reads ROOT files into a schema-driven awkward record array with optional behavior mixins                  |
-| `BaseSchema`           | Verbatim branch access, no behaviors; correct choice for flat ATLAS NTuples (AnalysisTop, SimpleAnalysis) |
-| `PHYSLITESchema`       | ATLAS DAOD_PHYSLITE derivation; provides Lorentz-vector behaviors on electrons, muons, jets               |
-| `NanoAODSchema`        | CMS NanoAOD format; not suited for ATLAS files                                                            |
-| `NtupleSchema`         | `atlas-schema` package; best choice for CP algorithm NTuples (TopCPToolkit, EasyJet, AnalysisTop)         |
-| `uproot.dask()`        | Produces dask-awkward arrays from ROOT files; feeds a dask executor                                       |
-| `coffea.dataset_tools` | Helpers for building file sets and running with dask                                                      |
+| Concept                                            | Notes                                                                                                                                                      |
+| -------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Processor`                                        | Class with `process(events)` → dict of accumulators                                                                                                        |
+| `hist.Hist`                                        | The standard histogram accumulator inside coffea processors                                                                                                |
+| `NanoEventsFactory`                                | Reads ROOT files into a schema-driven awkward record array with optional behavior mixins                                                                   |
+| `BaseSchema`                                       | Verbatim branch access, no behaviors; correct choice for flat ATLAS NTuples (AnalysisTop, SimpleAnalysis)                                                  |
+| `PHYSLITESchema`                                   | ATLAS DAOD_PHYSLITE derivation; provides Lorentz-vector behaviors on electrons, muons, jets                                                                |
+| `NanoAODSchema`                                    | CMS NanoAOD format; not suited for ATLAS files                                                                                                             |
+| `NtupleSchema`                                     | `atlas-schema` package; best choice for CP algorithm NTuples (TopCPToolkit, EasyJet, AnalysisTop)                                                          |
+| `uproot.dask()`                                    | Produces dask-awkward arrays from ROOT files; feeds a dask executor                                                                                        |
+| `coffea.dataset_tools`                             | Helpers for building file sets and running with dask                                                                                                       |
 | `Runner` / `IterativeExecutor` / `FuturesExecutor` | Current, supported APIs (v2026.x); `Runner` wraps an executor and dispatches a processor over a fileset; `apply_to_fileset` is the dask-native alternative |
-| `weight` / `Weights`   | `coffea.analysis_tools.Weights` manages multiple scale factor weights                                     |
-| `PackedSelection`      | Bitwise selection mask; fast AND/OR over boolean arrays                                                   |
+| `weight` / `Weights`                               | `coffea.analysis_tools.Weights` manages multiple scale factor weights                                                                                      |
+| `PackedSelection`                                  | Bitwise selection mask; fast AND/OR over boolean arrays                                                                                                    |
 
 ## Canonical Patterns
 
@@ -253,6 +253,47 @@ class SystematicsProcessor(ProcessorABC):
         return accumulator
 ```
 
+## Gotchas
+
+- **Schema selection matters for ATLAS**: CP algorithm NTuples (TopCPToolkit,
+  EasyJet) use `NtupleSchema` from `atlas-schema`; DAOD_PHYSLITE uses
+  `PHYSLITESchema`; other flat NTuples use `BaseSchema`. Setting `schema=None`
+  in `Runner` or `apply_to_fileset` disables NanoEvents entirely and passes raw
+  uproot arrays. Branches are flat or jagged `vector<float>` under `BaseSchema`,
+  not behavior-augmented — no `.pt`, `.eta` shorthand unless you use
+  `PHYSLITESchema` or `NtupleSchema`.
+- **NanoEvents fields are runtime-dynamic**: the available fields depend on the
+  schema and the file content. Always call `events.fields` and
+  `events.<collection>.fields` in a notebook before writing a processor to avoid
+  `AttributeError` on non-existent branches.
+- **All ATLAS branches are in MeV**: divide by 1000 before GeV histograms.
+- **Two valid execution patterns**: `Runner` +
+  `IterativeExecutor`/`FuturesExecutor` is the processor-based API for
+  synchronous or threaded execution; `apply_to_fileset` + dask is the
+  recommended path for cluster-scale runs. Both are supported in recent versions
+  (v2026.x). Check yours with `import coffea; print(coffea.__version__)`.
+- **`process()` must return a dict or a nested dict**: accumulators are merged
+  across chunks by the framework.
+- **`postprocess()` is called once** after all chunks are merged — use it for
+  normalization, not per-chunk computation.
+
+## Interop
+
+- **uproot**: `uproot.dask()` produces dask-awkward arrays for coffea
+  processors; `uproot.iterate` for non-dask mode.
+- **awkward**: All event data inside processors is `ak.Array`; use `ak.firsts`,
+  `ak.pad_none`, `ak.fill_none` for jagged branches.
+- **hist**: The standard accumulator type; fill inside `process()`, merge
+  automatically across chunks.
+- **vector**: `vector.register_awkward()` adds four-vector methods to awkward
+  records before passing to a processor.
+- **atlas-schema**: `NtupleSchema` from the `atlas-schema` package structures CP
+  algorithm NTuples into collections and exposes `events.systematic_names` /
+  `events[variation]` for systematic iteration; install with
+  `pip install atlas-schema` or `pixi add atlas-schema` (conda-forge).
+- **Coffea-Casa**: ATLAS analysis facility at University of Chicago that
+  pre-configures a dask cluster for ATLAS users.
+
 ## Worked Example: Two-region histogram accumulation
 
 ```python
@@ -304,47 +345,6 @@ class TwoRegionProcessor(ProcessorABC):
 | `None` values after `ak.firsts`                      | Events with zero jets                   | Wrap with `ak.fill_none(arr, default_value)`                |
 | Memory spike on dask worker                          | `step_size` too large                   | Reduce `step_size` in `preprocess`                          |
 | `IterativeExecutor` is slow on many files            | Serial execution                        | Switch to `FuturesExecutor(workers=4)` locally              |
-
-## Gotchas
-
-- **Schema selection matters for ATLAS**: CP algorithm NTuples (TopCPToolkit,
-  EasyJet) use `NtupleSchema` from `atlas-schema`; DAOD_PHYSLITE uses
-  `PHYSLITESchema`; other flat NTuples use `BaseSchema`. Setting `schema=None`
-  in `Runner` or `apply_to_fileset` disables NanoEvents entirely and passes raw
-  uproot arrays. Branches are flat or jagged `vector<float>` under `BaseSchema`,
-  not behavior-augmented — no `.pt`, `.eta` shorthand unless you use
-  `PHYSLITESchema` or `NtupleSchema`.
-- **NanoEvents fields are runtime-dynamic**: the available fields depend on the
-  schema and the file content. Always call `events.fields` and
-  `events.<collection>.fields` in a notebook before writing a processor to avoid
-  `AttributeError` on non-existent branches.
-- **All ATLAS branches are in MeV**: divide by 1000 before GeV histograms.
-- **Two valid execution patterns**: `Runner` + `IterativeExecutor`/`FuturesExecutor`
-  is the processor-based API for synchronous or threaded execution;
-  `apply_to_fileset` + dask is the recommended path for cluster-scale runs.
-  Both are supported in recent versions (v2026.x). Check yours with
-  `import coffea; print(coffea.__version__)`.
-- **`process()` must return a dict or a nested dict**: accumulators are merged
-  across chunks by the framework.
-- **`postprocess()` is called once** after all chunks are merged — use it for
-  normalization, not per-chunk computation.
-
-## Interop
-
-- **uproot**: `uproot.dask()` produces dask-awkward arrays for coffea
-  processors; `uproot.iterate` for non-dask mode.
-- **awkward**: All event data inside processors is `ak.Array`; use `ak.firsts`,
-  `ak.pad_none`, `ak.fill_none` for jagged branches.
-- **hist**: The standard accumulator type; fill inside `process()`, merge
-  automatically across chunks.
-- **vector**: `vector.register_awkward()` adds four-vector methods to awkward
-  records before passing to a processor.
-- **atlas-schema**: `NtupleSchema` from the `atlas-schema` package structures CP
-  algorithm NTuples into collections and exposes `events.systematic_names` /
-  `events[variation]` for systematic iteration; install with
-  `pip install atlas-schema` or `pixi add atlas-schema` (conda-forge).
-- **Coffea-Casa**: ATLAS analysis facility at University of Chicago that
-  pre-configures a dask cluster for ATLAS users.
 
 ## Docs
 
