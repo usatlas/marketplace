@@ -10,6 +10,6 @@ query = FuncADLQueryPHYS() \
     .Select(lambda e: e.TauJets("AnalysisTauJets")) \
     .Select(lambda taus: {
         "pt": taus.Select(lambda t: t.pt() / 1000.0),
-        "eta": taus.Select(lambda t: t.eta() / 1000.0),
+        "eta": taus.Select(lambda t: t.eta()),
     })
 ```
