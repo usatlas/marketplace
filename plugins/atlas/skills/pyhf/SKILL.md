@@ -36,7 +36,7 @@ fitting framework for new ATLAS analyses.
 | Modifier types        | `normfactor`, `histosys`, `normsys`, `staterror`, `shapesys` |
 | `pyhf.infer.hypotest` | CLs hypothesis test                                          |
 | `pyhf.infer.mle.fit`  | Maximum likelihood fit                                       |
-| Backends              | `numpy` (default), `jax`, `pytorch`, `tensorflow`            |
+| Backends              | `numpy` (default), `jax`, `pytorch`                          |
 
 ## Workspace JSON Structure
 
@@ -242,11 +242,15 @@ print(f"Observed limit: μ < {obs_limit:.2f} @ 95% CL")
 
 ## Interop
 
-- **cabinetry**: high-level wrapper that builds pyhf workspaces from config +
-  histograms
-- **pyhs3**: schema-compliant serialisation of pyhf workspaces
-- **hist**: convert `Hist` objects to numpy arrays for workspace construction
-- **TRExFitter**: can export HistFactory XML → convert with `pyhf xml2json`
+- **atlas:cabinetry**: high-level wrapper that builds pyhf workspaces from
+  config + histograms
+- **atlas:pyhs3**: schema-compliant serialisation of pyhf workspaces
+- **atlas:hist**: convert `Hist` objects to numpy arrays for workspace
+  construction
+- **atlas:trexfitter**: can export HistFactory XML → convert with
+  `pyhf xml2json`
+- **atlas:iminuit**: HEP-standard optimizer that can be used instead of default
+  scipy
 
 ## Docs
 
