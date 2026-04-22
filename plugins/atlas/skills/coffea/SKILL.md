@@ -41,7 +41,7 @@ read with uproot, not the NanoAOD schema layer.
 | `NtupleSchema`         | `atlas-schema` package; best choice for CP algorithm NTuples (TopCPToolkit, EasyJet, AnalysisTop)         |
 | `uproot.dask()`        | Produces dask-awkward arrays from ROOT files; feeds a dask executor                                       |
 | `coffea.dataset_tools` | Helpers for building file sets and running with dask                                                      |
-| `runner`               | Deprecated (v0.7); coffea v2025+ uses `apply_to_fileset` + dask directly                                  |
+| `Runner` / `IterativeExecutor` / `FuturesExecutor` | Current, supported APIs (v2026.x); `Runner` wraps an executor and dispatches a processor over a fileset; `apply_to_fileset` is the dask-native alternative |
 | `weight` / `Weights`   | `coffea.analysis_tools.Weights` manages multiple scale factor weights                                     |
 | `PackedSelection`      | Bitwise selection mask; fast AND/OR over boolean arrays                                                   |
 
@@ -319,9 +319,11 @@ class TwoRegionProcessor(ProcessorABC):
   `events.<collection>.fields` in a notebook before writing a processor to avoid
   `AttributeError` on non-existent branches.
 - **All ATLAS branches are in MeV**: divide by 1000 before GeV histograms.
-- **coffea v0.7 vs v2025+**: The `Runner`/`IterativeExecutor`/`FuturesExecutor`
-  API changed significantly. v2025 uses `apply_to_fileset` + dask. Check which
-  version is installed with `import coffea; print(coffea.__version__)`.
+- **Two valid execution patterns**: `Runner` + `IterativeExecutor`/`FuturesExecutor`
+  is the processor-based API for synchronous or threaded execution;
+  `apply_to_fileset` + dask is the recommended path for cluster-scale runs.
+  Both are supported in recent versions (v2026.x). Check yours with
+  `import coffea; print(coffea.__version__)`.
 - **`process()` must return a dict or a nested dict**: accumulators are merged
   across chunks by the framework.
 - **`postprocess()` is called once** after all chunks are merged — use it for
