@@ -1,15 +1,15 @@
 {
-  "name": "analysis-facilities",
+  "name": "usatlas-marketplace",
   "owner": {
     "name": "USATLAS",
     "url": "https://github.com/usatlas"
   },
-  "description": "Claude Code skills for USATLAS Members.",
+  "description": "Claude Code plugins for ATLAS physics analysis at US ATLAS analysis facilities.",
   "plugins": [
     {
       "name": "analysis-facilities",
       "description": "Skills for working with USATLAS Analysis Facilities (UChicago, BNL, SLAC) providing workflows for HTCondor batch jobs, JupyterLab, XCache, Rucio, ServiceX, Coffea Casa, and Triton ML inference",
-      "source": "./",
+      "source": "./plugins/analysis-facilities",
       "skills": ["uchicago-af"],
       "keywords": [
         "ATLAS",
