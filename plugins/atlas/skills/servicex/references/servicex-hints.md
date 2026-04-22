@@ -58,9 +58,7 @@ base_query = FuncADLQueryPHYSLITE()
 # Query: get all jet pT
 jet_pts_query = (base_query
     .Select(lambda evt: {"jets": evt.Jets()})
-    .Select(lambda collections: {"jets": collections.jets.Select(lambda jet: {
-        "jet_pt": jet.pt() / 1000.0,
-    })})
+    .Select(lambda collections: {"jet_pt": collections.jets.Select(lambda jet: jet.pt() / 1000.0)})
 )
 
 # Do the fetch
@@ -109,18 +107,18 @@ There are two ways to access the output of the `deliver` function.
 1. If the output is small enough you expect to be able to run in-memory. For
    quick studies, etc., this works very well and is quite easy.
 
-a. Make sure the `servicex_analysis_utilities` package is included in the
-project's dependencies. b. The following code will turn the output above into a
-single awkward array:
+   a. Make sure the `servicex_analysis_utilities` package is included in the
+      project's dependencies.
+   b. The following code will turn the output above into a single awkward array:
 
-```python
-from servicex_analysis_utils import to_awk
+   ```python
+   from servicex_analysis_utils import to_awk
 
-all_jets_pts_awk = to_awk(all_jet_pts_delivered)
-jet_pts = all_jets_pts_awk["jet_pt_fetch"]
-```
+   all_jets_pts_awk = to_awk(all_jet_pts_delivered)
+   jet_pts = all_jets_pts_awk["jet_pt_fetch"]
+   ```
 
-1. Use the ROOT files directly. These can be used with RDataFrame or `uproot`.
+2. Use the ROOT files directly. These can be used with RDataFrame or `uproot`.
    If you have to deal with a very large amount of data that won't fit in
    memory, this is the proper approach.
 
@@ -203,7 +201,7 @@ query = (FuncADLQueryPHYSLITE()
 
 Note:
 
-- Any collations or items you want to access in the second select statement must
+- Any collections or items you want to access in the second select statement must
   be passed through from the first.
 
 ## Errors
