@@ -1,153 +1,169 @@
 ---
 name: fastframes
 description: >-
-  Use when using FastFrames to process ATLAS DAOD or NTuple files with
-  RDataFrame: configuring FastFrames via YAML, understanding its columnar
-  processing model, comparing it to TopCPToolkit, running FastFrames locally or
-  on the grid, or reading FastFrames output histograms with uproot or hist.
+  Use when you need a supported RDataFrame-based framework to process
+  CP-algorithm NTuples or TopCPToolkit outputs into analysis histograms.
 ---
 
 # FastFrames
 
 ## Overview
 
-FastFrames is an ATLAS analysis framework built on ROOT RDataFrame. It processes
-DAOD or NTuple input in a columnar, lazy-evaluation model that is faster than
-event-loop approaches for many workflows. It is an alternative to TopCPToolkit
-for analyses that need high throughput or more flexible columnar
-transformations.
+FastFrames is a histogramming and ntuple reprocessing framework built on ROOT's
+RDataFrame. It processes NTuples produced by the standard CP algorithm stack in
+a columnar, lazy-evaluation model that is faster than event-loop approaches for
+many workflows. FastFrames automatically handles cross-section weighting,
+systematic variations, and profile-likelihood unfolding. It is officially
+supported by the ATLAS AMG and is the recommended method to process TopCPToolkit
+outputs into histograms.
 
 ## When to Use
 
-- Large-scale ATLAS analyses where processing speed matters
-- Analyses that prefer a columnar model (define columns, filter, fill
-  histograms) over event-loop
-- When you need to process both DAOD and NTuple inputs in the same framework
-- Teams comfortable with ROOT RDataFrame patterns
+- When you need to process TopCPToolkit outputs
+- When you want a supported framework for processing CP algorithm outputs
 
-## FastFrames vs TopCPToolkit
+## Key Concepts
 
-| Feature               | FastFrames                  | TopCPToolkit      |
-| --------------------- | --------------------------- | ----------------- |
-| Execution model       | RDataFrame (columnar, lazy) | Event loop        |
-| Speed                 | Faster for many workflows   | Adequate for most |
-| CP algorithm coverage | Good, growing               | Comprehensive     |
-| Systematic handling   | Supports variation TTrees   | Variation TTrees  |
-| Community support     | Smaller but active          | Broad (top group) |
-| Config format         | YAML                        | YAML              |
-| Output                | ROOT histograms or NTuples  | Flat NTuples      |
+```text
+DAOD_PHYS / DAOD_PHYSLITE
+    ↓ TopCPToolkit (runs in AnalysisBase/Athena)
+NTuples (ROOT, flat branches)
+    ↓ FastFrames / coffea
+Histograms → fit
+```
 
-For most standard ATLAS analyses with full CP tool coverage, **TopCPToolkit is
-the safer choice**. Use FastFrames when throughput is critical or when your
-analysis team already uses it.
+FastFrames takes CPalgs output (like that from TopCPToolkit or EasyJet) and
+processes into histograms or ntuples.
 
-## YAML Configuration
+## Canonical Patterns
+
+### YAML Configuration
 
 ```yaml
-# config.yaml
+# config.yml
 general:
-  input_filelist: "filelist.txt" # list of ROOT file paths
-  output_path: "output/"
-  campaign: "mc20e"
-  data_type: "mc" # "data" or "mc"
-
-samples:
-  - name: "ttbar"
-    dsid: 410470
-    cross_section: 831.76 # pb
-    filter_efficiency: 1.0
-    k_factor: 1.139
-    input_path: "/path/to/ttbar/*.root"
+  input_filelist_path: "filelist.txt"
+  input_sumweights_path: "sum_of_weights.txt"
+  output_path_histograms: ""
+  default_sumweights: "NOSYS"
+  default_event_weights: "weight_mc_NOSYS *globalTriggerEffSF_NOSYS"
+  xsection_files:
+    - campaigns: ["mc20a", "mc20d", "mc20e"]
+      files: ["test/data/PMGxsecDB_mc16.txt"]
+  automatic_systematics: True
+  nominal_only: False
+  number_of_cpus: 4
+  define_custom_columns:
+    - name: "jet_pt_GeV_NOSYS"
+      definition: "jet_pt_NOSYS/1e3"
 
 regions:
-  - name: "SR"
-    selection: "n_jets >= 4 && n_bjets >= 2 && met > 200000"
+  - name: "Electron"
+    selection: "el_pt_NOSYS.size() > 0 && el_pt_NOSYS[0] > 30000"
+    histograms_2d:
+      - x: "met_met"
+        y: "met_phi"
+    variables:
+      - name: "jet_pt"
+        #title : "histo title;X axis title;Y axis title"
+        definition: "jet_pt_GeV_NOSYS"
+        type: RVec<double>
+        is_nominal_only: True
+        binning:
+          min: 0
+          max: 300
+          number_of_bins: 10
+      - name: "met_met"
+        title: "histo title;X axis title;Y axis title"
+        definition: "met_met_NOSYS/1e3"
+        type: "double"
+        is_nominal_only: True
+        binning:
+          bin_edges: [0, 20, 60, 80, 140, 250]
+      - name: "met_phi"
+        title: "histo title;X axis title;Y axis title"
+        definition: "met_phi_NOSYS"
+        type: "float"
+        binning:
+          min: -3.2
+          max: 3.2
+          number_of_bins: 16
 
-  - name: "CR_top"
-    selection: "n_jets >= 4 && n_bjets >= 2 && met < 150000"
+truth_processing:
+  - name: parton_ttbar
+    produce_unfolding: True
+    truth_tree_name: "truth"
+    samples: ["ttbar_FS"]
+    event_weight: "weight_mc_NOSYS"
+    match_variables:
+      - reco: "jet_pt"
+        truth: "Ttbar_MC_t_afterFSR_pt"
+    variables:
+      - name: "Ttbar_MC_t_afterFSR_pt"
+        definition: "Ttbar_MC_t_afterFSR_pt/1e3"
+        type: "double"
+        binning:
+          min: 0
+          max: 500
+          number_of_bins: 10
 
-histograms:
-  - variable: "jet_pt[0]" # Leading jet pT
-    name: "leading_jet_pt"
-    regions: ["SR", "CR_top"]
-    nbins: 50
-    xmin: 0
-    xmax: 2000000 # MeV
-
-  - variable: "met"
-    name: "met_dist"
-    regions: ["SR"]
-    nbins: 30
-    xmin: 0
-    xmax: 1000000
+samples:
+  - name: "ttbar_FS"
+    dsids: [410470]
+    campaigns: ["mc20e"]
+    simulation_type: "fullsim"
 
 systematics:
-  - name: "JES"
-    type: "tree" # reads separate _JES__1up/_JES__1down trees
-
-  - name: "BTag_77"
-    type: "weight" # applies weight variation
-    weight_up: "weight_bTagSF_77_up"
-    weight_dn: "weight_bTagSF_77_dn"
+  - campaigns: ["mc20e"]
+    regions: ["Electron"]
+    variation:
+      up: "JET_BJES_Response__1up"
+      down: "JET_BJES_Response__1down"
+  - samples: ["ttbar_FS"]
+    campaigns: ["mc20e"]
+    variation:
+      up: "GEN_0p5muF_0p5muR_NNPDF31_NLO_0118"
+      sum_weights_up: "GEN_0p5muF_0p5muR_NNPDF31_NLO_0118"
 ```
 
-## Running FastFrames
-
-**Locally**:
+### Running FastFrames
 
 ```bash
-# Setup
+# option 1: conda-forge (pixi / conda)
+pixi add fastframes
+FastFrames.py --config config.yml
+
+# option 2: build from source inside AnalysisBase
 asetup AnalysisBase,25.2.X
-source FastFrames/setup.sh
-
-# Run
-fastframes --config config.yaml --ncpu 4
+cmake -S fastframes -B build
+cmake --build build
+source build/setup.sh
+FastFrames.py --config config.yml
 ```
 
-**On the grid**:
-
-```bash
-prun --exec "fastframes --config config.yaml" \
-     --inDS user.me.ntuples.mycontainer \
-     --outDS user.me.output.histograms
-```
-
-## Reading FastFrames Output
+### Reading FastFrames Output
 
 FastFrames produces ROOT files with histograms. Read with uproot:
 
 ```python
 import uproot, hist
 
-with uproot.open("output/histograms.root") as f:
-    # FastFrames names histograms as {sample}_{region}_{variable}
-    h_root = f["ttbar_SR_leading_jet_pt"]
+# By default FastFrames writes one ROOT file per sample
+with uproot.open("output/ttbar_FS.root") as f:
+    # FastFrames generally names histograms as {region}_{variable}
+    h_root = f["Electron_jet_pt"]
 
     # Convert to hist.Hist for plotting
     h = hist.Hist(hist.axis.Variable(h_root.axis().edges(), name="pt", label=r"$p_T$ [GeV]"))
     h.view()[:] = h_root.values()
 ```
 
-## Systematic Handling
+### Systematic Handling
 
-FastFrames supports two systematic types:
+FastFrames can automatically read systematics from the input files when
+`automatic_systematics` is `True`.
 
-**Tree-based** (for shape systematics from varied NTuples):
-
-```yaml
-- name: "JES"
-  type: "tree"
-  # Reads TTrees named {nominal_tree}_JES__1up and _JES__1down
-```
-
-**Weight-based** (for systematics stored as weight branches):
-
-```yaml
-- name: "BTag_77"
-  type: "weight"
-  weight_up: "weight_bTagSF_77_up"
-  weight_dn: "weight_bTagSF_77_dn"
-```
+FastFrames can also handle manually defined systematics in the YAML config.
 
 ## Gotchas
 
@@ -156,23 +172,17 @@ FastFrames supports two systematic types:
   2 TeV.
 - **RDataFrame lazy evaluation**: Column definitions aren't evaluated until an
   action (histogram fill, `Snapshot`) is triggered; bugs in column expressions
-  appear at run time.
-- **CP algorithm coverage**: FastFrames does not yet cover all CP algorithms;
-  check the FastFrames documentation for current support status before choosing
-  it over TopCPToolkit.
-- **Tree-based systematics require pre-existing variation trees**: FastFrames
-  reads variation trees from the input files — you need TCT or another framework
-  to have produced them.
+  appear at run time. Debugging is generally best performed when running with a
+  single thread.
 
 ## Interop
 
-- **TopCPToolkit**: Can process the same DAOD inputs; TCT NTuples can also be
-  read by FastFrames
-- **uproot / hist**: Primary downstream tools for reading FastFrames histogram
-  output
+- **TopCPToolkit**: FastFrames is the recommended way to process TopCPToolkit
+  outputs
+- **uproot / hist**: Downstream tools for reading FastFrames histogram output
 - **cabinetry / pyhf**: Feed FastFrames histogram output into cabinetry for the
   statistical fit
-- **coffea**: Alternative for columnar analysis without ROOT dependency
+- **coffea**: Alternative for columnar analysis without ROOT/CPalgs dependencies
 
 ## Docs
 
