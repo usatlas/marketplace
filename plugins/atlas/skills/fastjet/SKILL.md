@@ -3,8 +3,10 @@ name: fastjet
 description: >-
   Use when running jet clustering in Python with fastjet or pyjet: calling
   anti-kt or Cambridge/Aachen algorithms on particle four-vectors, accessing jet
-  constituents, computing jet substructure variables (tau_N, softdrop), or
-  clustering jets from generator-level events read with pyhepmc or pylhe.
+  constituents, computing jet substructure variables (tau_N, softdrop),
+  clustering jets from generator-level events read with pyhepmc or pylhe, or
+  processing many events over awkward arrays with the array-oriented (columnar)
+  interface to avoid slow Python loops.
 ---
 
 # fastjet
@@ -17,6 +19,13 @@ anti-kt, Cambridge/Aachen, and kt clustering algorithms. In ATLAS physics
 analyses the main use is truth-level jet clustering for generator studies or jet
 substructure calculations on particle-level events.
 
+The library provides two interfaces: the **array-oriented (columnar)
+interface**, which accepts `awkward` arrays directly and handles many events at
+once without Python loops, and the **classic (object-oriented) interface**,
+which mirrors the C++ API and operates one event at a time on lists of
+`PseudoJet` objects. Prefer the columnar interface whenever you are iterating
+over events.
+
 ## When to Use
 
 - Clustering particle-level or parton-level events from a Monte Carlo generator
@@ -27,15 +36,17 @@ substructure calculations on particle-level events.
 
 ## Key Concepts
 
-| Concept                       | Notes                                                               |
-| ----------------------------- | ------------------------------------------------------------------- |
-| `fastjet.ClusterSequence`     | Core clustering object; constructed from PseudoJets + JetDefinition |
-| `fastjet.PseudoJet`           | Four-vector container (px, py, pz, E)                               |
-| `fastjet.JetDefinition`       | Algorithm + R parameter, e.g. `anti_kt` with R=0.4                  |
-| `fastjet.ClusterSequenceArea` | Adds jet area computation (needed for pileup subtraction)           |
-| `fastjet.Selector`            | Filter jets by pT, eta, etc.                                        |
-| Jet constituents              | `jet.constituents()` returns list of PseudoJets                     |
-| User index                    | `pseudo_jet.set_user_index(i)` links back to the original particle  |
+| Concept                       | Notes                                                                           |
+| ----------------------------- | ------------------------------------------------------------------------------- |
+| `fastjet.ClusterSequence`     | Dispatch point: pass `ak.Array` → columnar; pass `list[PseudoJet]` → classic    |
+| `AwkwardClusterSequence`      | Internal type created for columnar input; `inclusive_jets()` returns `ak.Array` |
+| `fastjet.PseudoJet`           | Four-vector container (px, py, pz, E) — classic interface only                  |
+| `fastjet.JetDefinition`       | Algorithm + R parameter, e.g. `antikt_algorithm` with R=0.4                     |
+| `fastjet.ClusterSequenceArea` | Adds jet area computation (needed for pileup subtraction) — classic only        |
+| `fastjet.Selector`            | Filter jets by pT, eta, etc. — classic interface                                |
+| Jet constituents (columnar)   | `cluster.constituents()` returns jagged `ak.Array` of particles per jet         |
+| Jet constituents (classic)    | `jet.constituents()` returns list of PseudoJets                                 |
+| User index                    | `pseudo_jet.set_user_index(i)` links back to the original particle              |
 
 ## Canonical Patterns
 
@@ -56,25 +67,90 @@ pseudojets = [fj.PseudoJet(px[i], py[i], pz[i], E[i]) for i in range(len(px))]
 jet_def = fj.JetDefinition(fj.antikt_algorithm, 0.4)
 cs = fj.ClusterSequence(pseudojets, jet_def)
 
-jets = fj.sorted_by_pt(cs.inclusive_jets(ptmin=25.0))   # pT > 25 GeV
+jets = fj.sorted_by_pt(cs.inclusive_jets(ptmin=25.0))   # 25 GeV (use 25000.0 MeV for ATLAS)
 
 for j in jets:
     print(f"pT={j.pt():.1f} GeV  eta={j.eta():.2f}  phi={j.phi():.2f}")
     print(f"  {len(j.constituents())} constituents")
 ```
 
-### From awkward arrays (vectorized construction)
+### Columnar interface — single event (px/py/pz/E fields)
+
+Pass an `ak.Array` directly; no `PseudoJet` construction loop needed. Output is
+also an `ak.Array` (`MomentumArray4D`), not a list.
 
 ```python
-import fastjet as fj, awkward as ak, vector
+import fastjet
+import awkward as ak
+
+particles = ak.Array([
+    {"px": 1.2,  "py": 3.2,  "pz":   5.4, "E":  23.5},
+    {"px": 32.2, "py": 64.21, "pz": 543.34, "E": 755.12},
+    {"px": 32.45, "py": 63.21, "pz": 543.14, "E": 835.56},
+])
+
+jetdef = fastjet.JetDefinition(fastjet.antikt_algorithm, 0.4)
+cluster = fastjet.ClusterSequence(particles, jetdef)
+
+jets = cluster.inclusive_jets(min_pt=25.0)  # MomentumArray4D; 25 GeV (use 25000.0 MeV for ATLAS)
+print(jets.pt, jets.eta, jets.phi)
+```
+
+### Columnar interface — multi-event (jagged awkward array)
+
+The columnar interface is designed for many events at once. Pass a jagged array
+(outer dim = events, inner dim = particles per event); output is also jagged.
+
+```python
+import fastjet
+import awkward as ak
+
+# Each sub-array is one event; lengths may differ (jagged)
+events = ak.Array([
+    [{"px": 1.2,  "py": 3.2,  "pz":   5.4, "E":  23.5},
+     {"px": 32.2, "py": 64.21, "pz": 543.34, "E": 755.12}],
+    [{"px": 32.45, "py": 63.21, "pz": 543.14, "E": 835.56},
+     {"px": -1.2, "py": -3.2, "pz": -5.4, "E": 23.5}],
+])
+
+jetdef = fastjet.JetDefinition(fastjet.antikt_algorithm, 0.4)
+cluster = fastjet.ClusterSequence(events, jetdef)
+
+jets = cluster.inclusive_jets(min_pt=25.0)  # jagged: [[jets_ev0], [jets_ev1]]; 25 GeV (use 25000.0 MeV for ATLAS)
+print(ak.num(jets, axis=1))   # number of jets per event
+print(jets.pt)                # pT of all jets, jagged
+```
+
+### Columnar interface — pt/eta/phi/M coordinates with vector
+
+```python
+import fastjet
+import awkward as ak
+import vector
 vector.register_awkward()
 
-# particles is an ak.Array with fields px, py, pz, E
-def cluster_event(particles):
-    pjs = [fj.PseudoJet(float(p.px), float(p.py), float(p.pz), float(p.E))
-           for p in particles]
-    cs = fj.ClusterSequence(pjs, fj.JetDefinition(fj.antikt_algorithm, 0.4))
-    return fj.sorted_by_pt(cs.inclusive_jets(ptmin=20.0))
+events = ak.Array(
+    [
+        [{"pt": 71.8, "eta": 2.72, "phi": 1.11, "M": 0.14},
+         {"pt": 3.42, "eta": 1.24, "phi": 1.21, "M": 0.0}],
+        [{"pt": 55.0, "eta": -1.5, "phi": 0.5,  "M": 0.14}],
+    ],
+    with_name="Momentum4D",
+)
+
+jetdef = fastjet.JetDefinition(fastjet.antikt_algorithm, 0.4)
+cluster = fastjet.ClusterSequence(events, jetdef)
+jets = cluster.inclusive_jets(min_pt=25.0)  # 25 GeV (use 25000.0 MeV for ATLAS)
+```
+
+### Columnar interface — accessing constituents without a Python loop
+
+```python
+# constituents() returns a jagged array: [event][jet] → ak.Array of particles
+constituents = cluster.constituents(min_pt=25.0)  # 25 GeV (use 25000.0 MeV for ATLAS)
+# constituents[event_i][jet_j] is an ak.Array of the contributing particles
+# e.g. sum constituent pT:
+print(ak.sum(constituents.pt, axis=-1))
 ```
 
 ### Jet substructure: N-subjettiness
@@ -106,12 +182,22 @@ groomed_jets = [sd(j) for j in jets]
 ```python
 ghost_area = fj.AreaDefinition(fj.active_area, fj.GhostedAreaSpec(5.0))
 cs_area = fj.ClusterSequenceArea(pseudojets, jet_def, ghost_area)
-for j in cs_area.inclusive_jets(ptmin=25.0):
+for j in cs_area.inclusive_jets(ptmin=25.0):  # 25 GeV (use 25000.0 MeV for ATLAS)
     print(f"area = {j.area():.3f}")
 ```
 
 ## Gotchas
 
+- **Prefer the columnar interface over per-particle loops**: Building
+  `PseudoJet` objects one-by-one in a Python loop
+  (`[fj.PseudoJet(p.px, ...) for p in particles]`) crosses the Python
+  interpreter on every particle and every event. Pass an `ak.Array` to
+  `ClusterSequence` directly — this pushes the conversion into C++ and processes
+  all events without Python overhead.
+- **Classic interface is required for `ClusterSequenceArea` and fjcontrib**: The
+  columnar interface supports only `ClusterSequence`. Jet area computation and
+  substructure tools (`Nsubjettiness`, `SoftDrop`) require the classic
+  `PseudoJet`-based path.
 - **Units**: fastjet has no built-in unit system — ensure all four-vectors use
   the same units (usually GeV).
 - **`phi()` range**: fastjet returns phi in `[0, 2π)`; some downstream code
@@ -122,16 +208,20 @@ for j in cs_area.inclusive_jets(ptmin=25.0):
 - **fjcontrib availability**: substructure tools (`Nsubjettiness`, `SoftDrop`)
   require the `fastjet` package built with contrib support, or a separate
   `fjcontrib` install.
-- **No automatic batching**: fastjet processes one event at a time; loop over
-  events explicitly.
+- **`with_name="Momentum4D"` required for pt/eta/phi/M input**: Without
+  `vector.register_awkward()` and `with_name="Momentum4D"`, the columnar
+  interface only auto-detects `(px, py, pz, E)` field names.
 
 ## Interop
 
-- **pyhepmc**: Read HepMC3 events, extract final-state particles, build
-  PseudoJets.
+- **pyhepmc**: Read HepMC3 events, extract final-state particles into an
+  `ak.Array` with `(px, py, pz, E)` fields, then pass directly to
+  `ClusterSequence` using the columnar interface.
 - **pylhe**: Read LHE parton-level events for parton-jet matching studies.
-- **vector / awkward**: Convert awkward four-vector arrays to PseudoJets
-  event-by-event.
+- **vector / awkward**: Use `vector.register_awkward()` +
+  `with_name="Momentum4D"` to pass `(pt, eta, phi, M)` arrays to the columnar
+  interface. Classic interface still requires converting to `PseudoJet` objects
+  first.
 
 ## Docs
 
