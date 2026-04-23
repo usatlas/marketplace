@@ -54,6 +54,7 @@ Alternatively, install behaviors only in a single array without touching global
 `ak.behavior`:
 
 ```python
+import awkward as ak
 arr = ak.Array([...], with_name="Momentum4D",
                behavior=vector.backends.awkward.behavior)
 ```
@@ -133,6 +134,7 @@ print(muons.px, muons.energy)  # vectorized, operates on whole array
 
 ```python
 import numba as nb
+import numpy as np
 
 @nb.njit
 def sum_mass(array):
@@ -148,8 +150,8 @@ def sum_mass(array):
 masses = sum_mass(array)
 ```
 
-JIT compilation has a cold-start cost but achieves ~500× speedup on large arrays
-compared to equivalent Python loops.
+JIT compilation has a cold-start cost but can be significantly faster on large
+arrays; actual speedups depend on workload, hardware, and versions.
 
 **Symbolic vectors with SymPy — derive formulas or generate code**:
 
