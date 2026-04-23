@@ -38,6 +38,8 @@ awkward-array records, and scalar objects. The key design: register behaviors on
 | `vector.array(...)`         | NumPy structured-array subclass — vectorized, good for fixed-shape collections |
 | `vector.zip(...)`           | Like `ak.zip` but auto-sets `with_name`; no need to specify record type        |
 | `.to_*()`                   | Explicit coordinate conversion (`to_xyzt`, `to_rhophithetatau`, etc.)          |
+| `VectorSympy*D`             | Symbolic vector types (SymPy backend); all operations return SymPy expressions |
+| `vector.register_pytree()`  | Returns a pytree interface (flatten/unflatten); requires `optree` package      |
 
 ## Canonical Patterns
 
@@ -147,6 +149,53 @@ masses = sum_mass(array)
 JIT compilation has a cold-start cost but achieves ~500× speedup on large arrays
 compared to equivalent Python loops.
 
+**Symbolic vectors with SymPy — derive formulas or generate code**:
+
+```python
+import sympy
+
+# Symbols must be declared real=True; complex assumptions break trig simplifications
+x, y, z, t = sympy.symbols("x y z t", real=True)
+
+v = vector.VectorSympy4D(x=x, y=y, z=z, t=t)
+v.rho            # sqrt(x**2 + y**2)
+v.is_timelike()  # t**2 - x**2 - y**2 - z**2 > 0
+
+expr = v.boost(v.to_beta3()).t
+expr.simplify()                       # returns simplified SymPy expression
+expr.subs({x: 3, y: 2, z: 1, t: 10}) # substitute concrete values
+
+# Convert to Fortran/C/LaTeX for downstream use
+import sympy.printing.fortran
+print(sympy.printing.fortran.fcode(expr.simplify()))
+```
+
+**PyTree integration — flatten vector state for scipy/optree algorithms**:
+
+```python
+# Requires: pip install optree
+pytree = vector.register_pytree()  # one-time call; returns flatten/unflatten interface
+
+state = {
+    "position": vector.obj(x=1.0, y=2.0, z=3.0, t=0.0),
+    "momentum": vector.obj(x=0.0, y=10.0, z=0.0, t=14.0),
+}
+flat, treedef = pytree.flatten(state)   # flat is a plain list of 8 scalars
+reconstructed = pytree.unflatten(treedef, flat)  # round-trips exactly
+
+# Typical use: wrap scipy.integrate.solve_ivp so the integrator sees a 1D array
+def wrapped_solve(fun, t_span, y0, t_eval):
+    flat_y0, treedef = pytree.flatten(y0)
+    def flat_fun(t, flat_y):
+        state = pytree.unflatten(treedef, flat_y)
+        dstate_dt = fun(t, state)
+        flat_dstate_dt, _ = pytree.flatten(dstate_dt)
+        return flat_dstate_dt
+    from scipy.integrate import solve_ivp
+    sol = solve_ivp(flat_fun, t_span, flat_y0, t_eval=t_eval)
+    return pytree.unflatten(treedef, sol.y)
+```
+
 ## Gotchas
 
 - **`register_awkward()` before any vector access**: Calling `.deltaR()` on an
@@ -171,6 +220,13 @@ compared to equivalent Python loops.
   is fine; `pt` with `px` is not — vector picks the convention from the full set
   of field names and raises if they conflict.
 
+- **SymPy sign convention differs for space-like/negative time-like 4-vectors**:
+  The SymPy backend avoids piecewise if-then branches in symbolic expressions,
+  so its conventions for such vectors differ from other backends (which follow
+  ROOT). For physical momentum vectors (positive time-like), all backends agree.
+- **`register_pytree()` requires `optree`**: `optree` is not a default vector
+  dependency. Install it separately; `register_pytree()` raises `ImportError`
+  without it. Call it once at module level before any flatten/unflatten use.
 - **Units are your responsibility**: Vector does no unit conversion. If pT is in
   MeV, masses and energies are in MeV throughout. Divide by 1000 explicitly
   before presenting in GeV.
@@ -191,6 +247,12 @@ compared to equivalent Python loops.
 - **numba**: `@nb.njit` works with `vector.obj` and `vector.Array` (awkward);
   best for custom loops over large ragged arrays where awkward vectorization
   cannot express the logic
+- **sympy**: `VectorSympy2D/3D/4D` and `MomentumSympy2D/3D/4D` give fully
+  symbolic coordinate transforms; useful for deriving kinematic formulas and
+  code-generating Fortran/C/LaTeX output
+- **optree**: `vector.register_pytree()` enables flatten/unflatten of vector
+  objects and nested structures containing them; integrates with
+  `scipy.integrate`, optimizers, and any algorithm expecting a 1D numeric array
 
 ## Docs
 
