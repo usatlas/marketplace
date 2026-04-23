@@ -264,8 +264,8 @@ with uproot.recreate("hists.root") as f:
 
 ## Gotchas
 
-- **All ATLAS branches are in MeV**: divide by 1000 before GeV-scale histograms
-  or cuts.
+- **ATLAS energy/momentum values are in MeV**: divide by 1000 before GeV-scale
+  histograms or cuts.
 - **Systematic trees**: TopCPToolkit writes one TTree per systematic variation
   (e.g. `reco_JES__1up`). You must loop over tree names explicitly — there is no
   automatic loop.
