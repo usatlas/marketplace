@@ -25,7 +25,9 @@ converts a value into the system base; dividing converts back out.
 - Computing ctau or other derived quantities from physical constants
 - Bridging hepunits float values with Pint quantities
 
-## Module Structure
+## Key Concepts
+
+### Module Structure
 
 hepunits exposes two sub-modules, both re-exported at the top level:
 
@@ -40,8 +42,6 @@ from hepunits.units import picosecond, micrometer
 from hepunits.constants import c_light
 import hepunits.units as u                      # namespace alias
 ```
-
-## Key Concepts
 
 ### Base units
 
