@@ -36,6 +36,8 @@ awkward-array records, and scalar objects. The key design: register behaviors on
 | `.mass` property            | Invariant mass from E²-p² = m²                                                 |
 | `vector.obj(...)`           | Single scalar Python object — fast in Numba, slow in plain Python loops        |
 | `vector.array(...)`         | NumPy structured-array subclass — vectorized, good for fixed-shape collections |
+| `vector.zip(...)`           | Like `ak.zip` but auto-sets `with_name`; no need to specify record type        |
+| `.to_*()`                   | Explicit coordinate conversion (`to_xyzt`, `to_rhophithetatau`, etc.)          |
 
 ## Canonical Patterns
 
@@ -46,15 +48,24 @@ import vector
 vector.register_awkward()
 ```
 
+Alternatively, install behaviors only in a single array without touching global
+`ak.behavior`:
+
+```python
+arr = ak.Array([...], with_name="Momentum4D",
+               behavior=vector.backends.awkward.behavior)
+```
+
 **Build a Momentum4D record array from NTuple columns**:
 
 ```python
 import awkward as ak
-jets = ak.zip(
+# vector.zip auto-infers the record name from field names; no with_name needed
+jets = vector.zip(
     {"pt": events["jet_pt"], "phi": events["jet_phi"],
      "eta": events["jet_eta"], "mass": events["jet_m"]},
-    with_name="Momentum4D",
 )
+# equivalently: ak.zip({...}, with_name="Momentum4D")
 # Now jets.deltaR(other), jets.mass, jets.px, etc. all work
 ```
 
@@ -79,6 +90,16 @@ non_overlapping = jets[~ak.any(dr < 0.4, axis=1)]  # remove jets near any electr
 ```python
 # parent must be a vector object
 boosted = daughter.boost(-parent.to_beta3())
+```
+
+**Explicit coordinate conversion (numerical precision)**:
+
+```python
+# Access any coordinate regardless of how the vector was constructed
+v = vector.obj(px=3.0, py=4.0, pz=0.0, energy=5.0)
+v.pt   # reads rho — no copy, computed on the fly
+# Force storage in a different coordinate system to avoid repeated trig:
+v2 = v.to_rhophithetatau()  # returns new object in polar+pseudorapidity coords
 ```
 
 **Scalar Python object (`vector.obj`) — single vector or Numba use**:
@@ -138,10 +159,18 @@ compared to equivalent Python loops.
 - **NumPy backend Numba support is incomplete**: `@nb.njit` works with
   `vector.obj` and `vector.Array` (awkward), but NumPy array (`vector.array`)
   support inside Numba is incomplete (upstream issue [#43]).
-- **Field names must match exactly**: `energy` not `E`, `mass` not `m` for
-  awkward arrays. Vector picks the convention from the field names — mixing
-  `pt/phi/eta/energy` is fine; mixing `pt` and `px` is not. (`vector.obj`
-  accepts `E` as an alias for energy.)
+- **Multiple spellings are valid for energy and mass** — all four rows below are
+  recognized by every backend (objects, NumPy, awkward):
+
+  | temporal coord | synonyms                | notes                          |
+  | -------------- | ----------------------- | ------------------------------ |
+  | Cartesian time | `t`, `e`, `E`, `energy` | four-momentum energy component |
+  | proper time    | `tau`, `m`, `M`, `mass` | invariant mass / proper time   |
+
+  The real constraint is **don't mix coordinate systems**: `pt/phi/eta/energy`
+  is fine; `pt` with `px` is not — vector picks the convention from the full set
+  of field names and raises if they conflict.
+
 - **Units are your responsibility**: Vector does no unit conversion. If pT is in
   MeV, masses and energies are in MeV throughout. Divide by 1000 explicitly
   before presenting in GeV.
