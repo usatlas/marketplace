@@ -101,7 +101,7 @@ boosted = daughter.boost(-parent.to_beta3())
 v = vector.obj(px=3.0, py=4.0, pz=0.0, energy=5.0)
 v.pt   # reads rho — no copy, computed on the fly
 # Force storage in a different coordinate system to avoid repeated trig:
-v2 = v.to_rhophithetatau()  # returns new object in polar+pseudorapidity coords
+v2 = v.to_rhophithetatau()  # returns new object in rho, phi, theta (polar angle) and tau coords
 ```
 
 **Scalar Python object (`vector.obj`) — single vector or Numba use**:
@@ -113,7 +113,9 @@ print(v.px, v.py, v.pz, v.energy)
 ```
 
 `vector.obj` returns a plain Python object, not a NumPy array. It is slow in
-Python loops but compiles efficiently under `@nb.njit`. However, there is no performance advantage (and a likely disadvantage) when compiling a calculation on just a few vectors.
+Python loops but compiles efficiently under `@nb.njit`. However, there is no
+performance advantage (and a likely disadvantage) when compiling a calculation
+on just a few vectors.
 
 **NumPy structured array (`vector.array`) — fixed-shape collections**:
 
