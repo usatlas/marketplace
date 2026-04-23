@@ -111,7 +111,7 @@ print(v.px, v.py, v.pz, v.energy)
 ```
 
 `vector.obj` returns a plain Python object, not a NumPy array. It is slow in
-Python loops but compiles efficiently under `@nb.njit`.
+Python loops but compiles efficiently under `@nb.njit`. However, there is no performance advantage (and a likely disadvantage) when compiling a calculation on just a few vectors.
 
 **NumPy structured array (`vector.array`) — fixed-shape collections**:
 
