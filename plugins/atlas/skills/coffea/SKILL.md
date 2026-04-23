@@ -243,6 +243,29 @@ Schema summary for ATLAS work:
 | DAOD_PHYSLITE                      | `PHYSLITESchema` | `events.Jets.pt` with behaviors           |
 | CMS NanoAOD (reference/comparison) | `NanoAODSchema`  | `events.Jet.pt` with behaviors            |
 
+### NanoEventsFactory performance options
+
+`preload` and `buffer_cache` are available in `eager` and `virtual` modes only
+(not `dask` / `apply_to_fileset`):
+
+```python
+cache = {}   # any dict-like; LRU or Redis also work
+
+events = NanoEventsFactory.from_root(
+    {"ntuple.root": "reco"},
+    schemaclass=BaseSchema,
+    metadata={"dataset": "ttbar"},
+    preload=["jet_pt", "jet_eta", "met_met"],  # bulk-fetch before processor loop
+    buffer_cache=cache,  # stores raw numpy arrays; avoids re-decompressing on re-access
+    mode="virtual",
+).events()
+```
+
+`preload` accepts a list of branch names or a `filter_branch` callable (same
+signature as `uproot`'s `tree.arrays`). `buffer_cache` is keyed by globally
+unique strings; pass a shared cache instance across multiple factory calls to
+amortise decompression cost across chunks.
+
 ### atlas-schema: iterating systematic variations
 
 `NtupleSchema` exposes every systematic variation stored in the NTuple. Use
@@ -298,6 +321,10 @@ class SystematicsProcessor(ProcessorABC):
   `mode="dask"` NanoEvents internally — processors must use `hist.dask.Hist` and
   `process()` receives dask-awkward arrays rather than materialized ones. Check
   your version with `import coffea; print(coffea.__version__)`.
+- **`preload` / `buffer_cache` are eager/virtual only**: `preload` bulk-fetches
+  named branches before the processor loop; `buffer_cache` stores raw numpy
+  arrays to avoid re-decompressing on repeated access. Both are silently ignored
+  (or unavailable) in `mode="dask"` — do not use them with `apply_to_fileset`.
 - **`process()` must return a dict or a nested dict**: accumulators are merged
   across chunks by the framework.
 - **`postprocess()` is called once** after all chunks are merged — use it for
