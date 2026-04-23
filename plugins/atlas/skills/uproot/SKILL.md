@@ -1,11 +1,8 @@
 ---
 name: uproot
 description: >-
-  Use when reading or writing ROOT files in Python without a ROOT installation:
-  opening TTrees with uproot.open, reading branches as awkward or numpy arrays,
-  converting to pandas, iterating in batches over large files, writing new ROOT
-  files or appending histograms, or diagnosing common uproot errors (key not
-  found, cycle numbers, jagged branch shapes).
+  Use when reading or writing ROOT files in Python without a ROOT installation,
+  or when encountering issues opening TTrees, RNTuples, or histograms.
 ---
 
 # uproot
@@ -232,39 +229,7 @@ arrays = uproot.concatenate(
 )
 ```
 
-## Worked Example: Full NTuple → histogram pipeline
-
-```python
-import uproot, awkward as ak, hist, numpy as np
-import vector; vector.register_awkward()
-
-h_jet_pt = hist.Hist(
-    hist.axis.Regular(50, 0, 1000, name="pt", label=r"Leading jet $p_T$ [GeV]"),
-    storage=hist.storage.Weight(),
-)
-
-for batch in uproot.iterate(
-    "ntuples/*.root:reco",
-    ["jet_pt", "weight_mc", "weight_pileup", "weight_bTagSF_77"],
-    step_size=200_000,
-):
-    # combined event weight
-    w = batch["weight_mc"] * batch["weight_pileup"] * batch["weight_bTagSF_77"]
-
-    # safe leading jet pT in GeV
-    lj_pt = ak.firsts(batch["jet_pt"]) / 1000.0   # MeV → GeV
-    mask  = ~ak.is_none(lj_pt)                     # drop events with 0 jets
-
-    h_jet_pt.fill(pt=ak.to_numpy(lj_pt[mask]), weight=ak.to_numpy(w[mask]))
-
-import mplhep as hep, matplotlib.pyplot as plt
-fig, ax = plt.subplots()
-hep.histplot(h_jet_pt, ax=ax)
-hep.atlas.label(ax=ax, data=False, lumi=139)
-fig.savefig("leading_jet_pt.pdf")
-```
-
-## Writing ROOT files
+### Write ROOT files
 
 Uproot now writes RNTuples by default. Use `mkrntuple` to write an RNTuple
 (supports any structure representable as an Awkward Array, including jagged and
@@ -297,19 +262,6 @@ with uproot.recreate("hists.root") as f:
     f["h_mass"] = h  # uproot can write hist.Hist directly
 ```
 
-## Troubleshooting
-
-| Issue                         | Cause                                                      | Fix                                                      |
-| ----------------------------- | ---------------------------------------------------------- | -------------------------------------------------------- |
-| `KeyError: "reco"`            | Tree name wrong; file has cycle `reco;1`                   | `f.keys()` to inspect; or `f["reco;1"]` explicitly       |
-| `IndexError` on `array[:, 0]` | Some events have zero jets                                 | Replace with `ak.firsts(array)`                          |
-| `NotAnNumpyCompatible`        | Branch is jagged (variable-length)                         | Use `library="ak"` (default) or iterate                  |
-| `MemoryError`                 | File too large for single load                             | Switch to `uproot.iterate` with `step_size`              |
-| Wrong branch shape            | Systematic tree (e.g. `reco_JES__1up`) has extra dimension | Read the correct tree by name                            |
-| Remote file stalls            | XRootD not installed                                       | `pip install uproot[xrootd]` or `fsspec-xrootd`          |
-| `UnicodeDecodeError`          | ROOT string branch with non-UTF8 content                   | Use `branch.array(interpretation=uproot.AsStrings(...))` |
-| `None` values in awkward      | `ak.firsts` returns `None` for empty events                | Use `mask = ~ak.is_none(arr)` before numpy conversion    |
-
 ## Gotchas
 
 - **All ATLAS branches are in MeV**: divide by 1000 before GeV-scale histograms
@@ -337,6 +289,51 @@ with uproot.recreate("hists.root") as f:
   NanoAOD-style processors.
 - **fsspec-xrootd**: Mount EOS or grid storage so that uproot `root://` paths
   work transparently.
+
+## Worked Example: Full NTuple → histogram pipeline
+
+```python
+import uproot, awkward as ak, hist, numpy as np
+import vector; vector.register_awkward()
+
+h_jet_pt = hist.Hist(
+    hist.axis.Regular(50, 0, 1000, name="pt", label=r"Leading jet $p_T$ [GeV]"),
+    storage=hist.storage.Weight(),
+)
+
+for batch in uproot.iterate(
+    "ntuples/*.root:reco",
+    ["jet_pt", "weight_mc", "weight_pileup", "weight_bTagSF_77"],
+    step_size=200_000,
+):
+    # combined event weight
+    w = batch["weight_mc"] * batch["weight_pileup"] * batch["weight_bTagSF_77"]
+
+    # safe leading jet pT in GeV
+    lj_pt = ak.firsts(batch["jet_pt"]) / 1000.0   # MeV → GeV
+    mask  = ~ak.is_none(lj_pt)                     # drop events with 0 jets
+
+    h_jet_pt.fill(pt=ak.to_numpy(lj_pt[mask]), weight=ak.to_numpy(w[mask]))
+
+import mplhep as hep, matplotlib.pyplot as plt
+fig, ax = plt.subplots()
+hep.histplot(h_jet_pt, ax=ax)
+hep.atlas.label(ax=ax, data=False, lumi=139)
+fig.savefig("leading_jet_pt.pdf")
+```
+
+## Troubleshooting
+
+| Issue                         | Cause                                                      | Fix                                                      |
+| ----------------------------- | ---------------------------------------------------------- | -------------------------------------------------------- |
+| `KeyError: "reco"`            | Tree name wrong; file has cycle `reco;1`                   | `f.keys()` to inspect; or `f["reco;1"]` explicitly       |
+| `IndexError` on `array[:, 0]` | Some events have zero jets                                 | Replace with `ak.firsts(array)`                          |
+| `NotAnNumpyCompatible`        | Branch is jagged (variable-length)                         | Use `library="ak"` (default) or iterate                  |
+| `MemoryError`                 | File too large for single load                             | Switch to `uproot.iterate` with `step_size`              |
+| Wrong branch shape            | Systematic tree (e.g. `reco_JES__1up`) has extra dimension | Read the correct tree by name                            |
+| Remote file stalls            | XRootD not installed                                       | `pip install uproot[xrootd]` or `fsspec-xrootd`          |
+| `UnicodeDecodeError`          | ROOT string branch with non-UTF8 content                   | Use `branch.array(interpretation=uproot.AsStrings(...))` |
+| `None` values in awkward      | `ak.firsts` returns `None` for empty events                | Use `mask = ~ak.is_none(arr)` before numpy conversion    |
 
 ## Docs
 
