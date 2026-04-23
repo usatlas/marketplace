@@ -82,20 +82,17 @@ m.hesse()
 print(m.values["mu"], m.errors["mu"])
 ```
 
-### Extended binned NLL (yield + shape fit from histogram)
+### ExtendedBinnedNLL and BinnedNLL
 
-`ExtendedBinnedNLL` requires an **integrated density** (scaled CDF) evaluated at
-bin edges — not a per-bin PDF. The function returns the cumulative integral from
-the left edge up to each `xe` value; iminuit differences adjacent values to get
-expected counts per bin.
+Both require a **CDF-like callable at bin edges**, not a PDF at bin centers.
+`ExtendedBinnedNLL` takes a scaled CDF (yield × CDF per component); `BinnedNLL`
+takes a normalized CDF.
 
 ```python
-from iminuit.cost import ExtendedBinnedNLL
-import numpy as np
+from iminuit.cost import ExtendedBinnedNLL, BinnedNLL
 from scipy.stats import norm, expon
 
 def integral(xe, n_sig, mu, sigma, n_bkg, tau):
-    # scaled CDF: integral from -inf to xe for each component
     return n_sig * norm.cdf(xe, mu, sigma) + n_bkg * expon.cdf(xe, 0, tau)
 
 n, xe = np.histogram(data, bins=40, range=(100, 150))
@@ -104,16 +101,8 @@ m = Minuit(cost, n_sig=400, mu=125, sigma=2, n_bkg=100, tau=10)
 m.limits["n_sig", "n_bkg", "sigma", "tau"] = (0, None)
 m.migrad()
 m.hesse()
-```
 
-### Binned NLL (shape-only, normalized CDF)
-
-`BinnedNLL` requires a normalized CDF (not a PDF), evaluated at bin edges.
-
-```python
-from iminuit.cost import BinnedNLL
-from scipy.stats import norm
-
+# BinnedNLL: pass a normalized CDF instead
 def cdf(xe, mu, sigma):
     return norm.cdf(xe, mu, sigma)
 
@@ -124,10 +113,10 @@ m.migrad()
 m.hesse()
 ```
 
-### Extended unbinned NLL
+### ExtendedUnbinnedNLL
 
-`ExtendedUnbinnedNLL` model returns `(total_yield, pdf_values)` — the only cost
-function whose model returns a tuple.
+Model returns `(total_yield, density_per_point)` — the only cost function whose
+callable returns a tuple.
 
 ```python
 from iminuit.cost import ExtendedUnbinnedNLL
@@ -135,12 +124,12 @@ from iminuit.cost import ExtendedUnbinnedNLL
 def density(x, n_sig, mu, sigma, n_bkg, tau):
     sig = n_sig * np.exp(-0.5 * ((x - mu) / sigma)**2) / (sigma * np.sqrt(2 * np.pi))
     bkg = n_bkg * np.exp(-x / tau) / tau
-    return n_sig + n_bkg, sig + bkg   # (total yield, density per point)
+    return n_sig + n_bkg, sig + bkg
 
 cost = ExtendedUnbinnedNLL(data, density)
 ```
 
-### Least-squares (chi-squared) fit
+### LeastSquares (chi-squared) fit
 
 ```python
 from iminuit.cost import LeastSquares
@@ -151,72 +140,49 @@ def model(x, a, b):
 x = np.linspace(0, 10, 50)
 ye = np.full_like(x, 0.5)
 y = model(x, 1, 2) + rng.normal(0, 0.5, len(x))
-
 cost = LeastSquares(x, y, ye, model)
 m = Minuit(cost, a=0, b=0)
 m.migrad()
 ```
 
-### Read results and covariance
+### Read results, MINOS, and scanning
 
 ```python
-# After migrad + hesse:
-print(m.valid)          # True if fit converged
-print(m.accurate)       # True if Hesse succeeded
-print(m.values)         # parameter values dict
-print(m.errors)         # symmetric 1σ errors
-print(m.covariance)     # covariance matrix (numpy array)
-print(m.fval)           # minimum value of cost function
-print(m)                # prints parameter table with values, errors, limits
-```
+print(m.valid, m.accurate)   # convergence checks — verify before using results
+print(m.values, m.errors)    # best-fit values and symmetric 1σ uncertainties
+print(m.covariance)          # covariance matrix (numpy array)
+m.visualize()                # plot data vs. fitted model (requires matplotlib)
 
-### MINOS (asymmetric errors, likelihood profiling)
-
-```python
-m.minos()               # run MINOS for all parameters
-m.minos("mu")           # run MINOS for one parameter only (faster)
+m.minos("mu")                # asymmetric profiled errors for one parameter
 print(m.merrors["mu"].lower, m.merrors["mu"].upper)
+
+m.fixed["slope"] = True      # fix a parameter
+m.migrad()                   # refit with it fixed
+x, y, ok = m.mnprofile("mu", size=30, bound=3)  # profile ±3σ
 ```
 
-### Parameter fixing and scanning
+### Template fit and NormalConstraint
+
+`Template` fits histogram data to MC templates, propagating finite MC
+statistics. `t` is shape `(n_templates, n_bins)`; iminuit auto-names parameters
+`x0, x1, …` (accessible via `m.parameters`). Yields are non-negative by
+construction.
 
 ```python
-m.fixed["slope"] = True    # fix slope at current value
-m.migrad()                 # refit with slope fixed
+from iminuit.cost import Template, NormalConstraint
 
-# Scan one parameter (profile)
-x, y, ok = m.mnprofile("mu", size=30, bound=3)  # ±3σ range
-```
-
-### Template fit (MC templates with statistical uncertainty)
-
-`Template` fits histogram data to a sum of MC-derived templates, correctly
-propagating the finite MC statistics into the result. `t` is a 2D array of shape
-`(n_templates, n_bins)`; the fit parameters are one yield per template.
-
-```python
-from iminuit.cost import Template
-import numpy as np
-
-# t[i] = MC histogram for component i (counts, not normalized)
-# n    = observed data histogram
-# xe   = bin edges
-c = Template(n, xe, t)             # default method handles MC uncertainties
-m = Minuit(c, *initial_yields)
-m.limits = (0, None)               # yields must be non-negative
+c = Template(n, xe, t)
+m = Minuit(c, *initial_yields)   # parameters: x0, x1, ...
 m.migrad()
 m.hesse()
 ```
 
-### Adding constraints (`NormalConstraint`)
-
-`NormalConstraint` adds a Gaussian penalty term to any cost function. Combine
-with `+` to constrain nuisance parameters to external measurements.
+`NormalConstraint` adds a Gaussian penalty; combine with `+` to constrain
+nuisance parameters. Cost functions support `+` generally for simultaneous fits.
 
 ```python
 from iminuit.cost import ExtendedBinnedNLL, NormalConstraint
 
-# Constrain mu to 0.5 ± 0.1 and sigma to 0.1 ± 0.1
 c = ExtendedBinnedNLL(n, xe, integral) + NormalConstraint(
     ["mu", "sigma"], [0.5, 0.1], [0.1, 0.1]
 )
@@ -224,53 +190,34 @@ m = Minuit(c, n_sig=400, mu=0.5, sigma=0.1, n_bkg=100, tau=10)
 m.migrad()
 ```
 
-### Combining cost functions
-
-Cost functions can be added together to perform simultaneous fits with shared
-parameters:
-
-```python
-combined = cost1 + cost2
-m = Minuit(combined, **shared_params)
-m.migrad()
-```
-
 ## Gotchas
 
-- **`BinnedNLL` and `ExtendedBinnedNLL` need a CDF, not a PDF**: pass a function
-  returning the cumulative integral at bin edges, not the density at centers.
-  Use `use_pdf="approximate"` if only a PDF is available.
-- **`ExtendedBinnedNLL` model does NOT return a tuple**: unlike
-  `ExtendedUnbinnedNLL`, the integral callable returns a single array; iminuit
-  computes the per-bin expected counts from differences of adjacent values.
-- **Always call `hesse()` after `migrad()`**: `migrad()` computes the Hessian
-  internally, but calling `hesse()` explicitly ensures `m.accurate` is set and
+- **`BinnedNLL` / `ExtendedBinnedNLL` need a CDF, not a PDF**: cumulative
+  integral at bin edges. Use `use_pdf="approximate"` if only a PDF is available.
+- **`ExtendedBinnedNLL` model returns a single array, not a tuple**: unlike
+  `ExtendedUnbinnedNLL`; iminuit differences adjacent edge values for per-bin
+  expected counts.
+- **Always call `hesse()` after `migrad()`**: ensures `m.accurate` is set and
   errors are trustworthy.
-- **MINOS is slow for many parameters**: fix nuisance parameters or call
-  `m.minos("poi")` with the parameter name to run MINOS only on the POI.
+- **MINOS is slow for many parameters**: call `m.minos("poi")` to run only on
+  the parameter of interest.
 - **Initial values matter**: MIGRAD is a local minimizer; bad starting points
-  lead to wrong minima. Scan or grid-search if uncertain.
-- **PDFs must be vectorized**: `iminuit.cost` callables must operate
-  element-wise on arrays, not scalars.
-- **Units**: iminuit has no units — be consistent throughout the cost function.
-- **`m.strategy`**: default is 1; set to 0 for faster convergence when fitting
-  many parameters (>10) — scales linearly instead of quadratically with
-  parameter count. Use 2 only for difficult fits where the Hesse matrix changes
-  rapidly.
-- **Weighted histograms**: pass an array of shape `(n_bins, 2)` instead of
-  `(n_bins,)` as data to `BinnedNLL` or `ExtendedBinnedNLL`, where column 0 is
-  sum-of-weights and column 1 is sum-of-weights-squared (variance estimate per
-  bin).
+  produce wrong minima. Scan or grid-search if uncertain.
+- **PDFs must be vectorized**: callables must operate element-wise on arrays.
+- **`m.strategy`**: 0=fast (scales linearly with parameters, good for >10),
+  1=default, 2=careful. Use 2 only for ill-conditioned Hessians.
+- **Weighted histograms**: pass shape `(n_bins, 2)` as data — column 0 is
+  sum-of-weights, column 1 is sum-of-weights-squared (variance per bin).
 
 ## Interop
 
-- **hist**: Build `hist.Hist` objects for binned fits; `hist.Hist.values()` and
-  `.axes[0].extent` provide arrays for `BinnedNLL` / `ExtendedBinnedNLL`.
-- **pyhf**: For HistFactory-structured analyses use pyhf; use iminuit for custom
-  or unbinned models.
-- **numpy / scipy**: iminuit replaces `scipy.optimize.minimize` for likelihood
-  fits with proper uncertainty estimation. `scipy.stats` provides convenient
-  `cdf` and `pdf` methods compatible with iminuit cost functions.
+- **hist**: `hist.Hist.values()` and `.axes[0].edges` provide the bin-count
+  array and bin-edge array for `BinnedNLL` / `ExtendedBinnedNLL`; use
+  `.axes[0].extent` only for the axis range tuple `(min, max)`.
+- **pyhf**: Use pyhf for HistFactory-structured analyses; iminuit for custom or
+  unbinned models.
+- **numpy / scipy**: `scipy.stats` provides `cdf` / `pdf` methods compatible
+  with iminuit cost functions.
 
 ## Docs
 
