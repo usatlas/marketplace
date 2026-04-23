@@ -174,6 +174,7 @@ print(m)                # prints parameter table with values, errors, limits
 
 ```python
 m.minos()               # run MINOS for all parameters
+m.minos("mu")           # run MINOS for one parameter only (faster)
 print(m.merrors["mu"].lower, m.merrors["mu"].upper)
 ```
 
@@ -245,8 +246,8 @@ m.migrad()
 - **Always call `hesse()` after `migrad()`**: `migrad()` computes the Hessian
   internally, but calling `hesse()` explicitly ensures `m.accurate` is set and
   errors are trustworthy.
-- **MINOS is slow for many parameters**: fix nuisance parameters or restrict
-  `parameters=["poi"]` to run MINOS only on the POI.
+- **MINOS is slow for many parameters**: fix nuisance parameters or call
+  `m.minos("poi")` with the parameter name to run MINOS only on the POI.
 - **Initial values matter**: MIGRAD is a local minimizer; bad starting points
   lead to wrong minima. Scan or grid-search if uncertain.
 - **PDFs must be vectorized**: `iminuit.cost` callables must operate
