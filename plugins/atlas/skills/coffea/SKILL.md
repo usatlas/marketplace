@@ -30,20 +30,21 @@ read with uproot, not the NanoAOD schema layer.
 
 ## Key Concepts
 
-| Concept                                            | Notes                                                                                                                                                      |
-| -------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Processor`                                        | Class with `process(events)` → dict of accumulators                                                                                                        |
-| `hist.Hist`                                        | The standard histogram accumulator inside coffea processors                                                                                                |
-| `NanoEventsFactory`                                | Reads ROOT files into a schema-driven awkward record array with optional behavior mixins                                                                   |
-| `BaseSchema`                                       | Verbatim branch access, no behaviors; correct choice for flat ATLAS NTuples (AnalysisTop, SimpleAnalysis)                                                  |
-| `PHYSLITESchema`                                   | ATLAS DAOD_PHYSLITE derivation; provides Lorentz-vector behaviors on electrons, muons, jets                                                                |
-| `NanoAODSchema`                                    | CMS NanoAOD format; not suited for ATLAS files                                                                                                             |
-| `NtupleSchema`                                     | `atlas-schema` package; best choice for CP algorithm NTuples (TopCPToolkit, EasyJet, AnalysisTop)                                                          |
-| `uproot.dask()`                                    | Produces dask-awkward arrays from ROOT files; feeds a dask executor                                                                                        |
-| `coffea.dataset_tools`                             | Helpers for building file sets and running with dask                                                                                                       |
-| `Runner` / `IterativeExecutor` / `FuturesExecutor` | Current, supported APIs (v2026.x); `Runner` wraps an executor and dispatches a processor over a fileset; `apply_to_fileset` is the dask-native alternative |
-| `weight` / `Weights`                               | `coffea.analysis_tools.Weights` manages multiple scale factor weights                                                                                      |
-| `PackedSelection`                                  | Bitwise selection mask; fast AND/OR over boolean arrays                                                                                                    |
+| Concept                                                             | Notes                                                                                                                                                      |
+| ------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Processor`                                                         | Class with `process(events)` → dict of accumulators                                                                                                        |
+| `hist.Hist`                                                         | The standard histogram accumulator inside coffea processors                                                                                                |
+| `NanoEventsFactory`                                                 | Reads ROOT files into a schema-driven awkward record array with optional behavior mixins                                                                   |
+| `BaseSchema`                                                        | Verbatim branch access, no behaviors; correct choice for flat ATLAS NTuples (AnalysisTop, SimpleAnalysis)                                                  |
+| `PHYSLITESchema`                                                    | ATLAS DAOD_PHYSLITE derivation; provides Lorentz-vector behaviors on electrons, muons, jets                                                                |
+| `NanoAODSchema`                                                     | CMS NanoAOD format; not suited for ATLAS files                                                                                                             |
+| `NtupleSchema`                                                      | `atlas-schema` package; best choice for CP algorithm NTuples (TopCPToolkit, EasyJet, AnalysisTop)                                                          |
+| `uproot.dask()`                                                     | Produces dask-awkward arrays from ROOT files; feeds a dask executor                                                                                        |
+| `coffea.dataset_tools`                                              | Helpers for building file sets and running with dask                                                                                                       |
+| `Runner` / `IterativeExecutor` / `FuturesExecutor` / `DaskExecutor` | `Runner` wraps an executor and dispatches a processor over a fileset; swapping the executor is the only change needed to go from a laptop to a cluster     |
+| `apply_to_fileset`                                                  | Dask-native alternative in `coffea.dataset_tools`; builds a lazy dask graph using `mode="dask"` NanoEvents; requires `hist.dask.Hist` inside the processor |
+| `weight` / `Weights`                                                | `coffea.analysis_tools.Weights` manages multiple scale factor weights                                                                                      |
+| `PackedSelection`                                                   | Bitwise selection mask; fast AND/OR over boolean arrays                                                                                                    |
 
 ## Canonical Patterns
 
@@ -94,23 +95,38 @@ output = run(fileset, treename="reco", processor_instance=JetPtProcessor())
 
 ### Run with dask (scale out)
 
+Connect a `DaskExecutor` to a running `dask.distributed` cluster — the processor
+code is identical to the iterative example; only the executor changes.
+
 ```python
-import uproot, dask
+from dask.distributed import Client
+from coffea.processor import Runner, DaskExecutor
+
+client = Client("tcp://scheduler:8786")   # or Client() for a local cluster
+
+run = Runner(
+    executor=DaskExecutor(client=client),
+    schema=None,
+    savemetrics=True,
+)
+output, metrics = run(fileset, treename="reco", processor_instance=JetPtProcessor())
+```
+
+For a dask-native lazy graph (deferred until `dask.compute()`), use
+`apply_to_fileset` from `coffea.dataset_tools` instead. This path passes
+dask-awkward arrays into `process()`, so histograms must use `hist.dask.Hist`
+rather than `hist.Hist`:
+
+```python
+import dask
 from coffea.dataset_tools import apply_to_fileset, max_chunks, preprocess
 
-# Build preprocessed fileset (checks file accessibility, counts events)
-available_files, _ = preprocess(
-    fileset,
-    step_size=100_000,
-    skip_bad_files=True,
-)
-
+available_files, _ = preprocess(fileset, step_size=100_000, skip_bad_files=True)
 to_compute = apply_to_fileset(
     JetPtProcessor(),
     max_chunks(available_files, 300),
     uproot_options={"allow_read_errors_with_report": True},
 )
-
 output, reports = dask.compute(to_compute)
 ```
 
@@ -154,6 +170,12 @@ cr_mask = sel.all("baseline", "btag") & ~sel.all("met")
 NanoEvents fields are determined at runtime by the schema and the file content —
 there is no static list. Before writing a processor against an unfamiliar file,
 discover its structure interactively:
+
+Three `mode` values exist: `"eager"` (load everything immediately — good for
+interactive exploration), `"virtual"` (load branches on first access, default
+for production use with `Runner`), and `"dask"` (build a dask-awkward graph,
+used internally by `apply_to_fileset`). The examples below use `"eager"` so that
+`events` is immediately usable in a notebook.
 
 ```python
 import awkward as ak
@@ -267,11 +289,15 @@ class SystematicsProcessor(ProcessorABC):
   `events.<collection>.fields` in a notebook before writing a processor to avoid
   `AttributeError` on non-existent branches.
 - **All ATLAS branches are in MeV**: divide by 1000 before GeV histograms.
-- **Two valid execution patterns**: `Runner` +
-  `IterativeExecutor`/`FuturesExecutor` is the processor-based API for
-  synchronous or threaded execution; `apply_to_fileset` + dask is the
-  recommended path for cluster-scale runs. Both are supported in recent versions
-  (v2026.x). Check yours with `import coffea; print(coffea.__version__)`.
+- **Three execution patterns**: `Runner` + `IterativeExecutor`/`FuturesExecutor`
+  is the processor-based API for local execution; `Runner` +
+  `DaskExecutor(client=client)` scales the same processor to a Dask Distributed
+  cluster with zero processor-code changes (uses `mode="virtual"` NanoEvents
+  internally, `hist.Hist` works fine); `apply_to_fileset` from
+  `coffea.dataset_tools` is a dask-native graph alternative but uses
+  `mode="dask"` NanoEvents internally — processors must use `hist.dask.Hist` and
+  `process()` receives dask-awkward arrays rather than materialized ones. Check
+  your version with `import coffea; print(coffea.__version__)`.
 - **`process()` must return a dict or a nested dict**: accumulators are merged
   across chunks by the framework.
 - **`postprocess()` is called once** after all chunks are merged — use it for
