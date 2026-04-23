@@ -40,16 +40,20 @@ needed.
 | `m.covariance`       | Covariance matrix as numpy array                                    |
 | `m.valid`            | True if MIGRAD converged                                            |
 | `m.accurate`         | True if HESSE succeeded and errors are reliable                     |
+| `m.visualize()`      | Plot data vs. fitted model (requires matplotlib)                    |
+| `m.strategy`         | Minimization strategy: 0=fast, 1=default, 2=careful                 |
 
 ### Cost functions (`iminuit.cost`)
 
-| Cost function         | Input model callable            | Use when                               |
-| --------------------- | ------------------------------- | -------------------------------------- |
-| `UnbinnedNLL`         | `pdf(x, *p)` — normalized PDF   | Fitting shape only to unbinned data    |
-| `ExtendedUnbinnedNLL` | `density(x, *p) → (n, pdf)`     | Fitting yield + shape to unbinned data |
-| `BinnedNLL`           | `cdf(xe, *p)` — normalized CDF  | Fitting shape only to a histogram      |
-| `ExtendedBinnedNLL`   | `integral(xe, *p)` — scaled CDF | Fitting yield + shape to a histogram   |
-| `LeastSquares`        | `model(x, *p)` — predicted y    | Chi-squared regression with y-errors   |
+| Cost function         | Input model callable                   | Use when                               |
+| --------------------- | -------------------------------------- | -------------------------------------- |
+| `UnbinnedNLL`         | `pdf(x, *p)` — normalized PDF          | Fitting shape only to unbinned data    |
+| `ExtendedUnbinnedNLL` | `density(x, *p) → (n, pdf)`            | Fitting yield + shape to unbinned data |
+| `BinnedNLL`           | `cdf(xe, *p)` — normalized CDF         | Fitting shape only to a histogram      |
+| `ExtendedBinnedNLL`   | `integral(xe, *p)` — scaled CDF        | Fitting yield + shape to a histogram   |
+| `LeastSquares`        | `model(x, *p)` — predicted y           | Chi-squared regression with y-errors   |
+| `Template`            | `t` array (n_templates × n_bins) of MC | Template fits propagating MC stats     |
+| `NormalConstraint`    | `(names, values, errors)`              | Gaussian penalty on named parameters   |
 
 **Key distinction**: `Extended*` variants fit both shape and normalization
 (yield). `BinnedNLL` and `ExtendedBinnedNLL` require a CDF-like callable
@@ -183,6 +187,42 @@ m.migrad()                 # refit with slope fixed
 x, y, ok = m.mnprofile("mu", size=30, bound=3)  # ±3σ range
 ```
 
+### Template fit (MC templates with statistical uncertainty)
+
+`Template` fits histogram data to a sum of MC-derived templates, correctly
+propagating the finite MC statistics into the result. `t` is a 2D array of shape
+`(n_templates, n_bins)`; the fit parameters are one yield per template.
+
+```python
+from iminuit.cost import Template
+import numpy as np
+
+# t[i] = MC histogram for component i (counts, not normalized)
+# n    = observed data histogram
+# xe   = bin edges
+c = Template(n, xe, t)             # default method handles MC uncertainties
+m = Minuit(c, *initial_yields)
+m.limits = (0, None)               # yields must be non-negative
+m.migrad()
+m.hesse()
+```
+
+### Adding constraints (`NormalConstraint`)
+
+`NormalConstraint` adds a Gaussian penalty term to any cost function. Combine
+with `+` to constrain nuisance parameters to external measurements.
+
+```python
+from iminuit.cost import ExtendedBinnedNLL, NormalConstraint
+
+# Constrain mu to 0.5 ± 0.1 and sigma to 0.1 ± 0.1
+c = ExtendedBinnedNLL(n, xe, integral) + NormalConstraint(
+    ["mu", "sigma"], [0.5, 0.1], [0.1, 0.1]
+)
+m = Minuit(c, n_sig=400, mu=0.5, sigma=0.1, n_bkg=100, tau=10)
+m.migrad()
+```
+
 ### Combining cost functions
 
 Cost functions can be added together to perform simultaneous fits with shared
@@ -212,6 +252,14 @@ m.migrad()
 - **PDFs must be vectorized**: `iminuit.cost` callables must operate
   element-wise on arrays, not scalars.
 - **Units**: iminuit has no units — be consistent throughout the cost function.
+- **`m.strategy`**: default is 1; set to 0 for faster convergence when fitting
+  many parameters (>10) — scales linearly instead of quadratically with
+  parameter count. Use 2 only for difficult fits where the Hesse matrix changes
+  rapidly.
+- **Weighted histograms**: pass an array of shape `(n_bins, 2)` instead of
+  `(n_bins,)` as data to `BinnedNLL` or `ExtendedBinnedNLL`, where column 0 is
+  sum-of-weights and column 1 is sum-of-weights-squared (variance estimate per
+  bin).
 
 ## Interop
 
