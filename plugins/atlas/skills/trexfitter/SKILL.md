@@ -5,8 +5,7 @@ description: >-
   TRExFitter config file, defining regions, samples, systematics, and
   NormFactors, running actions (n/h/w/f/d/p/r/l/s), computing limits or
   significance, diagnosing fit convergence failures, NP pulls or constraints, or
-  exporting workspaces to pyhf. TRExFitter is the standard ROOT-based ATLAS fit
-  framework for top, Higgs, and SM analyses.
+  exporting workspaces to pyhf.
 ---
 
 # TRExFitter
