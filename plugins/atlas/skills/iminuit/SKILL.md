@@ -41,7 +41,7 @@ needed.
 | `m.valid`            | True if MIGRAD converged                                            |
 | `m.accurate`         | True if HESSE succeeded and errors are reliable                     |
 | `m.visualize()`      | Plot data vs. fitted model (requires matplotlib)                    |
-| `m.strategy`         | Minimization strategy: 0=fast, 1=default, 2=careful                 |
+| `m.strategy`         | 0=skip explicit Hesse in Newton steps, 1=default, 2=always explicit |
 
 ### Cost functions (`iminuit.cost`)
 
@@ -199,13 +199,18 @@ m.migrad()
   expected counts.
 - **Always call `hesse()` after `migrad()`**: ensures `m.accurate` is set and
   errors are trustworthy.
-- **MINOS is slow for many parameters**: call `m.minos("poi")` to run only on
-  the parameter of interest.
+- **MINOS runs on all parameters by default**: `m.minos()` computes asymmetric
+  errors for every parameter, including nuisances you may not care about. Pass
+  specific names to limit the work: `m.minos("mu")` or `m.minos("mu", "n_sig")`.
 - **Initial values matter**: MIGRAD is a local minimizer; bad starting points
   produce wrong minima. Scan or grid-search if uncertain.
 - **PDFs must be vectorized**: callables must operate element-wise on arrays.
-- **`m.strategy`**: 0=fast (scales linearly with parameters, good for >10),
-  1=default, 2=careful. Use 2 only for ill-conditioned Hessians.
+- **`m.strategy`**: 0=fast (skips explicit Hesse in Newton steps; prefer for
+  > 10 parameters), 1=default (explicit Hesse when significant correlations are
+  > detected), 2=careful (explicit Hesse every Newton step). Strategy 0 still
+  > maintains a DFP approximation of the Hesse, so scaling is not linear in the
+  > number of parameters — only L-BFGS achieves that. Use 2 only for
+  > ill-conditioned Hessians.
 - **Weighted histograms**: pass shape `(n_bins, 2)` as data — column 0 is
   sum-of-weights, column 1 is sum-of-weights-squared (variance per bin).
 
