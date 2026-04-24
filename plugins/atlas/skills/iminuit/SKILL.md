@@ -206,11 +206,11 @@ m.migrad()
   produce wrong minima. Scan or grid-search if uncertain.
 - **PDFs must be vectorized**: callables must operate element-wise on arrays.
 - **`m.strategy`**: 0=fast (skips explicit Hesse in Newton steps; prefer for
-  > 10 parameters), 1=default (explicit Hesse when significant correlations are
-  > detected), 2=careful (explicit Hesse every Newton step). Strategy 0 still
-  > maintains a DFP approximation of the Hesse, so scaling is not linear in the
-  > number of parameters — only L-BFGS achieves that. Use 2 only for
-  > ill-conditioned Hessians.
+  more than 10 parameters), 1=default (explicit Hesse when significant
+  correlations are detected), 2=careful (explicit Hesse every Newton step).
+  Strategy 0 still maintains a DFP approximation of the Hesse, so scaling is not
+  linear in the number of parameters — only L-BFGS achieves that. Use 2 only for
+  ill-conditioned Hessians.
 - **Weighted histograms**: pass shape `(n_bins, 2)` as data — column 0 is
   sum-of-weights, column 1 is sum-of-weights-squared (variance per bin).
 
