@@ -105,7 +105,7 @@ with uproot.open("output.root:reco") as tree:
     # entry-level cut (Python expression; ATLAS values in MeV)
     arrays = tree.arrays(
         ["jet_pt", "met_met"],
-        cut="n_jets >= 4 && met_met > 200000",
+        cut="n_jets >= 4 & met_met > 200000",
     )
 
     # compute derived quantities at read time
