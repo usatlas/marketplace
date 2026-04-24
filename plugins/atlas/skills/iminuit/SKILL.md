@@ -1,10 +1,9 @@
 ---
 name: iminuit
 description: >-
-  Use when performing a maximum-likelihood or least-squares fit in Python with
-  iminuit: defining a cost function, setting initial parameter values and
-  limits, running MIGRAD or MINOS, reading fit results and covariance, profiling
-  a parameter, or comparing iminuit to pyhf for binned fits.
+  Use when you need to minimize a scalar cost function in Python using MINUIT2
+  via iminuit (e.g., unbinned likelihood fits or least-squares fits), and you
+  need HESSE/MINOS-style uncertainties or custom cost functions.
 ---
 
 # iminuit
