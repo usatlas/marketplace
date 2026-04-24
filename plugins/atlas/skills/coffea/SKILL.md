@@ -2,10 +2,9 @@
 name: coffea
 description: >-
   Use when writing a columnar ATLAS analysis with coffea: defining a NanoEvents
-  or custom processor, running over multiple files with IterativeExecutor or
-  DaskExecutor, accumulating histograms with hist, applying scale factors and
-  systematic weights, or migrating a for-loop event analysis to a coffea
-  processor pattern.
+  or custom processor, running over ROOT files, accumulating histograms with
+  hist, applying scale factors and systematic weights, or migrating a for-loop
+  event analysis to a coffea processor pattern.
 ---
 
 # coffea
