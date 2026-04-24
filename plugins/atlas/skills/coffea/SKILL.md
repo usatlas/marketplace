@@ -77,7 +77,7 @@ class JetPtProcessor(ProcessorABC):
 ### Run iteratively (small datasets / testing)
 
 ```python
-import uproot
+from coffea.nanoevents import BaseSchema
 from coffea.processor import IterativeExecutor, Runner
 
 fileset = {
@@ -85,7 +85,7 @@ fileset = {
     "zjets": {"files": {"ntuples/zjets.root": "reco"}, "metadata": {"dataset": "zjets"}},
 }
 
-run = Runner(executor=IterativeExecutor(), schema=None)
+run = Runner(executor=IterativeExecutor(), schema=BaseSchema)
 output = run(fileset, treename="reco", processor_instance=JetPtProcessor())
 ```
 
@@ -95,20 +95,25 @@ Connect a `DaskExecutor` to a running `dask.distributed` cluster — the process
 code is identical to the iterative example; only the executor changes.
 
 ```python
-from dask.distributed import Client
+from coffea.nanoevents import BaseSchema
 from coffea.processor import Runner, DaskExecutor
+from dask.distributed import Client
 
 client = Client("tcp://scheduler:8786")   # or Client() for a local cluster
 
 run = Runner(
     executor=DaskExecutor(client=client),
-    schema=None,
+    schema=BaseSchema,
     savemetrics=True,
 )
 output, metrics = run(fileset, treename="reco", processor_instance=JetPtProcessor())
 ```
 
 ### Weights and scale factors
+
+`Weights` accumulates per-event weights and propagates systematic variations.
+Each `add()` call multiplies into the total; `weightUp`/`weightDown` register
+named variations (suffixes `Up`/`Down` are appended automatically).
 
 ```python
 from coffea.analysis_tools import Weights
@@ -121,12 +126,30 @@ def process(self, events):
                     weightUp=events["weight_bTagSF_77_up"],
                     weightDown=events["weight_bTagSF_77_dn"])
 
-    # nominal weight
-    total = w.weight()
+    total     = w.weight()            # product of all nominal weights
+    btag_up   = w.weight("btagUp")   # one systematic variation
+    btag_down = w.weight("btagDown")
 
-    # systematic variations
-    btag_up   = w.weight("btag_up")
-    btag_down = w.weight("btag_down")
+    print(w.variations)  # {'btagUp', 'btagDown', ...}
+```
+
+### Object-level systematics
+
+For custom object smearing (e.g. JES/JER when not baked into the NTuple), use
+`add_systematic` on a collection. This is separate from `NtupleSchema`
+systematics, which are already in the file:
+
+```python
+import numpy as np
+
+def jet_pt_scale(pt):
+    # returns shape (n_events, 2) — axis-1 is [up, down]
+    return (1.0 + np.array([0.05, -0.05], dtype="f4")) * pt[:, None]
+
+events.Jet.add_systematic("PtScale", "UpDownSystematic", "pt", jet_pt_scale)
+
+jet_pt_up   = events.Jet.systematics.PtScale.up.pt
+jet_pt_down = events.Jet.systematics.PtScale.down.pt
 ```
 
 ### PackedSelection (fast multi-cut)
@@ -151,14 +174,17 @@ discover its structure interactively:
 
 Two `mode` values are used in ATLAS work:
 
-- `"eager"` — all branches are fully loaded into memory when the factory is
-  called; best for small datasets and interactive exploration
-- `"virtual"` — branches are loaded lazily on first access; an `access_log`
-  tracks which branches were touched; this is the default and what `Runner` uses
-  internally; keeps memory low during processor execution
-
-The examples below use `"eager"` so that `events` is immediately usable in a
-notebook.
+- `"eager"` — all branches are fully loaded into memory at factory creation.
+  **Only use for very small test files** (≲ a few thousand events): a single 1
+  GB ROOT file can expand to several GB of RAM when decompressed and take over a
+  minute to load. The examples below use `"eager"` so results are immediately
+  visible in a notebook cell.
+- `"virtual"` — branches are loaded lazily only when first accessed; this is the
+  default and what `Runner` uses internally. Fine for interactive exploration
+  too — `repr(events)` shows `?` for unloaded fields, but access works normally.
+  Pass `access_log=[]` to track which branches are touched. Call
+  `ak.materialize(events.<field>)` to force-load a specific branch when
+  exploring.
 
 ```python
 import awkward as ak
@@ -322,23 +348,22 @@ class TwoRegionProcessor(ProcessorABC):
 
 ## Troubleshooting
 
-| Issue                                                | Cause                                   | Fix                                                         |
-| ---------------------------------------------------- | --------------------------------------- | ----------------------------------------------------------- |
-| `AttributeError: 'dict' has no attribute 'metadata'` | NanoEventsFactory used with flat NTuple | Use `schema=None` or `BaseSchema`; access branches directly |
-| `KeyError: treename`                                 | Wrong tree name in fileset              | Check with `uproot.open(file).keys()`                       |
-| Histograms don't accumulate across files             | Returning a new `hist.Hist` per chunk   | Use `StrCategory(growth=True)` and rely on `accumulate`     |
-| `None` values after `ak.firsts`                      | Events with zero jets                   | Wrap with `ak.fill_none(arr, default_value)`                |
-| `IterativeExecutor` is slow on many files            | Serial execution                        | Switch to `FuturesExecutor(workers=4)` locally              |
+| Issue                                                | Cause                                   | Fix                                                     |
+| ---------------------------------------------------- | --------------------------------------- | ------------------------------------------------------- |
+| `AttributeError: 'dict' has no attribute 'metadata'` | NanoEventsFactory used with flat NTuple | Use `BaseSchema`; access branches directly              |
+| `KeyError: treename`                                 | Wrong tree name in fileset              | Check with `uproot.open(file).keys()`                   |
+| Histograms don't accumulate across files             | Returning a new `hist.Hist` per chunk   | Use `StrCategory(growth=True)` and rely on `accumulate` |
+| `None` values after `ak.firsts`                      | Events with zero jets                   | Wrap with `ak.fill_none(arr, default_value)`            |
+| `IterativeExecutor` is slow on many files            | Serial execution                        | Switch to `FuturesExecutor(workers=4)` locally          |
 
 ## Gotchas
 
 - **Schema selection matters for ATLAS**: CP algorithm NTuples (TopCPToolkit,
   EasyJet) use `NtupleSchema` from `atlas-schema`; DAOD_PHYSLITE uses
-  `PHYSLITESchema`; other flat NTuples use `BaseSchema`. Setting `schema=None`
-  in `Runner` disables NanoEvents entirely and passes raw uproot arrays.
-  Branches are flat or jagged `vector<float>` under `BaseSchema`, not
-  behavior-augmented — no `.pt`, `.eta` shorthand unless you use
-  `PHYSLITESchema` or `NtupleSchema`.
+  `PHYSLITESchema`; other flat NTuples use `BaseSchema`. Always pass an explicit
+  schema to `Runner` — `schema=None` is not a valid option. Branches are flat or
+  jagged `vector<float>` under `BaseSchema`, not behavior-augmented — no `.pt`,
+  `.eta` shorthand unless you use `PHYSLITESchema` or `NtupleSchema`.
 - **NanoEvents fields are runtime-dynamic**: the available fields depend on the
   schema and the file content. Always call `events.fields` and
   `events.<collection>.fields` in a notebook before writing a processor to avoid
