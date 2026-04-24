@@ -231,10 +231,10 @@ arrays = uproot.concatenate(
 
 ### Write ROOT files
 
-Uproot now writes RNTuples by default. Use `mkrntuple` to write an RNTuple
-(supports any structure representable as an Awkward Array, including jagged and
-nested fields). Use `mktree` to explicitly write a TTree (flat and
-one-level-jagged branches only).
+Uproot now writes RNTuples by default when using the dict-like syntax. Use
+`mkrntuple` to write an RNTuple (supports any structure representable as an
+Awkward Array, including jagged and nested fields). Use `mktree` to explicitly
+write a TTree (flat and one-level-jagged branches only).
 
 ```python
 import uproot, numpy as np, awkward as ak, hist
@@ -247,6 +247,8 @@ with uproot.recreate("output.root") as f:
         "weight_mc": np.ones(n),
     }
     rntuple = f.mkrntuple("reco", data)
+    # or since it is default via dict-like
+    # f["reco"] = data
 
 # Write a TTree (legacy format — flat and one-level-jagged branches only)
 with uproot.recreate("output_ttree.root") as f:
