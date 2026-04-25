@@ -7,15 +7,15 @@ discovery p-values, and CLb values — as seen in ATLAS search papers (e.g. Tabl
 
 ## Columns of a Standard Results Table
 
-| Column                                                 | Meaning                                                           |
-| ------------------------------------------------------ | ----------------------------------------------------------------- |
-| Total Bkg.                                             | Background-only fit yield ± propagated uncertainty                |
-| Data                                                   | Observed event count                                              |
-| ⟨Aεσ⟩\_obs^95 \[fb]                                   | Observed 95% CL upper limit on visible cross-section              |
-| S\_obs^95                                              | Observed 95% CL upper limit on number of signal events            |
-| S\_exp^95                                              | Expected 95% CL upper limit (with ±1σ band)                      |
-| CLb                                                    | Compatibility of observed data with signal hypothesis at μ = μ_95 |
-| p(s=0) (Z)                                             | Discovery p-value and corresponding Gaussian significance         |
+| Column              | Meaning                                                           |
+| ------------------- | ----------------------------------------------------------------- |
+| Total Bkg.          | Background-only fit yield ± propagated uncertainty                |
+| Data                | Observed event count                                              |
+| ⟨Aεσ⟩\_obs^95 \[fb] | Observed 95% CL upper limit on visible cross-section              |
+| S_obs^95            | Observed 95% CL upper limit on number of signal events            |
+| S_exp^95            | Expected 95% CL upper limit (with ±1σ band)                       |
+| CLb                 | Compatibility of observed data with signal hypothesis at μ = μ_95 |
+| p(s=0) (Z)          | Discovery p-value and corresponding Gaussian significance         |
 
 ## Setup
 
@@ -100,7 +100,7 @@ bkg_unc = errors[region_idx]
 print(f"Total Bkg: {bkg:.0f} ± {bkg_unc:.0f}")
 ```
 
-## Upper Limits (S\_obs^95 and S\_exp^95)
+## Upper Limits (S_obs^95 and S_exp^95)
 
 Compute the 95% CL upper limit on the number of signal events using CLs:
 
@@ -152,7 +152,7 @@ Convention: p-value is capped at 0.5 in published tables.
 ## CLb
 
 CLb measures compatibility of the observed data with the signal hypothesis at
-the 95% CL signal strength (μ = μ\_95\_obs). It uses `return_tail_probs=True`:
+the 95% CL signal strength (μ = μ_95_obs). It uses `return_tail_probs=True`:
 
 ```python
 _, (_, CLb) = pyhf.infer.hypotest(
@@ -162,8 +162,8 @@ print(f"CLb: {float(CLb):.2f}")
 ```
 
 A small CLb indicates a downward fluctuation in data relative to the
-signal+background hypothesis — the CLs prescription prevents erroneous
-exclusion in this case by dividing by CLb.
+signal+background hypothesis — the CLs prescription prevents erroneous exclusion
+in this case by dividing by CLb.
 
 ## Assembling the Table
 
@@ -185,8 +185,7 @@ print(
 
 ## Docs
 
-- Tutorial:
-  https://pyhf.github.io/pyhf-tutorial/UpperLimitsTable.html
+- Tutorial: https://pyhf.github.io/pyhf-tutorial/UpperLimitsTable.html
 - CLs prescription: DOI
   [10.1088/0954-3899/28/10/313](https://doi.org/10.1088/0954-3899/28/10/313)
 - ATLAS visible cross-section conventions: ATL-PHYS-PUB-2022-017
