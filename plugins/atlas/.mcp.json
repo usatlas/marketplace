@@ -1,6 +1,7 @@
 {
   "mcpServers": {
     "rucio": {
+      "description": "Dataset and replica discovery",
       "command": "pixi",
       "args": ["exec", "rucio-mcp", "serve", "--read-only"],
       "env": {
@@ -9,10 +10,12 @@
       }
     },
     "ami": {
+      "description": "AMI metadata (cross-sections, tags)",
       "command": "pixi",
       "args": ["exec", "ami-mcp", "serve"]
     },
     "atlasopenmagic": {
+      "description": "ATLAS Open Data catalog",
       "command": "uvx",
       "args": ["atlasopenmagic-mcp", "serve"]
     }

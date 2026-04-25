@@ -18,6 +18,15 @@ Python 3.8+ and offering smaller binary size and faster compile times. In HEP,
 bindings are used to expose ROOT-based code, custom reconstruction algorithms,
 or legacy C++ analysis code to Python without rewriting.
 
+## When to Use
+
+- Exposing a C++ class or function to Python without rewriting it
+- Binding STL containers (`std::vector`, `std::map`) or Eigen arrays to numpy
+- Wrapping ROOT-based reconstruction algorithms or legacy C++ analysis code
+- Choosing between nanobind (faster compile, leaner) and pybind11 (broader
+  ecosystem) for a new project
+- Setting up a CMake build that produces an importable Python extension module
+
 ## Key Concepts
 
 | Feature       | nanobind                             | pybind11            |
