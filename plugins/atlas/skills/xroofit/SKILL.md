@@ -147,8 +147,8 @@ w["pdfs/simPdf/SR/samples/bkg"].coefs().Multiply("mu_bkg", "norm")
 w["pdfs/simPdf"].pars()["alpha_JES"].Constrain("normal")  # adds Gaussian constraint
 
 # Histo (shape+norm) systematic via histograms
-hJESup = ROOT.TH1D("JES=1", ...)   # name must follow convention: parName=value
-hJESdn = ROOT.TH1D("JES=-1", ...)
+hJESup = XRF.TH1D("JES=1", ...)   # name must follow convention: parName=value
+hJESdn = XRF.TH1D("JES=-1", ...)
 w["pdfs/simPdf/SR/samples/bkg"].Vary(hJESup)
 w["pdfs/simPdf/SR/samples/bkg"].Vary(hJESdn)
 
@@ -161,7 +161,7 @@ w["pdfs/simPdf/SR/samples/bkg"].SetBinContent(3, new_val, "alpha_JES", 1)
 ```python
 w = XRF.xRooNode("workspace.root")
 # or
-f = ROOT.TFile("workspace.root")
+f = XRF.TFile("workspace.root")
 ws = f.Get("combined")
 w = XRF.xRooNode(ws)
 ```
@@ -202,7 +202,7 @@ Tune fit hyperparameters:
 
 ```python
 nll = w["pdfs/simPdf"].nll("obsData", [XRF.xRooFit.Tolerance(1),
-                                        ROOT.RooFit.Strategy(2)])
+                                        XRF.RooFit.Strategy(2)])
 # or after construction:
 nll.fitConfig().MinimizerOptions().SetTolerance(1)
 nll.fitConfig().MinimizerOptions().SetStrategy(2)
@@ -245,7 +245,7 @@ hs.scan("pnull", 1, 0, 0)   # single point at mu=0
 print("Observed p0:", hs[0].pNull_asymp())
 print("Expected p0:", hs[0].pNull_asymp(0))
 # convert to significance:
-sig = ROOT.Math.gaussian_quantile_c(hs[0].pNull_asymp().value(), 1)
+sig = XRF.Math.gaussian_quantile_c(hs[0].pNull_asymp().value(), 1)
 ```
 
 ### Goodness of fit
@@ -260,7 +260,7 @@ nll.pgof()           # p-value including constraint term (use for toys only)
 ```python
 totErr  = fr.floatParsFinal().find("mu_sig").getError()
 statErr = fr.conditionalError("mu_sig", "alpha_*,gamma_*", up=True, approx=True)
-systErr = ROOT.TMath.Sqrt(totErr**2 - statErr**2)
+systErr = XRF.TMath.Sqrt(totErr**2 - statErr**2)
 ```
 
 ## Gotchas
