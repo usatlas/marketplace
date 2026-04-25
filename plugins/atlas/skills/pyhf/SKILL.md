@@ -207,6 +207,48 @@ fig, ax = plt.subplots()
 pyhf.contrib.viz.brazil.plot_results(poi_values, results, ax=ax)
 ```
 
+**Toy-based hypothesis test (when asymptotics break down)**:
+
+```python
+CLs_obs, CLs_exp = pyhf.infer.hypotest(
+    1.0, data, model, test_stat="qtilde",
+    return_expected_set=True,
+    calctype="toybased", ntoys=5_000, track_progress=True,
+)
+```
+
+**Combine workspaces (rename to avoid conflicts first)**:
+
+```python
+ws2 = ws.rename(
+    channels={"SR": "SR2"}, modifiers={"JES": "JES2"},
+    measurements={"measurement": "measurement2"},
+)
+combined = pyhf.Workspace.combine(ws, ws2)
+```
+
+**Pull plot (requires minuit for uncertainties)**:
+
+```python
+pyhf.set_backend("numpy", "minuit")
+result = pyhf.infer.mle.fit(data, model, return_uncertainties=True)
+bestfit, errors = result.T
+
+pulls = pyhf.tensorlib.concatenate([
+    (bestfit[model.config.par_slice(k)] - model.config.param_set(k).suggested_init)
+    / model.config.param_set(k).width()
+    for k in model.config.par_order if model.config.param_set(k).constrained
+])
+```
+
+**Download public likelihoods from HEPData**:
+
+```python
+pyhf.contrib.utils.download(
+    "https://doi.org/10.17182/hepdata.116034.v1/r34", "output_dir"
+)
+```
+
 **JAX backend for gradient-based fits**:
 
 ```python
@@ -221,6 +263,9 @@ pyhf json2xml workspace.json --output-dir xml_output/
 pyhf cls workspace.json                    # run CLs limit
 pyhf cls workspace.json --backend jax      # with specific backend
 pyhf inspect workspace.json                # print workspace summary
+pyhf sort workspace.json                   # normalize ordering for digest
+pyhf prune -c CR -s signal workspace.json  # remove channels/samples/modifiers
+pyhf rename -c SR NewSR workspace.json     # rename channels/modifiers
 pyhf patchset apply ws.json patchset.json --name "signal_500_100"
 pyhf digest workspace.json                 # SHA256 digest for reproducibility
 ```
@@ -358,6 +403,13 @@ print(f"Expected: {exp_limits[2]:.2f} (+1σ: {exp_limits[3]:.2f}, −1σ: {exp_l
 - **atlas:iminuit**: HEP-standard optimizer usable as pyhf backend via
   `pyhf.set_backend("numpy", "minuit")`
 
+## References
+
+- **`references/upper-limits-table.md`** — ATLAS model-independent upper limits
+  table workflow: background-only fits with error propagation, CLb, discovery
+  p-values, visible cross-section limits.
+
 ## Docs
 
-https://pyhf.readthedocs.io/en/latest/
+- https://pyhf.readthedocs.io/en/latest/
+- https://pyhf.github.io/pyhf-tutorial/
