@@ -13,8 +13,8 @@ description: >-
 
 ## Overview
 
-xmlAnaWSBuilder constructs RooFit workspaces for statistical analyses using
-XML configuration cards. It specializes in:
+xmlAnaWSBuilder constructs RooFit workspaces for statistical analyses using XML
+configuration cards. It specializes in:
 
 - **1D analytic models** (e.g. H→γγ signal as double-sided Crystal Ball,
   background as polynomial or power-law)
@@ -24,11 +24,11 @@ XML configuration cards. It specializes in:
 The produced workspace follows the standard `RooSimultaneous` + `ModelConfig`
 convention and can be used directly with
 [workspaceCombiner](https://gitlab.cern.ch/atlas_higgs_combination/software/workspaceCombiner)
-and [quickFit](https://gitlab.cern.ch/atlas_higgs_combination/software/quickFit).
+and
+[quickFit](https://gitlab.cern.ch/atlas_higgs_combination/software/quickFit).
 
 xmlAnaWSBuilder is included in the StatAnalysis release. It can also be built
-standalone from:
-https://gitlab.cern.ch/atlas-hgam-sw/xmlAnaWSBuilder
+standalone from: https://gitlab.cern.ch/atlas-hgam-sw/xmlAnaWSBuilder
 
 ## Running XMLReader
 
@@ -41,15 +41,15 @@ XMLReader -x config/top.xml -b 1 -s 0        # binned fit, Minuit2 strategy 0
 XMLReader -x config/top.xml -v               # verbose debug output
 ```
 
-| Option | Description |
-|---|---|
-| `-x` / `--xml` | Top-level XML card path (required) |
-| `-v` / `--verbose` | Print debug info |
-| `-m` / `--minimizerAlgo` | `Minuit2` (default) or `Minuit` |
-| `-s` / `--minimizerStrategy` | 0, 1 (default), or 2 |
-| `-t` / `--minimizerTolerance` | Default 1e-3 |
-| `-b` / `--binned` | Fit to binned (pseudo-binned) dataset |
-| `-o` / `--plotOption` | Plot options (e.g. `logy`, `rebin10`) |
+| Option                        | Description                           |
+| ----------------------------- | ------------------------------------- |
+| `-x` / `--xml`                | Top-level XML card path (required)    |
+| `-v` / `--verbose`            | Print debug info                      |
+| `-m` / `--minimizerAlgo`      | `Minuit2` (default) or `Minuit`       |
+| `-s` / `--minimizerStrategy`  | 0, 1 (default), or 2                  |
+| `-t` / `--minimizerTolerance` | Default 1e-3                          |
+| `-b` / `--binned`             | Fit to binned (pseudo-binned) dataset |
+| `-o` / `--plotOption`         | Plot options (e.g. `logy`, `rebin10`) |
 
 ## Three-Level XML Structure
 
@@ -83,23 +83,23 @@ top-level card (.xml)
 </Combination>
 ```
 
-For blinded analysis set `Blind="true"` and add `BlindRange` to each `Data`
-node (see [Blinded Analysis](#blinded-analysis)).
+For blinded analysis set `Blind="true"` and add `BlindRange` to each `Data` node
+(see [Blinded Analysis](#blinded-analysis)).
 
 ### Asimov action keywords
 
-| Keyword | Meaning |
-|---|---|
-| `fit` | Maximum likelihood fit |
-| `genasimov` | Generate Asimov dataset (once per line) |
-| `savesnapshot` | Save parameter snapshot (once per line) |
-| `matchglob` | Match global observables to NP values; always pair with `reset` |
-| `reset` | Reset to state before current action list |
-| `raw` | Reset to state before any actions |
-| `fixsyst` | Fix all constrained NPs |
-| `fixall` | Fix all NPs |
-| `float` | Float NPs fixed by `fixsyst` or `Setup` |
-| `<snapshot name>` | Load a saved snapshot |
+| Keyword           | Meaning                                                         |
+| ----------------- | --------------------------------------------------------------- |
+| `fit`             | Maximum likelihood fit                                          |
+| `genasimov`       | Generate Asimov dataset (once per line)                         |
+| `savesnapshot`    | Save parameter snapshot (once per line)                         |
+| `matchglob`       | Match global observables to NP values; always pair with `reset` |
+| `reset`           | Reset to state before current action list                       |
+| `raw`             | Reset to state before any actions                               |
+| `fixsyst`         | Fix all constrained NPs                                         |
+| `fixall`          | Fix all NPs                                                     |
+| `float`           | Float NPs fixed by `fixsyst` or `Setup`                         |
+| `<snapshot name>` | Load a saved snapshot                                           |
 
 ## Category-Level Card
 
@@ -135,55 +135,55 @@ node (see [Blinded Analysis](#blinded-analysis)).
 
 ### Data node attributes
 
-| Attribute | Description |
-|---|---|
-| `InputFile` | Data file path (text, ROOT ntuple, or histogram) |
-| `FileType` | `ascii` (default), `root`, or `histogram` |
-| `TreeName` | TTree name (ROOT ntuple only) |
-| `VarName` | Branch name (ROOT ntuple only) |
-| `HistName` | Histogram name (histogram mode only) |
-| `Observable` | `name:[lo,hi]` — name and range of observable |
-| `Binning` | Number of bins for Asimov and pseudo-binned dataset |
+| Attribute     | Description                                           |
+| ------------- | ----------------------------------------------------- |
+| `InputFile`   | Data file path (text, ROOT ntuple, or histogram)      |
+| `FileType`    | `ascii` (default), `root`, or `histogram`             |
+| `TreeName`    | TTree name (ROOT ntuple only)                         |
+| `VarName`     | Branch name (ROOT ntuple only)                        |
+| `HistName`    | Histogram name (histogram mode only)                  |
+| `Observable`  | `name:[lo,hi]` — name and range of observable         |
+| `Binning`     | Number of bins for Asimov and pseudo-binned dataset   |
 | `InjectGhost` | `true`: inject weight-1e-9 ghost events per empty bin |
-| `NumData` | Number of observed events (counting experiments only) |
-| `BlindRange` | Range to veto, e.g. `120,130` |
+| `NumData`     | Number of observed events (counting experiments only) |
+| `BlindRange`  | Range to veto, e.g. `120,130`                         |
 
 Choose fine enough `Binning` — typically 10× smaller than detector resolution.
 The pseudo-binned dataset introduces bias if bins are too coarse.
 
 ### Systematic node attributes
 
-| Attribute | Description |
-|---|---|
-| `Name` | Nuisance parameter name (same name = correlated across categories) |
-| `Constr` | Constraint type: `gaus`, `logn`, `asym`, `dfd` |
-| `CentralValue` | Nominal response value (usually `1`; use `0` for additive) |
-| `Mag` | Uncertainty magnitude; for `asym`: `upper,lower` |
-| `WhereTo` | `yield` (auto-applied) or `shape` (user must place `response::`) |
-| `Process` | Group name for routing to specific samples via `ImportSyst` |
+| Attribute      | Description                                                        |
+| -------------- | ------------------------------------------------------------------ |
+| `Name`         | Nuisance parameter name (same name = correlated across categories) |
+| `Constr`       | Constraint type: `gaus`, `logn`, `asym`, `dfd`                     |
+| `CentralValue` | Nominal response value (usually `1`; use `0` for additive)         |
+| `Mag`          | Uncertainty magnitude; for `asym`: `upper,lower`                   |
+| `WhereTo`      | `yield` (auto-applied) or `shape` (user must place `response::`)   |
+| `Process`      | Group name for routing to specific samples via `ImportSyst`        |
 
 **Constraint types and response functions:**
 
-| Type | Response function |
-|---|---|
-| `gaus` | `CentralValue + NP × Mag` |
-| `logn` | `(1 + Mag/CentralValue)^NP` |
+| Type   | Response function                                              |
+| ------ | -------------------------------------------------------------- |
+| `gaus` | `CentralValue + NP × Mag`                                      |
+| `logn` | `(1 + Mag/CentralValue)^NP`                                    |
 | `asym` | Polynomial interp within ±1σ, log-normal extrapolation outside |
-| `dfd` | Double-Fermi-Dirac box (for ill-defined uncertainties) |
+| `dfd`  | Double-Fermi-Dirac box (for ill-defined uncertainties)         |
 
 Signs in `Mag` matter — always follow the sign convention of the upstream tool.
 For `asym`, only the sign of the upper uncertainty is used.
 
 ### Sample node attributes
 
-| Attribute | Description |
-|---|---|
-| `Name` | Process name (unique within category) |
-| `InputFile` | Path to pdf-level XML card |
-| `ImportSyst` | Comma-separated common systematic groups; `:common:` = all ungrouped; `:self:` = none |
-| `MultiplyLumi` | Whether to multiply `Lumi` to yield |
-| `SharePdf` | All processes with the same value share a single PDF |
-| `Norm`, `XSection`, `BR`, etc. | Pre-defined constant scale factors on yield |
+| Attribute                      | Description                                                                           |
+| ------------------------------ | ------------------------------------------------------------------------------------- |
+| `Name`                         | Process name (unique within category)                                                 |
+| `InputFile`                    | Path to pdf-level XML card                                                            |
+| `ImportSyst`                   | Comma-separated common systematic groups; `:common:` = all ungrouped; `:self:` = none |
+| `MultiplyLumi`                 | Whether to multiply `Lumi` to yield                                                   |
+| `SharePdf`                     | All processes with the same value share a single PDF                                  |
+| `Norm`, `XSection`, `BR`, etc. | Pre-defined constant scale factors on yield                                           |
 
 ### NormFactor and ShapeFactor
 
@@ -217,16 +217,16 @@ Keep observable name consistent with HistFactory when importing external PDFs.
 
 ## XML Keywords
 
-| Keyword | Meaning |
-|---|---|
-| `response::<NP>` | Response function for NP (in same domain) |
-| `:category:` | Replaced by current category name |
-| `:observable:` | Observable name of current category |
-| `:process:` | Name of current Sample |
-| `:common:` | All ungrouped common systematics |
-| `:self:` | Only process-specific systematics; suppresses `:common:` |
-| `:lt:` `:le:` `:gt:` `:ge:` | `<` `<=` `>` `>=` (XML-safe math symbols) |
-| `:and:` `:or:` | Logic operators for ntuple cuts |
+| Keyword                     | Meaning                                                  |
+| --------------------------- | -------------------------------------------------------- |
+| `response::<NP>`            | Response function for NP (in same domain)                |
+| `:category:`                | Replaced by current category name                        |
+| `:observable:`              | Observable name of current category                      |
+| `:process:`                 | Name of current Sample                                   |
+| `:common:`                  | All ungrouped common systematics                         |
+| `:self:`                    | Only process-specific systematics; suppresses `:common:` |
+| `:lt:` `:le:` `:gt:` `:ge:` | `<` `<=` `>` `>=` (XML-safe math symbols)                |
+| `:and:` `:or:`              | Logic operators for ntuple cuts                          |
 
 `RooFormulaVar` must use indexed syntax `@0, @1, ...` — never variable names
 (renaming during workspace creation breaks name-based references).
@@ -265,16 +265,15 @@ Remove `SBLo` or `SBHi` if the blinded range touches the observable boundary.
 
 ## Gotchas
 
-- **`AnaWSBuilder.dtd` location**: must be in every folder containing XML
-  cards — copy or symlink (`ln -s`) from the xmlAnaWSBuilder repo `dtd/`
-  directory.
+- **`AnaWSBuilder.dtd` location**: must be in every folder containing XML cards
+  — copy or symlink (`ln -s`) from the xmlAnaWSBuilder repo `dtd/` directory.
 - **Fine binning is critical**: pseudo-binned and Asimov datasets are biased
   when bins are coarse; use ~10× finer than detector resolution.
 - **Indexed proxies in formulas**: `RooFormulaVar` must use `@0, @1, ...`
   because variables are renamed during workspace construction.
-- **`matchglob` + `reset`**: always call `reset` at the end of any action
-  list containing `matchglob`, otherwise global observable values are altered
-  in the final workspace.
+- **`matchglob` + `reset`**: always call `reset` at the end of any action list
+  containing `matchglob`, otherwise global observable values are altered in the
+  final workspace.
 - **ResponseFunction custom class**: all workspaces produced by xmlAnaWSBuilder
   contain the `ResponseFunction` class (available in `RooFitExtensions`);
   downstream tools must have `RooFitExtensions` on `LD_LIBRARY_PATH`.

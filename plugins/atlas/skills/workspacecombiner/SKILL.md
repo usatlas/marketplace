@@ -15,12 +15,12 @@ workspaceCombiner is an XML-driven tool for combining, editing, and debugging
 RooFit workspaces. Widely used in ATLAS and LHC combination efforts since the
 Higgs boson discovery, it provides four main operations:
 
-| Operation | Flag | Description |
-|---|---|---|
-| `combine` | `-w combine` | Combine multiple input workspaces into one |
-| `edit` | `-w edit` | Modify PDFs, NPs, POIs in an existing workspace |
+| Operation       | Flag                  | Description                                              |
+| --------------- | --------------------- | -------------------------------------------------------- |
+| `combine`       | `-w combine`          | Combine multiple input workspaces into one               |
+| `edit`          | `-w edit`             | Modify PDFs, NPs, POIs in an existing workspace          |
 | `split`/`print` | `-w split`/`-w print` | Print workspace contents; extract a subset of categories |
-| `regulate` | `-w regulate` | Rebuild workspace PDFs with standardized structure |
+| `regulate`      | `-w regulate`         | Rebuild workspace PDFs with standardized structure       |
 
 For statistical tests on a combined workspace, use
 [quickFit](https://gitlab.cern.ch/atlas_higgs_combination/software/quickFit).
@@ -28,7 +28,8 @@ For statistical tests on a combined workspace, use
 workspaceCombiner is included in the StatAnalysis release (available after
 `asetup StatAnalysis,0.7,latest`).
 
-Repository: https://gitlab.cern.ch/atlas_higgs_combination/software/workspaceCombiner/
+Repository:
+https://gitlab.cern.ch/atlas_higgs_combination/software/workspaceCombiner/
 
 ## Prerequisites for Input Workspaces
 
@@ -45,8 +46,8 @@ Input workspaces must satisfy the following requirements:
   that correctly identifies observables, POIs, NPs, and global observables.
 - **Constraint PDFs**: Implement as normal (Gaussian, unit sigma, zero mean)
   PDFs where possible; multiply them to the S+B PDF.
-- **Observable uniqueness**: Each observable must have a unique name across
-  the entire combination: `(observable)_(category)_(analysis)` convention
+- **Observable uniqueness**: Each observable must have a unique name across the
+  entire combination: `(observable)_(category)_(analysis)` convention
   recommended.
 - **RooFormulaVar**: Use indexed syntax (`@0+@1`) not variable names; renaming
   breaks name-based formulas.
@@ -68,8 +69,8 @@ manager -w split -f ws.root --wsName combWS --dataName obsData -i all
 manager -w regulate -f ws.root --wsName combWS --dataName obsData
 ```
 
-Split output always uses `combWS`/`ModelConfig`/`combData` as fixed names.
-Add `--rebuildPdf 1` to rebuild per-category PDFs. Add `--rebin N` to convert
+Split output always uses `combWS`/`ModelConfig`/`combData` as fixed names. Add
+`--rebuildPdf 1` to rebuild per-category PDFs. Add `--rebin N` to convert
 unbinned datasets to binned with N bins.
 
 ## Workspace Editing
@@ -112,18 +113,18 @@ manager -w edit -x modify.xml
 
 ### Asimov action keywords
 
-| Keyword | Meaning |
-|---|---|
-| `fit` | Perform maximum likelihood fit |
-| `genasimov` | Generate Asimov dataset (once per action list) |
-| `savesnapshot` | Save snapshot (once per action list) |
-| `matchglob` | Match global observables to NP values; always pair with `reset` |
-| `reset` | Reset parameters to state before current action list |
-| `raw` | Reset to state before any actions |
-| `fixsyst` | Fix all constrained NPs |
-| `fixall` | Fix all NPs |
-| `float` | Float NPs fixed by `fixsyst` or `Setup` |
-| `<snapshot name>` | Load a named snapshot |
+| Keyword           | Meaning                                                         |
+| ----------------- | --------------------------------------------------------------- |
+| `fit`             | Perform maximum likelihood fit                                  |
+| `genasimov`       | Generate Asimov dataset (once per action list)                  |
+| `savesnapshot`    | Save snapshot (once per action list)                            |
+| `matchglob`       | Match global observables to NP values; always pair with `reset` |
+| `reset`           | Reset parameters to state before current action list            |
+| `raw`             | Reset to state before any actions                               |
+| `fixsyst`         | Fix all constrained NPs                                         |
+| `fixall`          | Fix all NPs                                                     |
+| `float`           | Float NPs fixed by `fixsyst` or `Setup`                         |
+| `<snapshot name>` | Load a named snapshot                                           |
 
 Parameter `Setup` syntax: `param=value` to fix; `param=start_low_high` to float.
 
@@ -197,10 +198,10 @@ listed but absent in the workspace are silently skipped.
 
 ## Gotchas
 
-- **`Combination.dtd` / `Organization.dtd`**: must be in the same folder as
-  the XML card, not just the working directory.
-- **One-to-one POI list**: the `Input` POI list in each `Channel` must have
-  the same length as the `Combined` list; use `dummy` as placeholder.
+- **`Combination.dtd` / `Organization.dtd`**: must be in the same folder as the
+  XML card, not just the working directory.
+- **One-to-one POI list**: the `Input` POI list in each `Channel` must have the
+  same length as the `Combined` list; use `dummy` as placeholder.
 - **Cross-channel NP correlation**: achieved only through matching `NewName` in
   renaming maps; never by identical `OldName`.
 - **Custom RooFit classes**: workspaces using classes outside vanilla ROOT

@@ -62,30 +62,30 @@ quickFit --EvalBackend=cuda -f ws.root -d dataset -p mu=1_-5_5
 
 ### Parameter syntax (`-p`)
 
-| Form | Meaning |
-|---|---|
-| `mu=1_-5_5` | Float `mu` with initial value 1, range [−5, 5] |
-| `mu=2` | Fix `mu` at 2 |
-| `mu_ggH=1_-5_5,mu_VBF=1_-5_5` | Multiple params, comma-separated |
+| Form                          | Meaning                                        |
+| ----------------------------- | ---------------------------------------------- |
+| `mu=1_-5_5`                   | Float `mu` with initial value 1, range [−5, 5] |
+| `mu=2`                        | Fix `mu` at 2                                  |
+| `mu_ggH=1_-5_5,mu_VBF=1_-5_5` | Multiple params, comma-separated               |
 
 ### Key quickFit options
 
-| Option | Description |
-|---|---|
-| `-f` | Input workspace ROOT file |
-| `-w` | Workspace name (default: `combWS`) |
-| `-m` | ModelConfig name (default: `ModelConfig`) |
-| `-d` | Dataset name to fit |
-| `-p` | POI/parameter configuration |
-| `-n` | Fix NPs matching pattern |
-| `-o` | Output ROOT file |
-| `--savefitresult` | 0 = NLL only, 1 = full RooFitResult |
-| `--hesse` | Run HESSE after MIGRAD (1=yes) |
-| `--minos` | Run MINOS (1=yes) |
-| `--useModularL` | Enable modular likelihood evaluation |
-| `--numCPU` | Number of cores for parallel evaluation |
-| `--EvalBackend` | Evaluation backend (`cpu`, `cuda`, etc.) |
-| `--minTolerance` | Minimizer tolerance |
+| Option            | Description                               |
+| ----------------- | ----------------------------------------- |
+| `-f`              | Input workspace ROOT file                 |
+| `-w`              | Workspace name (default: `combWS`)        |
+| `-m`              | ModelConfig name (default: `ModelConfig`) |
+| `-d`              | Dataset name to fit                       |
+| `-p`              | POI/parameter configuration               |
+| `-n`              | Fix NPs matching pattern                  |
+| `-o`              | Output ROOT file                          |
+| `--savefitresult` | 0 = NLL only, 1 = full RooFitResult       |
+| `--hesse`         | Run HESSE after MIGRAD (1=yes)            |
+| `--minos`         | Run MINOS (1=yes)                         |
+| `--useModularL`   | Enable modular likelihood evaluation      |
+| `--numCPU`        | Number of cores for parallel evaluation   |
+| `--EvalBackend`   | Evaluation backend (`cpu`, `cuda`, etc.)  |
+| `--minTolerance`  | Minimizer tolerance                       |
 
 ## quickAsimov — Generating Asimov Datasets
 
@@ -112,17 +112,17 @@ quickAsimov -x card.xml -w combWS -m ModelConfig -d obsData
 
 ### Action keywords (colon-separated in `Action` attribute)
 
-| Keyword | Meaning |
-|---|---|
-| `fit` | Perform maximum likelihood fit |
-| `genasimov` | Generate Asimov dataset (once per action list) |
-| `savesnapshot` | Save parameter snapshot (once per action list) |
-| `matchglob` | Match global observables to NP values (use with `reset`) |
-| `reset` | Reset parameters to state before current action list |
-| `raw` | Reset to state before any actions |
-| `fixsyst` | Fix all constrained NPs |
-| `float` | Float NPs fixed by `fixsyst` or `Setup` |
-| `<snapshot name>` | Load a saved snapshot |
+| Keyword           | Meaning                                                  |
+| ----------------- | -------------------------------------------------------- |
+| `fit`             | Perform maximum likelihood fit                           |
+| `genasimov`       | Generate Asimov dataset (once per action list)           |
+| `savesnapshot`    | Save parameter snapshot (once per action list)           |
+| `matchglob`       | Match global observables to NP values (use with `reset`) |
+| `reset`           | Reset parameters to state before current action list     |
+| `raw`             | Reset to state before any actions                        |
+| `fixsyst`         | Fix all constrained NPs                                  |
+| `float`           | Float NPs fixed by `fixsyst` or `Setup`                  |
+| `<snapshot name>` | Load a saved snapshot                                    |
 
 ## quickLimit — Asymptotic CLs Limits
 
@@ -155,8 +155,8 @@ Converts an unbinned dataset to a pseudo-binned one for faster fitting:
 quickRebin -f output.root -d toyData -o output_binned.root -r 500
 ```
 
-Creates `toyDatabinned` in the output file with 500 bins. Categories where
-the number of entries is less than the bin count remain unbinned.
+Creates `toyDatabinned` in the output file with 500 bins. Categories where the
+number of entries is less than the bin count remain unbinned.
 
 ## quickPull — NP Pull to a POI
 
@@ -173,10 +173,10 @@ quickPull -f ws.root -w combWS -d combData \
 - **Custom classes**: If the workspace uses custom RooFit classes (from
   `RooFitExtensions` or local code), ensure `LD_LIBRARY_PATH` includes the
   library directory before opening the workspace, or the program will crash.
-- **`matchglob` requires `reset`**: Always pair `matchglob` with `reset` at
-  the end of the same action list to restore global observable values.
-- **`genasimov` once per action list**: Including it more than once causes
-  an error.
+- **`matchglob` requires `reset`**: Always pair `matchglob` with `reset` at the
+  end of the same action list to restore global observable values.
+- **`genasimov` once per action list**: Including it more than once causes an
+  error.
 - **Workspace name defaults**: All tools default to `combWS`/`ModelConfig`;
   specify `-w` and `-m` explicitly if names differ.
 - **ROOT ≥ 6.18 required**: Older ROOT versions are not supported.
