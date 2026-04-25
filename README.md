@@ -81,7 +81,7 @@ software orientation.
 | `panda`                 | Submitting ATLAS grid jobs with prun or pathena, monitoring tasks with pbook or |
 | `particle`              | Looking up particle properties (mass, charge, PDG ID, lifetime, width) from the |
 | `pyhepmc`               | Reading or writing HepMC3 event records in Python                               |
-| `pyhf`                  | Building or running a HistFactory statistical model in Python                   |
+| `pyhf`                  | HistFactory and python statistical modeling, profile-likelihood fits, CLs       |
 | `pyhs3`                 | Reading, writing, or validating binned and/or unbinned statistical models in    |
 | `pylhe`                 | Reading Les Houches Event (LHE) files in Python                                 |
 | `quickfit`              | Fitting a RooWorkspace dataset with quickFit, generating an Asimov dataset with |
