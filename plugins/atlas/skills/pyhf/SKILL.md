@@ -1,7 +1,7 @@
 ---
 name: pyhf
 description: >-
-  Use when HistFactory and python statistical modeling, profile-likelihood fits,
+  Use when you need HistFactory statistical modeling, profile-likelihood fits,
   CLs limits, or workspace manipulation in Python.
 ---
 
