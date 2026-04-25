@@ -252,7 +252,7 @@ AI-accessible interfaces to ATLAS data services — no CLI invocation needed.
 | Server           | Tool                                    | Auth required                              | Notes                        |
 | ---------------- | --------------------------------------- | ------------------------------------------ | ---------------------------- |
 | `rucio`          | `pixi exec rucio-mcp serve --read-only` | `RUCIO_ACCOUNT` env var + valid VOMS proxy | Read-only Rucio data catalog |
-| `ami`            | `pixi exec ami-mcp serve`               | none                                       | ATLAS metadata (AMI) queries |
+| `ami`            | `pixi exec ami-mcp serve`               | `~/.globus` certs + valid VOMS proxy       | ATLAS metadata (AMI) queries |
 | `atlasopenmagic` | `uvx atlasopenmagic-mcp serve`          | none                                       | ATLAS open data queries      |
 
 Required environment for the `rucio` server:
