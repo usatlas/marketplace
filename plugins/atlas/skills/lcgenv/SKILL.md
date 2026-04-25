@@ -15,14 +15,14 @@ description: >-
 `lcgenv` and `views` are two mechanisms for setting up software from the LCG
 (CERN SFT) stack distributed via CVMFS. `lcgenv` provides fine-grained control,
 allowing individual packages and their dependencies to be configured from a
-specific LCG release. `views` provides a coarse-grained alternative that sets
-up an entire LCG release at once. Both are accessed via `lsetup` after running
+specific LCG release. `views` provides a coarse-grained alternative that sets up
+an entire LCG release at once. Both are accessed via `lsetup` after running
 `setupATLAS`.
 
 ## When to Use
 
-- Setting up a specific Python, HEP, or math library from an LCG release
-  without loading a full ATLAS release
+- Setting up a specific Python, HEP, or math library from an LCG release without
+  loading a full ATLAS release
 - Listing available LCG releases, platforms, and packages
 - Setting up multiple LCG packages with compatible versions from the same
   release
@@ -40,12 +40,12 @@ for specific platforms and distributed via `/cvmfs/sft.cern.ch`.
 
 **lcgenv vs views**:
 
-| Aspect      | lcgenv                          | views                          |
-| ----------- | ------------------------------- | ------------------------------ |
-| Granularity | Individual packages             | Entire LCG release             |
-| Speed       | Slower (resolves dependencies)  | Faster (single setup)          |
-| Flexibility | Pick only what you need         | All-or-nothing                 |
-| Use case    | Minimal environment, mixing     | Full LCG stack needed          |
+| Aspect      | lcgenv                         | views                 |
+| ----------- | ------------------------------ | --------------------- |
+| Granularity | Individual packages            | Entire LCG release    |
+| Speed       | Slower (resolves dependencies) | Faster (single setup) |
+| Flexibility | Pick only what you need        | All-or-nothing        |
+| Use case    | Minimal environment, mixing    | Full LCG stack needed |
 
 ## Canonical Patterns
 
@@ -115,19 +115,19 @@ specified release in one command.
 lsetup "lcgenv -p LCG_104 x86_64-el9-gcc13-opt" | grep -i boost
 ```
 
-The output lists all available packages with their versions; grep to find
-a specific one.
+The output lists all available packages with their versions; grep to find a
+specific one.
 
 ### Common packages available via lcgenv
 
-| Package       | Description                            |
-| ------------- | -------------------------------------- |
-| `pyanalysis`  | Python analysis stack (numpy, etc.)    |
-| `pygraphics`  | Plotting libraries (matplotlib, etc.)  |
-| `Boost`       | Boost C++ libraries                    |
-| `eigen`       | Eigen linear algebra library           |
-| `hdf5`        | HDF5 data format library               |
-| `fftw`        | Fast Fourier Transform library         |
+| Package      | Description                           |
+| ------------ | ------------------------------------- |
+| `pyanalysis` | Python analysis stack (numpy, etc.)   |
+| `pygraphics` | Plotting libraries (matplotlib, etc.) |
+| `Boost`      | Boost C++ libraries                   |
+| `eigen`      | Eigen linear algebra library          |
+| `hdf5`       | HDF5 data format library              |
+| `fftw`       | Fast Fourier Transform library        |
 
 ## Gotchas
 

@@ -31,8 +31,8 @@ catch regressions before releases are tagged.
 ATLAS projects (Athena, AthSimulation, AthGeneration, etc.). Failures block
 release tagging until resolved.
 
-**Per-package tests**: Tests are organized by package. Each package maintains its
-own test scripts in the `test/` directory under the package source tree.
+**Per-package tests**: Tests are organized by package. Each package maintains
+its own test scripts in the `test/` directory under the package source tree.
 
 **Test artifacts**: ART archives output files (histograms, log files, metadata)
 from each test run for comparison across nightlies. These artifacts enable
@@ -40,11 +40,11 @@ regression detection and performance monitoring.
 
 **Test types**:
 
-| Type      | Description                                        |
-| --------- | -------------------------------------------------- |
-| Grid      | Tests that run on the grid (batch-style, no TTY)   |
-| Build     | Tests that run during the build/CI phase           |
-| Unit      | Fast unit tests for individual components          |
+| Type  | Description                                      |
+| ----- | ------------------------------------------------ |
+| Grid  | Tests that run on the grid (batch-style, no TTY) |
+| Build | Tests that run during the build/CI phase         |
+| Unit  | Fast unit tests for individual components        |
 
 ## Canonical Patterns
 
@@ -120,16 +120,16 @@ sys.exit(test_config())
 
 Test scripts use special comment headers to declare metadata:
 
-| Directive           | Purpose                                    |
-| ------------------- | ------------------------------------------ |
-| `art-description`   | Human-readable test description            |
-| `art-type`          | Test category: `grid`, `build`, or `unit`  |
-| `art-input`         | Input dataset name (for grid tests)        |
-| `art-output`        | Output files to archive as artifacts       |
-| `art-input-nfiles`  | Number of input files to process           |
-| `art-cores`         | Number of CPU cores to request             |
-| `art-memory`        | Memory limit in MB                         |
-| `art-athena-mt`     | Number of AthenaMT threads                 |
+| Directive          | Purpose                                   |
+| ------------------ | ----------------------------------------- |
+| `art-description`  | Human-readable test description           |
+| `art-type`         | Test category: `grid`, `build`, or `unit` |
+| `art-input`        | Input dataset name (for grid tests)       |
+| `art-output`       | Output files to archive as artifacts      |
+| `art-input-nfiles` | Number of input files to process          |
+| `art-cores`        | Number of CPU cores to request            |
+| `art-memory`       | Memory limit in MB                        |
+| `art-athena-mt`    | Number of AthenaMT threads                |
 
 ### Checking Results on the Dashboard
 
@@ -156,15 +156,15 @@ and download test artifacts. Filter by project, branch, package, or test name.
 
 - **setupATLAS / asetup**: ART requires a configured ATLAS release — see the
   setupatlas skill for environment setup.
-- **acm**: `acm test MyPackage` runs CTest-registered tests for a package,
-  which may include ART tests — see the acm skill.
+- **acm**: `acm test MyPackage` runs CTest-registered tests for a package, which
+  may include ART tests — see the acm skill.
 - **Athena transforms**: Grid-type ART tests typically invoke Athena transforms
   (`Reco_tf.py`, `Sim_tf.py`, `Derivation_tf.py`) as their workflow.
 
-| Domain                        | Contact                          |
-| ----------------------------- | -------------------------------- |
-| ART framework and dashboard   | hn-atlas-offlineSWHelp@cern.ch   |
-| Release validation            | hn-atlas-offlineSWHelp@cern.ch   |
+| Domain                      | Contact                        |
+| --------------------------- | ------------------------------ |
+| ART framework and dashboard | hn-atlas-offlineSWHelp@cern.ch |
+| Release validation          | hn-atlas-offlineSWHelp@cern.ch |
 
 ## Docs
 

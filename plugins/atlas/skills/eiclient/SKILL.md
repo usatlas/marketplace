@@ -26,13 +26,13 @@ stages, from RAW through ESD, AOD, and DAOD.
 
 ## Key Concepts
 
-| Concept         | Notes                                                        |
-| --------------- | ------------------------------------------------------------ |
-| Event Index     | Central catalog of all ATLAS events across processing stages |
-| Event lookup    | Find datasets containing a specific run + event number       |
-| Event picking   | Given a list of run/event pairs, find matching datasets      |
-| Provenance      | Trace an event through RAW → ESD → AOD → DAOD chain         |
-| Run/event pair  | Events are uniquely identified by (run number, event number) |
+| Concept        | Notes                                                        |
+| -------------- | ------------------------------------------------------------ |
+| Event Index    | Central catalog of all ATLAS events across processing stages |
+| Event lookup   | Find datasets containing a specific run + event number       |
+| Event picking  | Given a list of run/event pairs, find matching datasets      |
+| Provenance     | Trace an event through RAW → ESD → AOD → DAOD chain          |
+| Run/event pair | Events are uniquely identified by (run number, event number) |
 
 ## Canonical Patterns
 
@@ -95,9 +95,8 @@ final derivation.
   be slow — batch queries when possible.
 - **Indexing lag**: Not all processing steps are indexed immediately after
   production — recently produced datasets may have incomplete provenance.
-- **All ATLAS energy/momentum values are in MeV**: The Event Index itself
-  stores metadata, not kinematics, but downstream datasets follow ATLAS
-  conventions.
+- **All ATLAS energy/momentum values are in MeV**: The Event Index itself stores
+  metadata, not kinematics, but downstream datasets follow ATLAS conventions.
 
 ## Interop
 
@@ -116,5 +115,4 @@ Contact: See ATLAS Computing documentation
 
 https://twiki.cern.ch/twiki/bin/view/AtlasComputing/EventIndex
 
-Tutorial:
-https://twiki.cern.ch/twiki/bin/view/AtlasComputing/EventIndexPicking
+Tutorial: https://twiki.cern.ch/twiki/bin/view/AtlasComputing/EventIndexPicking

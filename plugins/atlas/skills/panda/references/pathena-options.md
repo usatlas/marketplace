@@ -29,81 +29,81 @@ pathena --trf "Transform_trf.py arg1=%IN arg2=%OUT.suffix" --inDS inputDS --outD
 
 ## Input/Output Options
 
-| Option           | Description                                                      |
-| ---------------- | ---------------------------------------------------------------- |
-| `--inDS`         | Input dataset (Rucio name); PanDA splits files across jobs       |
-| `--outDS`        | Output dataset; must match `user.<account>.<tag>`                |
-| `--destSE`       | Destination RSE for output storage                               |
-| `--secondaryDSs` | Secondary input datasets; format: `NAME:nFiles:datasetName/`    |
+| Option           | Description                                                  |
+| ---------------- | ------------------------------------------------------------ |
+| `--inDS`         | Input dataset (Rucio name); PanDA splits files across jobs   |
+| `--outDS`        | Output dataset; must match `user.<account>.<tag>`            |
+| `--destSE`       | Destination RSE for output storage                           |
+| `--secondaryDSs` | Secondary input datasets; format: `NAME:nFiles:datasetName/` |
 
 ## Job Sizing Options
 
-| Option             | Description                                                    |
-| ------------------ | -------------------------------------------------------------- |
-| `--nEventsPerJob`  | Events per job                                                 |
-| `--nFilesPerJob`   | Files per job                                                  |
-| `--nFiles`         | Limit total input files (use for testing before full runs)     |
-| `--nGBPerJob`      | GB per job (alternative to `--nFilesPerJob`)                   |
-| `--split`          | Number of jobs when no input dataset is specified              |
-| `--maxCpuCount`    | Maximum CPU time in seconds                                    |
-| `--maxWalltime`    | Maximum wall clock time in seconds                             |
+| Option            | Description                                                |
+| ----------------- | ---------------------------------------------------------- |
+| `--nEventsPerJob` | Events per job                                             |
+| `--nFilesPerJob`  | Files per job                                              |
+| `--nFiles`        | Limit total input files (use for testing before full runs) |
+| `--nGBPerJob`     | GB per job (alternative to `--nFilesPerJob`)               |
+| `--split`         | Number of jobs when no input dataset is specified          |
+| `--maxCpuCount`   | Maximum CPU time in seconds                                |
+| `--maxWalltime`   | Maximum wall clock time in seconds                         |
 
 ## Build Options
 
-| Option           | Description                                                      |
-| ---------------- | ---------------------------------------------------------------- |
-| `--noBuild`      | Skip build step; 50 MB sandbox limit applies                     |
-| `--noCompile`    | Include source but skip compilation                              |
-| `--extFile`      | Additional files to include in the sandbox                       |
-| `--excludeFile`  | Glob patterns to exclude from the sandbox                        |
+| Option          | Description                                  |
+| --------------- | -------------------------------------------- |
+| `--noBuild`     | Skip build step; 50 MB sandbox limit applies |
+| `--noCompile`   | Include source but skip compilation          |
+| `--extFile`     | Additional files to include in the sandbox   |
+| `--excludeFile` | Glob patterns to exclude from the sandbox    |
 
 ## Site and Resource Options
 
-| Option              | Description                                                    |
-| ------------------- | -------------------------------------------------------------- |
-| `--site`            | Target specific site                                           |
-| `--excludedSite`    | Comma-separated sites to avoid                                 |
-| `--cloud`           | Target cloud (e.g. `US`, `CERN`)                               |
-| `--memory`          | Requested memory in MB                                         |
-| `--nCore`           | Number of CPU cores; routes to multi-core queues               |
-| `--maxDiskCount`    | Maximum disk usage in KB per job                               |
+| Option           | Description                                      |
+| ---------------- | ------------------------------------------------ |
+| `--site`         | Target specific site                             |
+| `--excludedSite` | Comma-separated sites to avoid                   |
+| `--cloud`        | Target cloud (e.g. `US`, `CERN`)                 |
+| `--memory`       | Requested memory in MB                           |
+| `--nCore`        | Number of CPU cores; routes to multi-core queues |
+| `--maxDiskCount` | Maximum disk usage in KB per job                 |
 
 ## Athena-Specific Options
 
-| Option              | Description                                                    |
-| ------------------- | -------------------------------------------------------------- |
-| `--trf`             | Transformation command string (alternative to job options)      |
-| `--CA`              | Enable ComponentAccumulator configuration mode                  |
-| `--athenaTag`       | Override the Athena version tag                                 |
-| `--useAthenaPackages` | Include Athena packages from the work area                   |
+| Option                | Description                                                |
+| --------------------- | ---------------------------------------------------------- |
+| `--trf`               | Transformation command string (alternative to job options) |
+| `--CA`                | Enable ComponentAccumulator configuration mode             |
+| `--athenaTag`         | Override the Athena version tag                            |
+| `--useAthenaPackages` | Include Athena packages from the work area                 |
 
 ## Production Options
 
-| Option              | Description                                                    |
-| ------------------- | -------------------------------------------------------------- |
-| `--official`        | Submit as group production (requires `--voms`)                 |
-| `--voms`            | VOMS role for group production (e.g. `atlas:/atlas/phys-hdbs`) |
+| Option       | Description                                                    |
+| ------------ | -------------------------------------------------------------- |
+| `--official` | Submit as group production (requires `--voms`)                 |
+| `--voms`     | VOMS role for group production (e.g. `atlas:/atlas/phys-hdbs`) |
 
 ## Event Picking
 
-| Option                   | Description                                             |
-| ------------------------ | ------------------------------------------------------- |
-| `--eventPickEvtList`     | Text file with run:event pairs to pick                  |
-| `--eventPickDataType`    | Data type to pick from (e.g. `AOD`, `ESD`)              |
-| `--eventPickStreamName`  | Stream name filter                                      |
+| Option                  | Description                                |
+| ----------------------- | ------------------------------------------ |
+| `--eventPickEvtList`    | Text file with run:event pairs to pick     |
+| `--eventPickDataType`   | Data type to pick from (e.g. `AOD`, `ESD`) |
+| `--eventPickStreamName` | Stream name filter                         |
 
 ## Placeholder Variables
 
 Use inside `--trf` strings. PanDA substitutes at runtime.
 
-| Placeholder      | Resolves to                                                    |
-| ---------------- | -------------------------------------------------------------- |
-| `%IN`            | Comma-separated input file names for this job                  |
-| `%OUT.suffix`    | Output file with given suffix (e.g. `%OUT.NTUP.root`)         |
-| `%MAXEVENTS`     | Maximum events to process in this job                          |
-| `%SKIPEVENTS`    | Number of events to skip (for splitting)                       |
-| `%RNDM:base`     | Random seed derived from `base + jobID`                       |
-| `%CORE_NUMBER`   | Number of allocated cores (use with `--nCore`)                 |
+| Placeholder    | Resolves to                                           |
+| -------------- | ----------------------------------------------------- |
+| `%IN`          | Comma-separated input file names for this job         |
+| `%OUT.suffix`  | Output file with given suffix (e.g. `%OUT.NTUP.root`) |
+| `%MAXEVENTS`   | Maximum events to process in this job                 |
+| `%SKIPEVENTS`  | Number of events to skip (for splitting)              |
+| `%RNDM:base`   | Random seed derived from `base + jobID`               |
+| `%CORE_NUMBER` | Number of allocated cores (use with `--nCore`)        |
 
 ## Examples
 

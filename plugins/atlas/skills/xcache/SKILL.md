@@ -29,10 +29,10 @@ speed.
 
 **Local vs remote proxy**: XCache exposes two proxy endpoints after starting:
 
-| Variable                     | Endpoint                                 | Use case                                     |
-| ---------------------------- | ---------------------------------------- | -------------------------------------------- |
-| `ALRB_XCACHE_PROXY`         | `root://localhost:59560//`               | Same machine as the cache                    |
-| `ALRB_XCACHE_PROXY_REMOTE`  | `root://atlasremote.triumf.ca:59560//`   | Other machines on the same local network     |
+| Variable                   | Endpoint                               | Use case                                 |
+| -------------------------- | -------------------------------------- | ---------------------------------------- |
+| `ALRB_XCACHE_PROXY`        | `root://localhost:59560//`             | Same machine as the cache                |
+| `ALRB_XCACHE_PROXY_REMOTE` | `root://atlasremote.triumf.ca:59560//` | Other machines on the same local network |
 
 **How it works**: Prepend the proxy variable to any `root://` URI. XCache
 intercepts the request, fetches blocks from the remote server, stores them on
@@ -154,8 +154,8 @@ the network.
 
 ## Interop
 
-- **setupATLAS**: `lsetup xcache` requires `setupATLAS` to be sourced first.
-  See the setupatlas skill.
+- **setupATLAS**: `lsetup xcache` requires `setupATLAS` to be sourced first. See
+  the setupatlas skill.
 - **fsspec-xrootd / uproot**: Prepend the xcache proxy to `root://` URIs passed
   to uproot for cached Python access. See the fsspec-xrootd skill.
 - **Rucio**: Use `rucio list-file-replicas` to obtain `root://` PFNs, then

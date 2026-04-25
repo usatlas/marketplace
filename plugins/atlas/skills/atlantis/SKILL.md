@@ -32,7 +32,7 @@ calorimeter deposits, muon hits, and jets across multiple detector views.
 | Y-X projection   | Transverse view (beam axis perpendicular to screen)         |
 | R-Z projection   | Longitudinal view (beam axis horizontal)                    |
 | phi-eta view     | Unrolled detector view in pseudorapidity vs azimuthal angle |
-| Interactive cuts  | Apply pT, eta, or object-type filters directly in the GUI   |
+| Interactive cuts | Apply pT, eta, or object-type filters directly in the GUI   |
 
 ## Canonical Patterns
 

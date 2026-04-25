@@ -2,9 +2,10 @@
 name: acm
 description: >-
   Use when building ATLAS software with acm (AtlasACM): setting up a cmake build
-  environment with acmSetup, compiling packages, cloning or sparse-cloning athena,
-  adding or excluding packages from the build, creating skeleton analysis
-  packages, running ctests, or troubleshooting cmake configuration issues.
+  environment with acmSetup, compiling packages, cloning or sparse-cloning
+  athena, adding or excluding packages from the build, creating skeleton
+  analysis packages, running ctests, or troubleshooting cmake configuration
+  issues.
 ---
 
 # ACM (AtlasACM)
@@ -14,9 +15,8 @@ description: >-
 ACM is the ATLAS cmake/git package management and compilation tool. It wraps
 `asetup` and provides a command-line interface for managing source checkouts,
 cmake builds, and testing on top of an ATLAS release. The two entry points are
-`acmSetup` (configures a release with a source area) and `acm` (build, test,
-and package management commands). ACM becomes available after running
-`setupATLAS`.
+`acmSetup` (configures a release with a source area) and `acm` (build, test, and
+package management commands). ACM becomes available after running `setupATLAS`.
 
 ## When to Use
 
@@ -41,9 +41,9 @@ project/
   run/        # athena job execution
 ```
 
-**acmSetup vs acm**: `acmSetup` initializes (or restores) the build
-environment, linking a release to a source area. `acm` subcommands operate
-within that environment to compile, test, and manage packages.
+**acmSetup vs acm**: `acmSetup` initializes (or restores) the build environment,
+linking a release to a source area. `acm` subcommands operate within that
+environment to compile, test, and manage packages.
 
 **Session persistence**: `acmSetup` saves its configuration. Running `acmSetup`
 with no arguments inside a previously configured build directory re-applies the
@@ -51,11 +51,11 @@ saved environment.
 
 **Environment variables**:
 
-| Variable                   | Purpose                                                |
-| -------------------------- | ------------------------------------------------------ |
-| `SourceArea`               | Path to source code directory                          |
-| `TestArea`                 | Path to build directory                                |
-| `ACM_GITLAB_PATH_PREFIX`   | Git path prefix (default: `https://:@gitlab.cern.ch:8443/`) |
+| Variable                 | Purpose                                                     |
+| ------------------------ | ----------------------------------------------------------- |
+| `SourceArea`             | Path to source code directory                               |
+| `TestArea`               | Path to build directory                                     |
+| `ACM_GITLAB_PATH_PREFIX` | Git path prefix (default: `https://:@gitlab.cern.ch:8443/`) |
 
 ## Canonical Patterns
 

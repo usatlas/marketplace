@@ -40,9 +40,9 @@ This adds the atlasrootstyle macro directory to the ROOT include path.
 
 ### Components
 
-| File              | Purpose                                              |
-| ----------------- | ---------------------------------------------------- |
-| `AtlasStyle.C/h`  | Main style definitions: font, tick marks, margins    |
+| File              | Purpose                                               |
+| ----------------- | ----------------------------------------------------- |
+| `AtlasStyle.C/h`  | Main style definitions: font, tick marks, margins     |
 | `AtlasLabels.C/h` | Functions for placing official ATLAS labels on plots  |
 | `AtlasUtils.C/h`  | Utility functions: text, lines, boxes, marker legends |
 
@@ -61,13 +61,13 @@ This adds the atlasrootstyle macro directory to the ROOT include path.
 
 Label text follows ATLAS publication policy strictly:
 
-| Label text              | Usage                                         |
-| ----------------------- | --------------------------------------------- |
-| `"ATLAS"`               | Approved results in published papers          |
-| `"ATLAS Preliminary"`   | Conference results not yet in a paper         |
-| `"ATLAS Internal"`      | Results not for public distribution           |
-| `"ATLAS Simulation"`    | Simulation-only results (no real data)        |
-| `"ATLAS Work in Progress"` | Early-stage results, not for approval      |
+| Label text                 | Usage                                  |
+| -------------------------- | -------------------------------------- |
+| `"ATLAS"`                  | Approved results in published papers   |
+| `"ATLAS Preliminary"`      | Conference results not yet in a paper  |
+| `"ATLAS Internal"`         | Results not for public distribution    |
+| `"ATLAS Simulation"`       | Simulation-only results (no real data) |
+| `"ATLAS Work in Progress"` | Early-stage results, not for approval  |
 
 ## Canonical Patterns
 
@@ -201,8 +201,8 @@ myText(0.2, 0.78, 1, "#sqrt{s} = 13.6 TeV");
   all defaults.
 - **Use `#include`, not `gROOT->LoadMacro()`** in compiled C++ macros after
   `lsetup astyle` — the macros are on the ROOT include path.
-- **For PyROOT, use `gROOT.LoadMacro()`**: Python cannot use `#include`, so
-  load macros explicitly at runtime.
+- **For PyROOT, use `gROOT.LoadMacro()`**: Python cannot use `#include`, so load
+  macros explicitly at runtime.
 - **NDC coordinates for labels**: `ATLASLabel` and `myText` use Normalized
   Device Coordinates (0–1 range). Typical placement is `x=0.2, y=0.85` for the
   ATLAS label.

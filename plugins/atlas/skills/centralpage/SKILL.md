@@ -26,8 +26,8 @@ dataset metadata.
 
 ## Key Concepts
 
-| Concept                | Notes                                                   |
-| ---------------------- | ------------------------------------------------------- |
+| Concept                | Notes                                                    |
+| ---------------------- | -------------------------------------------------------- |
 | PMG central database   | Authoritative catalog of centrally produced MC samples   |
 | MC campaign            | Production campaign (mc20, mc21, mc23) with fixed config |
 | Cross-section database | PMG-maintained xsec, k-factor, filter efficiency values  |

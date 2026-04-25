@@ -28,18 +28,18 @@ the `panda` lsetup package.
 
 ## Key Concepts
 
-| Concept          | Notes                                                                |
-| ---------------- | -------------------------------------------------------------------- |
-| `prun`           | Submit arbitrary executables (C++, Python, shell) to the grid        |
-| `pathena`        | Submit Athena job options or transformations to the grid              |
-| `pbook`          | Bookkeeping: list, monitor, retry, kill tasks                        |
-| `--outDS`        | Output dataset name; must match `user.<account>.<tag>` naming        |
-| `--inDS`         | Input dataset (Rucio name); PanDA splits into per-job file groups    |
-| `--containerImage` | Run inside a Docker or CVMFS container on the worker node          |
-| `--noBuild`      | Skip build step; use pre-built code or a container image             |
-| BigPanDA         | Web interface at https://bigpanda.cern.ch for monitoring tasks       |
-| Build job        | Compiles user code on the grid before running analysis jobs          |
-| VOMS proxy       | Required authentication; `voms-proxy-init --voms atlas`              |
+| Concept            | Notes                                                             |
+| ------------------ | ----------------------------------------------------------------- |
+| `prun`             | Submit arbitrary executables (C++, Python, shell) to the grid     |
+| `pathena`          | Submit Athena job options or transformations to the grid          |
+| `pbook`            | Bookkeeping: list, monitor, retry, kill tasks                     |
+| `--outDS`          | Output dataset name; must match `user.<account>.<tag>` naming     |
+| `--inDS`           | Input dataset (Rucio name); PanDA splits into per-job file groups |
+| `--containerImage` | Run inside a Docker or CVMFS container on the worker node         |
+| `--noBuild`        | Skip build step; use pre-built code or a container image          |
+| BigPanDA           | Web interface at https://bigpanda.cern.ch for monitoring tasks    |
+| Build job          | Compiles user code on the grid before running analysis jobs       |
+| VOMS proxy         | Required authentication; `voms-proxy-init --voms atlas`           |
 
 ## Canonical Patterns
 
@@ -176,8 +176,8 @@ pbook finish 12345678
 
 ### prun: secondary input datasets
 
-Use `--secondaryDSs` to provide additional input datasets accessible via
-`%IN2`, `%IN3`, etc.
+Use `--secondaryDSs` to provide additional input datasets accessible via `%IN2`,
+`%IN3`, etc.
 
 ```bash
 prun --exec "myanalysis %IN %IN2" \
@@ -187,8 +187,8 @@ prun --exec "myanalysis %IN %IN2" \
      --output output.root
 ```
 
-The format is `NAME:nFilesPerJob:datasetName`. `%IN2` resolves to the files
-from the secondary dataset.
+The format is `NAME:nFilesPerJob:datasetName`. `%IN2` resolves to the files from
+the secondary dataset.
 
 ### prun: merge output
 
@@ -224,8 +224,8 @@ filename.
 - **Placeholder spelling**: `%IN`, `%OUT`, `%RNDM:base` are literal strings
   inside `--exec`; PanDA substitutes them at runtime. Misspelling causes silent
   failures.
-- **Multi-core jobs**: use `--nCore N` with pathena to request multi-core queues;
-  without it, multi-threaded code may be killed for over-consuming CPU.
+- **Multi-core jobs**: use `--nCore N` with pathena to request multi-core
+  queues; without it, multi-threaded code may be killed for over-consuming CPU.
 
 ## Interop
 
@@ -281,16 +281,16 @@ pbook retry <taskID>
 
 ## Troubleshooting
 
-| Error                          | Cause                              | Fix                                                     |
-| ------------------------------ | ---------------------------------- | ------------------------------------------------------- |
-| `sh: line 1: XYZ Killed`      | Exceeded memory limit              | Reduce `--nFilesPerJob` or `--nGBPerJob`                |
-| `lost heartbeat`               | No heartbeat for 6 hours           | Usually recovers on `pbook retry`; transient site issue  |
-| `Looping job killed`           | No output update for 2 hours       | Use `--maxCpuCount` for legitimately long jobs           |
-| `upstream job failed`          | Build job (bexec) failed           | Check build log on BigPanDA; fix compilation errors      |
-| `over_cpu_consumption`         | Multi-threaded exceeding CPU share | Use `--nCore N` to request multi-core queue              |
-| Missing output files           | Output stream not used             | Use `--supStream` to suppress unused output streams      |
-| `�proxy expired` / auth errors | VOMS proxy expired                 | Re-run `voms-proxy-init --voms atlas`                    |
-| `�dataset already exists`      | Reused `--outDS` name              | Change dataset name; append version suffix               |
+| Error                          | Cause                              | Fix                                                       |
+| ------------------------------ | ---------------------------------- | --------------------------------------------------------- |
+| `sh: line 1: XYZ Killed`       | Exceeded memory limit              | Reduce `--nFilesPerJob` or `--nGBPerJob`                  |
+| `lost heartbeat`               | No heartbeat for 6 hours           | Usually recovers on `pbook retry`; transient site issue   |
+| `Looping job killed`           | No output update for 2 hours       | Use `--maxCpuCount` for legitimately long jobs            |
+| `upstream job failed`          | Build job (bexec) failed           | Check build log on BigPanDA; fix compilation errors       |
+| `over_cpu_consumption`         | Multi-threaded exceeding CPU share | Use `--nCore N` to request multi-core queue               |
+| Missing output files           | Output stream not used             | Use `--supStream` to suppress unused output streams       |
+| `�proxy expired` / auth errors | VOMS proxy expired                 | Re-run `voms-proxy-init --voms atlas`                     |
+| `�dataset already exists`      | Reused `--outDS` name              | Change dataset name; append version suffix                |
 | Submission hangs               | Network or PanDA server issue      | Check https://bigpanda.cern.ch; retry after a few minutes |
 
 ## Docs

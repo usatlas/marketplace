@@ -2,30 +2,28 @@
 name: managetier3sw
 description: >-
   Use when installing, updating, or removing ATLAS software on a local Tier-3
-  cluster, laptop, or desktop with manageTier3SW, configuring
-  ATLASLocalRootBase for a non-CVMFS site, running local ATLAS software
-  diagnostics, setting up local post-user scripts, or troubleshooting Tier-3
-  ATLAS software installations.
+  cluster, laptop, or desktop with manageTier3SW, configuring ATLASLocalRootBase
+  for a non-CVMFS site, running local ATLAS software diagnostics, setting up
+  local post-user scripts, or troubleshooting Tier-3 ATLAS software
+  installations.
 ---
 
 # manageTier3SW
 
 ## Overview
 
-manageTier3SW installs, updates, and removes ATLAS software
-(ATLASLocalRootBase, AtlasSetup, PandaClient, ROOT, Rucio, etc.) on laptops,
-desktops, or Tier-3 clusters where CVMFS is not available. It mirrors the CVMFS
-software stack into a local directory managed by a non-privileged account,
-keeping the environment identical to what `setupATLAS` provides on lxplus. If
-CVMFS is available, prefer mounting `/cvmfs/atlas.cern.ch` directly — no local
-install is needed.
+manageTier3SW installs, updates, and removes ATLAS software (ATLASLocalRootBase,
+AtlasSetup, PandaClient, ROOT, Rucio, etc.) on laptops, desktops, or Tier-3
+clusters where CVMFS is not available. It mirrors the CVMFS software stack into
+a local directory managed by a non-privileged account, keeping the environment
+identical to what `setupATLAS` provides on lxplus. If CVMFS is available, prefer
+mounting `/cvmfs/atlas.cern.ch` directly — no local install is needed.
 
 ## When to Use
 
 - Installing ATLAS software locally on a machine without CVMFS
 - Updating or removing ATLAS software versions on a Tier-3 site
-- Configuring local overrides for ALRB (custom post-setup scripts, local
-  config)
+- Configuring local overrides for ALRB (custom post-setup scripts, local config)
 - Running diagnostics to validate a Tier-3 ATLAS software installation
 - Troubleshooting missing RPMs, broken Frontier-squid, or stale tool versions
 
@@ -129,9 +127,9 @@ ls $ATLAS_LOCAL_ROOT_BASE/logDir/installed
 - **Cron job is essential**: Without `updateManageTier3SW.sh` running regularly,
   the installation drifts from the current CVMFS state and accumulates obsolete
   versions.
-- **RPM dependencies**: `checkOS` identifies missing system-level RPMs that ATLAS
-  software requires. Install these with the system package manager (requires root
-  privileges, unlike the ATLAS software itself).
+- **RPM dependencies**: `checkOS` identifies missing system-level RPMs that
+  ATLAS software requires. Install these with the system package manager
+  (requires root privileges, unlike the ATLAS software itself).
 - **Frontier-squid**: `db-fnget` tests the local Frontier-squid proxy used for
   conditions database access. A failed test means conditions data lookups will
   fall back to direct connections or fail entirely.
@@ -139,15 +137,15 @@ ls $ATLAS_LOCAL_ROOT_BASE/logDir/installed
 
 ## Interop
 
-- **setupATLAS**: Once manageTier3SW is installed, `setupATLAS` works identically
-  to CVMFS-based sites — see the setupatlas skill.
+- **setupATLAS**: Once manageTier3SW is installed, `setupATLAS` works
+  identically to CVMFS-based sites — see the setupatlas skill.
 - **CVMFS**: Sites with CVMFS access do not need manageTier3SW; mount
   `/cvmfs/atlas.cern.ch` and source `atlasLocalSetup.sh` directly.
 
-| Domain                   | Contact                                |
-| ------------------------ | -------------------------------------- |
-| Tier-3 software install  | atlas-adc-tier3-managers@cern.ch       |
-| ATLAS software (general) | hn-atlas-offlineSWHelp@cern.ch         |
+| Domain                   | Contact                          |
+| ------------------------ | -------------------------------- |
+| Tier-3 software install  | atlas-adc-tier3-managers@cern.ch |
+| ATLAS software (general) | hn-atlas-offlineSWHelp@cern.ch   |
 
 ## Docs
 

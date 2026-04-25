@@ -20,78 +20,78 @@ prun --exec "command" --outDS user.<account>.<tag> [options]
 
 ## Execution Options
 
-| Option             | Description                                                        |
-| ------------------ | ------------------------------------------------------------------ |
+| Option             | Description                                                         |
+| ------------------ | ------------------------------------------------------------------- |
 | `--exec "cmd"`     | Execution string; supports `%IN`, `%OUT`, `%RNDM:base` placeholders |
-| `--bexec "cmd"`    | Build step command (runs once before analysis jobs, e.g. `make`)   |
-| `--noBuild`        | Skip build step; use for containers or pre-built code              |
-| `--containerImage` | Docker image (`docker://...`) or CVMFS image for the worker node   |
-| `--architecture`   | CPU/GPU spec; append `&nvidia` for GPU (e.g. `'&nvidia'`)         |
+| `--bexec "cmd"`    | Build step command (runs once before analysis jobs, e.g. `make`)    |
+| `--noBuild`        | Skip build step; use for containers or pre-built code               |
+| `--containerImage` | Docker image (`docker://...`) or CVMFS image for the worker node    |
+| `--architecture`   | CPU/GPU spec; append `&nvidia` for GPU (e.g. `'&nvidia'`)           |
 
 ## Input/Output Options
 
-| Option             | Description                                                     |
-| ------------------ | --------------------------------------------------------------- |
-| `--inDS`           | Input dataset (Rucio name); PanDA splits across jobs            |
-| `--outDS`          | Output dataset; must match `user.<account>.<tag>`               |
-| `--output`         | Comma-separated output file names to collect from the worker    |
-| `--secondaryDSs`   | Secondary input datasets; format: `NAME:nFiles:datasetName/`    |
-| `--mergeOutput`    | Merge output files after all jobs complete                      |
-| `--mergeScript`    | Custom merge script; `%OUT` placeholder for merged file name    |
-| `--destSE`         | Destination RSE for output (default: closest to submission site) |
+| Option           | Description                                                      |
+| ---------------- | ---------------------------------------------------------------- |
+| `--inDS`         | Input dataset (Rucio name); PanDA splits across jobs             |
+| `--outDS`        | Output dataset; must match `user.<account>.<tag>`                |
+| `--output`       | Comma-separated output file names to collect from the worker     |
+| `--secondaryDSs` | Secondary input datasets; format: `NAME:nFiles:datasetName/`     |
+| `--mergeOutput`  | Merge output files after all jobs complete                       |
+| `--mergeScript`  | Custom merge script; `%OUT` placeholder for merged file name     |
+| `--destSE`       | Destination RSE for output (default: closest to submission site) |
 
 ## Job Sizing Options
 
-| Option             | Description                                                     |
-| ------------------ | --------------------------------------------------------------- |
-| `--nJobs`          | Number of jobs (when no `--inDS`)                               |
-| `--nFilesPerJob`   | Files per job (with `--inDS`)                                   |
-| `--nGBPerJob`      | GB per job (alternative to `--nFilesPerJob`)                    |
-| `--nEventsPerJob`  | Events per job                                                  |
-| `--nFiles`         | Limit total input files (use for testing)                       |
-| `--maxCpuCount`    | Maximum CPU time in seconds; increase for long jobs             |
-| `--maxWalltime`    | Maximum wall clock time in seconds                              |
+| Option            | Description                                         |
+| ----------------- | --------------------------------------------------- |
+| `--nJobs`         | Number of jobs (when no `--inDS`)                   |
+| `--nFilesPerJob`  | Files per job (with `--inDS`)                       |
+| `--nGBPerJob`     | GB per job (alternative to `--nFilesPerJob`)        |
+| `--nEventsPerJob` | Events per job                                      |
+| `--nFiles`        | Limit total input files (use for testing)           |
+| `--maxCpuCount`   | Maximum CPU time in seconds; increase for long jobs |
+| `--maxWalltime`   | Maximum wall clock time in seconds                  |
 
 ## Site and Resource Options
 
-| Option              | Description                                                    |
-| ------------------- | -------------------------------------------------------------- |
-| `--site`            | Target specific site (e.g. `CERN-PROD`)                        |
-| `--excludedSite`    | Comma-separated sites to avoid                                 |
-| `--cloud`           | Target cloud (e.g. `US`, `CERN`)                               |
-| `--memory`          | Requested memory in MB                                         |
-| `--nCore`           | Number of CPU cores per job                                    |
-| `--maxDiskCount`    | Maximum disk usage in KB per job                               |
+| Option           | Description                             |
+| ---------------- | --------------------------------------- |
+| `--site`         | Target specific site (e.g. `CERN-PROD`) |
+| `--excludedSite` | Comma-separated sites to avoid          |
+| `--cloud`        | Target cloud (e.g. `US`, `CERN`)        |
+| `--memory`       | Requested memory in MB                  |
+| `--nCore`        | Number of CPU cores per job             |
+| `--maxDiskCount` | Maximum disk usage in KB per job        |
 
 ## ROOT and Software Options
 
-| Option              | Description                                                    |
-| ------------------- | -------------------------------------------------------------- |
-| `--rootVer`         | ROOT version; use `recommended` for latest stable              |
-| `--cmtConfig`       | CMT configuration tag                                          |
-| `--useAthenaPackages` | Include Athena packages in the sandbox                       |
+| Option                | Description                                       |
+| --------------------- | ------------------------------------------------- |
+| `--rootVer`           | ROOT version; use `recommended` for latest stable |
+| `--cmtConfig`         | CMT configuration tag                             |
+| `--useAthenaPackages` | Include Athena packages in the sandbox            |
 
 ## Sandbox Options
 
-| Option              | Description                                                    |
-| ------------------- | -------------------------------------------------------------- |
-| `--extFile`         | Additional files to include in the sandbox                     |
-| `--excludeFile`     | Glob patterns of files to exclude from the sandbox             |
-| `--noCompile`       | Do not compile even if `--bexec` is set                        |
+| Option          | Description                                        |
+| --------------- | -------------------------------------------------- |
+| `--extFile`     | Additional files to include in the sandbox         |
+| `--excludeFile` | Glob patterns of files to exclude from the sandbox |
+| `--noCompile`   | Do not compile even if `--bexec` is set            |
 
 ## Placeholder Variables
 
 Use these inside `--exec` strings. PanDA substitutes them at runtime on the
 worker node.
 
-| Placeholder     | Resolves to                                                   |
-| --------------- | ------------------------------------------------------------- |
-| `%IN`           | Comma-separated list of input file names for this job         |
-| `%IN2`, `%IN3`  | Files from secondary datasets (see `--secondaryDSs`)          |
-| `%OUT`          | Output file name in merge step (use with `--mergeScript`)     |
-| `%RNDM:base`    | Random seed derived from `base + jobID`; reproducible per job |
-| `%SKIPEVENTS`   | Number of events to skip (for event-level splitting)          |
-| `%MAXEVENTS`    | Maximum events for this job                                   |
+| Placeholder    | Resolves to                                                   |
+| -------------- | ------------------------------------------------------------- |
+| `%IN`          | Comma-separated list of input file names for this job         |
+| `%IN2`, `%IN3` | Files from secondary datasets (see `--secondaryDSs`)          |
+| `%OUT`         | Output file name in merge step (use with `--mergeScript`)     |
+| `%RNDM:base`   | Random seed derived from `base + jobID`; reproducible per job |
+| `%SKIPEVENTS`  | Number of events to skip (for event-level splitting)          |
+| `%MAXEVENTS`   | Maximum events for this job                                   |
 
 ## Examples
 
