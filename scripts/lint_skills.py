@@ -26,13 +26,13 @@ ROOT = Path(__file__).resolve().parent.parent
 ORDERED_PAIRS: list[tuple[str, str]] = [
     ("Overview", "When to Use"),
     ("When to Use", "Canonical Patterns"),
+    ("Canonical Patterns", "Worked Example"),
     ("Canonical Patterns", "Gotchas"),
     ("Canonical Patterns", "Interop"),
+    ("Worked Example", "Troubleshooting"),
+    ("Troubleshooting", "Gotchas"),
     ("Gotchas", "Interop"),
     ("Interop", "Docs"),
-    ("Worked Example", "Troubleshooting"),
-    ("Interop", "Additional Resources"),
-    ("Additional Resources", "Docs"),
 ]
 
 # Sections that MUST be present in any standard skill.
@@ -40,7 +40,10 @@ ORDERED_PAIRS: list[tuple[str, str]] = [
 REQUIRED_IN_STANDARD_SKILL: list[str] = [
     "Overview",
     "When to Use",
+    "Key Concepts",
     "Canonical Patterns",
+    "Gotchas",
+    "Interop",
     "Docs",
 ]
 
@@ -68,6 +71,13 @@ def _find_index(headings: list[str], name: str) -> int | None:
     return None
 
 
+def _docs_section_content(path: Path) -> str:
+    """Return the text of the ## Docs section (empty string if absent)."""
+    text = path.read_text(encoding="utf-8")
+    m = re.search(r"^## Docs\s*\n(.*?)(?=^## |\Z)", text, re.MULTILINE | re.DOTALL)
+    return m.group(1) if m else ""
+
+
 def check_skill(path: Path) -> list[str]:
     """Return a list of human-readable error strings for this SKILL.md."""
     headings = _section_headings(path)
@@ -91,6 +101,18 @@ def check_skill(path: Path) -> list[str]:
                 f"section order: '## {headings[idx_a]}' (pos {idx_a + 1})"
                 f" must come before '## {headings[idx_b]}' (pos {idx_b + 1})"
             )
+
+    # Docs must be the last top-level section
+    idx_docs = _find_index(headings, "Docs")
+    if idx_docs is not None and idx_docs != len(headings) - 1:
+        errors.append(
+            f"'## Docs' must be the last section (found at pos {idx_docs + 1}"
+            f" of {len(headings)})"
+        )
+
+    # Docs must contain at least one https?:// URL
+    if idx_docs is not None and not re.search(r"https?://", _docs_section_content(path)):
+        errors.append("'## Docs' section contains no URL (https?://)")
 
     return errors
 

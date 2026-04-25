@@ -206,14 +206,14 @@ cmake -DATLAS_BUILD_ROOT=OFF ...    # skip ROOT build (use system ROOT)
 - **setupATLAS**: The entry point to load StatAnalysis on any server with
   `/cvmfs/atlas.cern.ch`; see the setupatlas skill.
 
-## Additional Resources
+## Docs
+
+https://gitlab.cern.ch/atlas/StatAnalysis
+
+### Additional Resources
 
 For detailed content beyond this overview, consult the reference files:
 
 - **`references/statchallenges-guide.md`** — Full implementation workflow
   (writing solvers, comparing toolkits, writing new suites), test pattern
   details, environment variables, available suites
-
-## Docs
-
-https://gitlab.cern.ch/atlas/StatAnalysis

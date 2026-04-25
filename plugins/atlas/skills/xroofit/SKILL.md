@@ -119,13 +119,13 @@ w["pdfs"].Add("simPdf")
 w["pdfs/simPdf"].Add("SR").SetTitle("Signal Region")
 
 # Declare the observable and add a sample from a histogram
-hBkg = ROOT.TH1D("bkg", "Background;m_{T2} [GeV]", 5, 200, 700)
+hBkg = XRF.TH1D("bkg", "Background;m_{T2} [GeV]", 5, 200, 700)
 hBkg.GetXaxis().SetName("mt2")   # observable name
 # ... fill histogram ...
 w["pdfs/simPdf/SR/samples"].Add(hBkg)   # bin errors → automatic MC-stat ShapeSys
 
 # Signal sample
-hSig = ROOT.TH1D("sig", "Signal;m_{T2} [GeV]", 5, 200, 700)
+hSig = XRF.TH1D("sig", "Signal;m_{T2} [GeV]", 5, 200, 700)
 hSig.GetXaxis().SetName("mt2")
 w["pdfs/simPdf/SR/samples"].Add(hSig)
 
@@ -133,7 +133,7 @@ w["pdfs/simPdf/SR/samples"].Add(hSig)
 w["pdfs/simPdf/SR/samples/sig"].coefs().Multiply("mu_sig", "norm")
 
 # Observed data
-hData = ROOT.TH1D("obsData", "Data;m_{T2} [GeV]", 5, 200, 700)
+hData = XRF.TH1D("obsData", "Data;m_{T2} [GeV]", 5, 200, 700)
 # ... fill histogram ...
 hData.SetName("obsData")
 w["pdfs/simPdf/SR"].datasets().Add(hData)
@@ -299,7 +299,11 @@ systErr = ROOT.TMath.Sqrt(totErr**2 - statErr**2)
 - **xRooBrowser**: Interactive ROOT GUI (`ROOT::Experimental::RooBrowser` in
   ROOT 6.28+) for exploring workspaces.
 
-## Additional Resources
+## Docs
+
+https://xroofit.readthedocs.io/
+
+### Additional Resources
 
 For detailed content beyond this overview, consult the reference files:
 
@@ -313,7 +317,3 @@ For detailed content beyond this overview, consult the reference files:
 - **`references/hypothesis-testing.md`** — Test statistic definitions (tmu, qmu,
   qmutilde, q0, u0), full verbose limit-setting example, toy-based limits, limit
   troubleshooting, hypoPoint methods/fits tables, limit-setting checklist
-
-## Docs
-
-https://xroofit.readthedocs.io/

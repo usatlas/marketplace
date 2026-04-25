@@ -264,34 +264,6 @@ with uproot.recreate("hists.root") as f:
     f["h_mass"] = h  # uproot can write hist.Hist directly
 ```
 
-## Gotchas
-
-- **ATLAS energy/momentum values are in MeV**: divide by 1000 before GeV-scale
-  histograms or cuts.
-- **Systematic trees**: TopCPToolkit writes one TTree per systematic variation
-  (e.g. `reco_JES__1up`). You must loop over tree names explicitly — there is no
-  automatic loop.
-- **`ak.to_numpy` fails on None**: filter with `~ak.is_none()` or
-  `ak.fill_none(arr, 0.0)` first.
-- **`tree.arrays()` reads all events by default**: for files with millions of
-  events use `iterate` or `entry_start`/`entry_stop`.
-- **TTree writing is limited**: jagged-array TTrees are restricted to one level
-  of variable-length lists. For richer nested structures, write an RNTuple
-  instead using `file.mkrntuple(...)`.
-
-## Interop
-
-- **awkward**: `tree.arrays()` returns `ak.Array` by default; pass
-  `library="np"` for flat branches.
-- **vector**: `vector.register_awkward()` adds Momentum4D behavior to awkward
-  records named `{pt,eta,phi,mass}`.
-- **hist**: Fill `hist.Hist` objects from uproot arrays; uproot can also write
-  `hist.Hist` objects to ROOT files.
-- **coffea**: `uproot.dask()` produces dask-awkward arrays for coffea
-  NanoAOD-style processors.
-- **fsspec-xrootd**: Mount EOS or grid storage so that uproot `root://` paths
-  work transparently.
-
 ## Worked Example: Full NTuple → histogram pipeline
 
 ```python
@@ -336,6 +308,34 @@ fig.savefig("leading_jet_pt.pdf")
 | Remote file stalls            | XRootD not installed                                       | `pip install uproot[xrootd]` or `fsspec-xrootd`          |
 | `UnicodeDecodeError`          | ROOT string branch with non-UTF8 content                   | Use `branch.array(interpretation=uproot.AsStrings(...))` |
 | `None` values in awkward      | `ak.firsts` returns `None` for empty events                | Use `mask = ~ak.is_none(arr)` before numpy conversion    |
+
+## Gotchas
+
+- **ATLAS energy/momentum values are in MeV**: divide by 1000 before GeV-scale
+  histograms or cuts.
+- **Systematic trees**: TopCPToolkit writes one TTree per systematic variation
+  (e.g. `reco_JES__1up`). You must loop over tree names explicitly — there is no
+  automatic loop.
+- **`ak.to_numpy` fails on None**: filter with `~ak.is_none()` or
+  `ak.fill_none(arr, 0.0)` first.
+- **`tree.arrays()` reads all events by default**: for files with millions of
+  events use `iterate` or `entry_start`/`entry_stop`.
+- **TTree writing is limited**: jagged-array TTrees are restricted to one level
+  of variable-length lists. For richer nested structures, write an RNTuple
+  instead using `file.mkrntuple(...)`.
+
+## Interop
+
+- **awkward**: `tree.arrays()` returns `ak.Array` by default; pass
+  `library="np"` for flat branches.
+- **vector**: `vector.register_awkward()` adds Momentum4D behavior to awkward
+  records named `{pt,eta,phi,mass}`.
+- **hist**: Fill `hist.Hist` objects from uproot arrays; uproot can also write
+  `hist.Hist` objects to ROOT files.
+- **coffea**: `uproot.dask()` produces dask-awkward arrays for coffea
+  NanoAOD-style processors.
+- **fsspec-xrootd**: Mount EOS or grid storage so that uproot `root://` paths
+  work transparently.
 
 ## Docs
 

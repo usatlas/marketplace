@@ -241,6 +241,20 @@ prun --exec "python analysis.py %IN" \
 pbook retry <taskID>
 ```
 
+## Troubleshooting
+
+| Error                         | Cause                              | Fix                                                       |
+| ----------------------------- | ---------------------------------- | --------------------------------------------------------- |
+| `sh: line 1: XYZ Killed`      | Exceeded memory limit              | Reduce `--nFilesPerJob` or `--nGBPerJob`                  |
+| `lost heartbeat`              | No heartbeat for 6 hours           | Usually recovers on `pbook retry`; transient site issue   |
+| `Looping job killed`          | No output update for 2 hours       | Use `--maxCpuCount` for legitimately long jobs            |
+| `upstream job failed`         | Build job (bexec) failed           | Check build log on BigPanDA; fix compilation errors       |
+| `over_cpu_consumption`        | Multi-threaded exceeding CPU share | Use `--nCore N` to request multi-core queue               |
+| Missing output files          | Output stream not used             | Use `--supStream` to suppress unused output streams       |
+| `proxy expired` / auth errors | VOMS proxy expired                 | Re-run `voms-proxy-init --voms atlas`                     |
+| `dataset already exists`      | Reused `--outDS` name              | Change dataset name; append version suffix                |
+| Submission hangs              | Network or PanDA server issue      | Check https://bigpanda.cern.ch; retry after a few minutes |
+
 ## Gotchas
 
 - **VOMS proxy must be valid**: all three tools fail silently or cryptically
@@ -278,20 +292,6 @@ pbook retry <taskID>
 - **ServiceX**: for column-level data extraction without grid jobs, consider
   ServiceX as a lighter alternative to running prun/pathena for simple
   selections.
-
-## Troubleshooting
-
-| Error                          | Cause                              | Fix                                                       |
-| ------------------------------ | ---------------------------------- | --------------------------------------------------------- |
-| `sh: line 1: XYZ Killed`       | Exceeded memory limit              | Reduce `--nFilesPerJob` or `--nGBPerJob`                  |
-| `lost heartbeat`               | No heartbeat for 6 hours           | Usually recovers on `pbook retry`; transient site issue   |
-| `Looping job killed`           | No output update for 2 hours       | Use `--maxCpuCount` for legitimately long jobs            |
-| `upstream job failed`          | Build job (bexec) failed           | Check build log on BigPanDA; fix compilation errors       |
-| `over_cpu_consumption`         | Multi-threaded exceeding CPU share | Use `--nCore N` to request multi-core queue               |
-| Missing output files           | Output stream not used             | Use `--supStream` to suppress unused output streams       |
-| `�proxy expired` / auth errors | VOMS proxy expired                 | Re-run `voms-proxy-init --voms atlas`                     |
-| `�dataset already exists`      | Reused `--outDS` name              | Change dataset name; append version suffix                |
-| Submission hangs               | Network or PanDA server issue      | Check https://bigpanda.cern.ch; retry after a few minutes |
 
 ## Docs
 

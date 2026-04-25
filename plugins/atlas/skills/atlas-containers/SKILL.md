@@ -242,6 +242,21 @@ setupATLAS -c el9 --postsetup "source ~/mysetup.sh"
    python my_analysis.py
    ```
 
+## Troubleshooting
+
+| Symptom                               | Cause                                   | Fix                                                                                |
+| ------------------------------------- | --------------------------------------- | ---------------------------------------------------------------------------------- |
+| `setupATLAS -c` hangs on macOS        | Docker Desktop not running              | Start Docker Desktop, wait for engine ready                                        |
+| `FATAL: container creation failed`    | Apptainer not installed or too old      | Install Apptainer >= 1.0 or use `--swtype docker`                                  |
+| Files missing inside container        | Working dir not under `$HOME` or `$PWD` | Move files to `$HOME` or `$PWD`; add custom mounts with `-o "-v /host:/container"` |
+| `voms-proxy-init` timezone error      | Unpacked container TZ mismatch          | `export TZ=America/Chicago` or use `arcproxy`                                      |
+| X11 apps fail on macOS                | XQuartz not configured                  | Install XQuartz, enable network clients, restart                                   |
+| SSH auth fails inside Docker on macOS | Host SSH agent inaccessible             | Run `ssh-add` inside the container                                                 |
+| `Permission denied` on mounted files  | UID mapping mismatch (rootless Podman)  | Use Apptainer or Docker; or configure Podman UID mapping                           |
+| Container exits immediately with `-r` | Payload script has errors               | Test the script interactively first, check exit codes                              |
+| Hostname-related errors on macOS      | Special characters in computer name     | Change computer name to alphanumeric only in System Settings                       |
+| Java/Atlantis crashes in Singularity  | Known unresolved issue                  | No fix available; use Docker instead                                               |
+
 ## Gotchas
 
 - **macOS: Docker only.** Apptainer, Podman, and Shifter are unsupported on
@@ -270,21 +285,6 @@ setupATLAS -c el9 --postsetup "source ~/mysetup.sh"
 - **Exiting a joined Docker session.** When using `dockerJoin`, exiting kills
   only the joined session, not the original container. But be aware that
   processes started in the joined session terminate on exit.
-
-## Troubleshooting
-
-| Symptom                               | Cause                                   | Fix                                                                                |
-| ------------------------------------- | --------------------------------------- | ---------------------------------------------------------------------------------- |
-| `setupATLAS -c` hangs on macOS        | Docker Desktop not running              | Start Docker Desktop, wait for engine ready                                        |
-| `FATAL: container creation failed`    | Apptainer not installed or too old      | Install Apptainer >= 1.0 or use `--swtype docker`                                  |
-| Files missing inside container        | Working dir not under `$HOME` or `$PWD` | Move files to `$HOME` or `$PWD`; add custom mounts with `-o "-v /host:/container"` |
-| `voms-proxy-init` timezone error      | Unpacked container TZ mismatch          | `export TZ=America/Chicago` or use `arcproxy`                                      |
-| X11 apps fail on macOS                | XQuartz not configured                  | Install XQuartz, enable network clients, restart                                   |
-| SSH auth fails inside Docker on macOS | Host SSH agent inaccessible             | Run `ssh-add` inside the container                                                 |
-| `Permission denied` on mounted files  | UID mapping mismatch (rootless Podman)  | Use Apptainer or Docker; or configure Podman UID mapping                           |
-| Container exits immediately with `-r` | Payload script has errors               | Test the script interactively first, check exit codes                              |
-| Hostname-related errors on macOS      | Special characters in computer name     | Change computer name to alphanumeric only in System Settings                       |
-| Java/Atlantis crashes in Singularity  | Known unresolved issue                  | No fix available; use Docker instead                                               |
 
 ## Interop
 
