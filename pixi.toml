@@ -7,7 +7,7 @@ version = "0.1.0"
 
 [tasks]
 pre-commit = { cmd = "pre-commit run --all-files", description = "Run pre-commit hooks on all files" }
-sync-skills = { cmd = "python scripts/sync_skills.py && pre-commit run --all-files", description = "Sync README with current plugins/skills and reformat" }
+sync-skills = { cmd = "python scripts/sync_skills.py", description = "Sync README with current plugins/skills and reformat" }
 lint-skills = { cmd = "python scripts/lint_skills.py", description = "Check SKILL.md section ordering" }
 check-skills = { cmd = "(pre-commit run -a || true) && git diff --exit-code", depends-on = [ "lint-skills", "sync-skills" ], description = "CI: lint skills and verify README is up to date" }
 
