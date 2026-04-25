@@ -244,6 +244,29 @@ ami list datasets --project mc20_13TeV --type EVNT "*Ztautau*"
 
 Contact: atlas-bookkeeping@cern.ch
 
+### MCP Servers (atlas plugin)
+
+The atlas plugin ships `.mcp.json` with three MCP servers that give Claude
+AI-accessible interfaces to ATLAS data services — no CLI invocation needed.
+
+| Server           | Tool                                    | Auth required                              | Notes                        |
+| ---------------- | --------------------------------------- | ------------------------------------------ | ---------------------------- |
+| `rucio`          | `pixi exec rucio-mcp serve --read-only` | `RUCIO_ACCOUNT` env var + valid VOMS proxy | Read-only Rucio data catalog |
+| `ami`            | `pixi exec ami-mcp serve`               | none                                       | ATLAS metadata (AMI) queries |
+| `atlasopenmagic` | `uvx atlasopenmagic-mcp serve`          | none                                       | ATLAS open data queries      |
+
+Required environment for the `rucio` server:
+
+```bash
+export RUCIO_ACCOUNT=yourusername          # required, no default
+export RUCIO_AUTH_TYPE=x509_proxy          # default; alternatives: oidc, userpass
+voms-proxy-init --voms atlas               # valid proxy required
+```
+
+These servers are installed automatically when the atlas plugin is installed.
+Users with the atlas plugin active can ask Claude to query Rucio datasets, look
+up AMI dataset metadata, or explore ATLAS open data directly in conversation.
+
 ### Utility Commands
 
 ```bash
@@ -288,6 +311,10 @@ helpMe                  # extended help with all tool documentation
 - **ATLAS analysis facilities**: setupATLAS is pre-configured on CERN lxplus,
   ATLAS AF-US, AF-UK, and SWAN; tier-3 sites that mount `/cvmfs/atlas.cern.ch`
   work identically.
+- **MCP servers**: The atlas plugin's `.mcp.json` provides `rucio-mcp` (Rucio
+  data catalog, read-only), `ami-mcp` (ATLAS metadata / AMI), and
+  `atlasopenmagic-mcp` (ATLAS open data) as AI-accessible MCP servers — see the
+  MCP Servers canonical pattern above for setup details.
 
 | Domain                                        | Mailing list                        |
 | --------------------------------------------- | ----------------------------------- |
