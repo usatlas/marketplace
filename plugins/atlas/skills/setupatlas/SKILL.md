@@ -298,12 +298,12 @@ helpMe                  # extended help with all tool documentation
 | Atlantis event display                        | hn-atlas-AtlantisDisplay@cern.ch    |
 | AMI bookkeeping                               | atlas-bookkeeping@cern.ch           |
 
-## Additional Resources
+## Docs
+
+https://twiki.atlas-canada.ca/bin/view/AtlasCanada/ATLASLocalRootBase2
+
+### Reference Files
 
 - **`references/asetup.md`** — Complete asetup option reference, configuration
   file format, environment variables, saved session workflow, and platform
   string syntax.
-
-## Docs
-
-https://twiki.atlas-canada.ca/bin/view/AtlasCanada/ATLASLocalRootBase2

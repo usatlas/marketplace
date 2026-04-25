@@ -31,34 +31,6 @@ also distributed as part of the ATLAS
 - Choosing ROOT/RooFit-based statistics over pyhf when C++ performance, custom
   RooFit classes, or direct RooStats infrastructure access is required
 
-## Setup
-
-```python
-# Option 1 — StatAnalysis (recommended for ATLAS users)
-# In the shell:
-#   setupATLAS && asetup StatAnalysis,0.7,latest
-import ROOT as XRF               # xRooFit built on top of ROOT
-
-# Option 2 — ROOT's bundled version (≥ 6.30)
-import ROOT
-from ROOT.Experimental import XRooFit as XRF
-```
-
-Using `import ROOT as XRF` (option 1) is the recommended form in the xRooFit
-docs and is used in all examples below. Methods that are specific to the
-built-in version would use `XRF.xRooFit.<method>` in both options.
-
-### Standalone build (if not using StatAnalysis)
-
-```bash
-git clone https://:@gitlab.cern.ch:8443/will/xroofit.git
-cmake -S xroofit -B xroofit_build && cmake --build xroofit_build
-source xroofit_build/setup.sh   # add to PATH each session
-```
-
-Requires ROOT ≥ 6.32 (6.38+ recommended). The StatAnalysis 0.7 branch provides
-ROOT 6.38 on EL9.
-
 ## Key Concepts
 
 ### xRooNode
@@ -103,6 +75,34 @@ w.floats().Print()                                   # list floating pars
 ```
 
 ## Canonical Patterns
+
+### Setup
+
+```python
+# Option 1 — StatAnalysis (recommended for ATLAS users)
+# In the shell:
+#   setupATLAS && asetup StatAnalysis,0.7,latest
+import ROOT as XRF               # xRooFit built on top of ROOT
+
+# Option 2 — ROOT's bundled version (≥ 6.30)
+import ROOT
+from ROOT.Experimental import XRooFit as XRF
+```
+
+Using `import ROOT as XRF` (option 1) is the recommended form in the xRooFit
+docs and is used in all examples below. Methods that are specific to the
+built-in version would use `XRF.xRooFit.<method>` in both options.
+
+#### Standalone build (if not using StatAnalysis)
+
+```bash
+git clone https://:@gitlab.cern.ch:8443/will/xroofit.git
+cmake -S xroofit -B xroofit_build && cmake --build xroofit_build
+source xroofit_build/setup.sh   # add to PATH each session
+```
+
+Requires ROOT ≥ 6.32 (6.38+ recommended). The StatAnalysis 0.7 branch provides
+ROOT 6.38 on EL9.
 
 ### Building a workspace from scratch
 

@@ -31,9 +31,24 @@ workspaceCombiner is included in the StatAnalysis release (available after
 Repository:
 https://gitlab.cern.ch/atlas_higgs_combination/software/workspaceCombiner/
 
-## Prerequisites for Input Workspaces
+## When to Use
 
-Input workspaces must satisfy the following requirements:
+- Combining multiple single-channel workspaces into a joint likelihood for an
+  ATLAS combination (Higgs coupling, cross-section measurement, etc.)
+- Editing an existing workspace to reparameterize POIs, rename or remove NPs, or
+  fix systematic sign conventions without remaking it from scratch
+- Printing a workspace summary (categories, POIs, datasets) or splitting a
+  subset of categories out for debugging
+- Regulating a workspace to standardize PDF structure or strip unused constraint
+  terms before passing it to downstream fitting tools
+- Preparing NP renaming maps to correlate or decorrelate systematics across
+  input channels
+
+## Key Concepts
+
+### Prerequisites for Input Workspaces
+
+Input workspaces must satisfy the following requirements before combination:
 
 - **Fit model**: Use
   [`RooSimultaneous`](https://root.cern.ch/doc/master/classRooSimultaneous.html)
@@ -50,9 +65,48 @@ Input workspaces must satisfy the following requirements:
   entire combination: `(observable)_(category)_(analysis)` convention
   recommended.
 - **RooFormulaVar**: Use indexed syntax (`@0+@1`) not variable names; renaming
-  breaks name-based formulas.
+  during combination breaks name-based formulas.
 
-## Workspace Printing and Splitting
+### NP Types
+
+| NP type              | Renaming map syntax        | Notes                           |
+| -------------------- | -------------------------- | ------------------------------- |
+| Gaussian-constrained | `OldName="pdf(NP, GO)"`    | Unit-sigma normal constraint    |
+| Unconstrained (free) | `OldName="np_name"`        | Background shape parameters     |
+| MC-stat (`gamma_*`)  | `OldName="gamma_stat_..."` | Never correlate across channels |
+
+### DTD Files
+
+Two DTD files are required alongside XML cards:
+
+- `Combination.dtd` — for `combine` operations
+- `Organization.dtd` — for `edit` operations
+
+Copy or symlink (`ln -s`) the relevant DTD into every directory containing XML
+cards.
+
+### Asimov Action Keywords
+
+Shared by both `combine` and `edit` XML cards (colon-separated in `Action`):
+
+| Keyword           | Meaning                                                         |
+| ----------------- | --------------------------------------------------------------- |
+| `fit`             | Maximum likelihood fit                                          |
+| `genasimov`       | Generate Asimov dataset (once per action list)                  |
+| `savesnapshot`    | Save parameter snapshot (once per action list)                  |
+| `matchglob`       | Match global observables to NP values; always pair with `reset` |
+| `reset`           | Reset parameters to state before current action list            |
+| `raw`             | Reset to state before any actions                               |
+| `fixsyst`         | Fix all constrained NPs                                         |
+| `fixall`          | Fix all NPs                                                     |
+| `float`           | Float NPs fixed by `fixsyst` or `Setup`                         |
+| `<snapshot name>` | Load a named snapshot                                           |
+
+Parameter `Setup` syntax: `param=value` to fix; `param=start_low_high` to float.
+
+## Canonical Patterns
+
+### Printing and Splitting a Workspace
 
 ```bash
 # Print workspace summary (categories, POIs, datasets)
@@ -73,15 +127,13 @@ Split output always uses `combWS`/`ModelConfig`/`combData` as fixed names. Add
 `--rebuildPdf 1` to rebuild per-category PDFs. Add `--rebin N` to convert
 unbinned datasets to binned with N bins.
 
-## Workspace Editing
+### Editing a Workspace
 
 Editing modifies parameterization of an existing workspace via an XML card:
 
 ```bash
 manager -w edit -x modify.xml
 ```
-
-### Edit card structure (Organization.dtd)
 
 ```xml
 <!DOCTYPE Organization SYSTEM 'Organization.dtd'>
@@ -109,35 +161,11 @@ manager -w edit -x modify.xml
 </Organization>
 ```
 
-`Organization.dtd` must be present in the same folder as the XML card.
-
-### Asimov action keywords
-
-| Keyword           | Meaning                                                         |
-| ----------------- | --------------------------------------------------------------- |
-| `fit`             | Perform maximum likelihood fit                                  |
-| `genasimov`       | Generate Asimov dataset (once per action list)                  |
-| `savesnapshot`    | Save snapshot (once per action list)                            |
-| `matchglob`       | Match global observables to NP values; always pair with `reset` |
-| `reset`           | Reset parameters to state before current action list            |
-| `raw`             | Reset to state before any actions                               |
-| `fixsyst`         | Fix all constrained NPs                                         |
-| `fixall`          | Fix all NPs                                                     |
-| `float`           | Float NPs fixed by `fixsyst` or `Setup`                         |
-| `<snapshot name>` | Load a named snapshot                                           |
-
-Parameter `Setup` syntax: `param=value` to fix; `param=start_low_high` to float.
-
-## Workspace Combination
-
-Combines multiple input workspaces. Requires `Combination.dtd` in the same
-folder as XML cards.
+### Combining Workspaces
 
 ```bash
 manager -w combine -x combine.xml
 ```
-
-### Combination card structure (Combination.dtd)
 
 ```xml
 <!DOCTYPE Combination SYSTEM 'Combination.dtd'>
@@ -159,25 +187,18 @@ manager -w combine -x combine.xml
     WorkspaceName="combined"
     ModelConfigName="ModelConfig"
     DataName="obsData">
-    <!-- Input POI list must match Combined POIList one-to-one; use "dummy" for missing POIs -->
+    <!-- Input POI list must be one-to-one with Combined list; use "dummy" for missing POIs -->
     <POIList Input="mu,mu_ttH,dummy,dummy"/>
-    <!-- NP renaming map for correlations -->
     <RenameMap InputFile="syst_map/channel_HZZ.xml"/>
-  </Channel>
-
-  <Channel Name="channel_Hyy" ...>
-    ...
   </Channel>
 </Combination>
 ```
 
-Add tag `_binned` to the channel name (e.g. `channel_HZZ_binned`) to enable
-binned fit acceleration for HistFactory workspaces.
+Add `_binned` to the channel name (e.g. `channel_HZZ_binned`) to enable binned
+fit acceleration for HistFactory workspaces. Set `SimplifiedImport="true"` on a
+channel to skip renaming when all objects already have unique names.
 
-Set `SimplifiedImport="true"` on a channel if all objects already have unique
-names — this skips renaming and is faster for large workspaces.
-
-## NP Renaming Maps
+### NP Renaming Maps
 
 The renaming map correlates NPs across input channels. NPs with the same
 `NewName` become correlated in the combination.
@@ -209,6 +230,9 @@ listed but absent in the workspace are silently skipped.
   the workspaceCombiner source (`inc/` + `src/` + `LinkDef.h`).
 - **No intra-channel NP merging**: to correlate two NPs within the same input
   channel, edit the workspace first before combining.
+- **All ATLAS energy/momentum values are in MeV**: workspace observables and
+  histogram axes from ATLAS reconstruction use MeV (1 GeV = 1000 MeV); convert
+  explicitly when comparing with external inputs.
 
 ## Interop
 
@@ -217,8 +241,6 @@ listed but absent in the workspace are silently skipped.
   valid workspaceCombiner inputs.
 - **StatAnalysis**: workspaceCombiner is available after
   `asetup StatAnalysis,0.7,latest`.
-
-## Support
 
 Contact: workspaceCombiner-user@cern.ch
 
