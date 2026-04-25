@@ -6,7 +6,7 @@ description: >-
   with systematic modifiers (normfactor, histosys, normsys, staterror, lumi,
   shapefactor), running a profile likelihood fit, computing CLs exclusion limits
   or discovery significance, patching or combining workspaces with PatchSet,
-  converting between HistFactory XML and pyhf JSON via the CLI, or using pyhf
+  converting between HistFactory XML and HiFa JSON via the CLI, or using pyhf
   simplemodels for quick hypothesis tests.
 ---
 
@@ -29,7 +29,7 @@ significance). It is the preferred fitting framework for new ATLAS analyses.
 - Patching, combining, or reinterpreting HistFactory workspaces
 - Validating a HistFactory XML workspace from TRExFitter/HistFitter
 - Quick hypothesis tests with `pyhf.simplemodels`
-- Converting between HistFactory XML and pyhf JSON via CLI
+- Converting between HistFactory XML and HiFa JSON via CLI
 
 ## Key Concepts
 
