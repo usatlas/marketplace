@@ -221,7 +221,7 @@ hs.Draw()
 import ROOT as XRF
 
 w   = XRF.xRooNode("workspace.root")
-nll = w["simPdf"].nll("obsData")
+nll = w["pdfs/simPdf"].nll("obsData")
 hs  = nll.hypoSpace("mu_sig", XRF.xRooFit.TestStatistic.qmutilde)
 
 hs.scan("cls visualize", 0, 0, 10)   # auto-scan; visualize shows progress
