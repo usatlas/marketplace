@@ -160,4 +160,4 @@ Issues and PRs welcome at https://github.com/usatlas/marketplace
 ## License
 
 MIT — see LICENSE for details. Vendored content from the IRIS-HEP marketplace is
-BSD 3-Clause; see `plugins/atlas/VENDORED-LICENSES.md` for full attribution.
+BSD 3-Clause; see `VENDORED-LICENSES.md` files for full attribution.
