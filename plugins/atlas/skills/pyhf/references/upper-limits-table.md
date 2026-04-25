@@ -21,6 +21,7 @@ discovery p-values, and CLb values — as seen in ATLAS search papers (e.g. Tabl
 
 ```python
 import json
+import pathlib
 import numpy as np
 import pyhf
 import pyhf.contrib.utils
@@ -36,7 +37,11 @@ pyhf.contrib.utils.download(
     "https://doi.org/10.17182/hepdata.116034.v1/r34", "workspace_dir"
 )
 
-ws = pyhf.Workspace(spec)  # load from extracted JSON
+ws_file = next(pathlib.Path("workspace_dir").glob("*.json"))
+with open(ws_file) as f:
+    spec = json.load(f)
+
+ws = pyhf.Workspace(spec)
 model = ws.model()
 data = ws.data(model)
 ```
@@ -72,9 +77,10 @@ ROOT's `RooAbsReal::getPropagatedError()`.
 
 The error formula is:
 
-    error²(x) = F_a(x) · Corr(a,a') · F_a'ᵀ(x)
-
-where F_a(x) = (f(x, a+da) - f(x, a-da)) / 2.
+```
+error²(x) = F_a(x) · Corr(a,a') · F_a'ᵀ(x)
+F_a(x) = (f(x, a+da) - f(x, a-da)) / 2.
+```
 
 Batched computation (efficient — avoids Python loop over parameters):
 

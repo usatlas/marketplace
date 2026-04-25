@@ -397,13 +397,13 @@ print(f"Expected: {exp_limits[2]:.2f} (+1σ: {exp_limits[3]:.2f}, −1σ: {exp_l
 - **atlas:iminuit**: HEP-standard optimizer usable as pyhf backend via
   `pyhf.set_backend("numpy", "minuit")`
 
-## References
-
-- **`references/upper-limits-table.md`** — ATLAS model-independent upper limits
-  table workflow: background-only fits with error propagation, CLb, discovery
-  p-values, visible cross-section limits.
-
 ## Docs
 
 - https://pyhf.readthedocs.io/en/latest/
 - https://pyhf.github.io/pyhf-tutorial/
+
+### References
+
+- **`references/upper-limits-table.md`** — ATLAS model-independent upper limits
+  table workflow: background-only fits with error propagation, CLb, discovery
+  p-values, visible cross-section limits.
