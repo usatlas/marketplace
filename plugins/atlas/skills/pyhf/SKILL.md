@@ -3,40 +3,49 @@ name: pyhf
 description: >-
   Use when building or running a HistFactory statistical model in Python:
   creating a pyhf workspace from JSON, defining signal and background samples
-  with systematic modifiers (normfactor, histosys, staterror), running a profile
-  likelihood fit, computing CLs exclusion limits or discovery significance,
-  patching workspaces, or converting between HistFactory XML and pyhf JSON
-  format.
+  with systematic modifiers (normfactor, histosys, normsys, staterror, lumi,
+  shapefactor), running a profile likelihood fit, computing CLs exclusion limits
+  or discovery significance, patching or combining workspaces with PatchSet,
+  converting between HistFactory XML and pyhf JSON via the CLI, or using pyhf
+  simplemodels for quick hypothesis tests.
 ---
 
 # pyhf
 
 ## Overview
 
-pyhf implements the HistFactory statistical model in pure Python
-(NumPy/JAX/PyTorch backends). A workspace is a JSON document describing
-histograms, samples, and systematic modifiers; pyhf builds a differentiable
-likelihood from it and provides frequentist inference tools. It is the preferred
-fitting framework for new ATLAS analyses.
+pyhf implements the HistFactory statistical model in pure Python with swappable
+tensor backends (NumPy, JAX, PyTorch). A workspace is a self-contained JSON
+document describing channels, samples, modifiers, observations, and
+measurements; pyhf builds a differentiable likelihood from it and provides
+frequentist inference tools (profile likelihood fits, CLs limits, discovery
+significance). It is the preferred fitting framework for new ATLAS analyses.
 
 ## When to Use
 
 - Building a profile likelihood fit for a search or measurement
 - Computing CLs exclusion limits on a signal model
 - Computing discovery significance (q₀ test statistic)
-- Patching or combining HistFactory workspaces
+- Patching, combining, or reinterpreting HistFactory workspaces
 - Validating a HistFactory XML workspace from TRExFitter/HistFitter
+- Quick hypothesis tests with `pyhf.simplemodels`
+- Converting between HistFactory XML and pyhf JSON via CLI
 
 ## Key Concepts
 
-| Concept               | Notes                                                        |
-| --------------------- | ------------------------------------------------------------ |
-| `pyhf.Workspace`      | JSON schema-validated workspace object                       |
-| `pyhf.Model`          | Differentiable likelihood built from a workspace             |
-| Modifier types        | `normfactor`, `histosys`, `normsys`, `staterror`, `shapesys` |
-| `pyhf.infer.hypotest` | CLs hypothesis test                                          |
-| `pyhf.infer.mle.fit`  | Maximum likelihood fit                                       |
-| Backends              | `numpy` (default), `jax`, `pytorch`                          |
+| Concept                   | Notes                                                 |
+| ------------------------- | ----------------------------------------------------- |
+| `pyhf.Workspace`          | JSON schema-validated workspace object                |
+| `pyhf.Model`              | Differentiable likelihood built from a workspace      |
+| `pyhf.PatchSet` / `Patch` | Named collection of JSON patches for reinterpretation |
+| `pyhf.simplemodels`       | Convenience constructors for common model topologies  |
+| Modifier types            | `normfactor`, `histosys`, `normsys`, `staterror`,     |
+|                           | `shapesys`, `lumi`, `shapefactor`                     |
+| `pyhf.infer.hypotest`     | CLs hypothesis test (asymptotic or toy-based)         |
+| `pyhf.infer.mle.fit`      | Maximum likelihood fit                                |
+| `pyhf.infer.intervals`    | Upper limit scans (linear grid or TOMS 748)           |
+| Backends                  | `numpy` (default), `jax`, `pytorch`                   |
+| Test statistics           | `q0`, `qmu`, `qmu_tilde`, `tmu`, `tmu_tilde`          |
 
 ## Workspace JSON Structure
 
@@ -113,61 +122,148 @@ model = ws.model()
 data = ws.data(model)
 ```
 
+**Quick model with simplemodels (no JSON needed)**:
+
+```python
+import pyhf
+
+model = pyhf.simplemodels.uncorrelated_background(
+    signal=[5.0, 10.0], bkg=[50.0, 60.0], bkg_uncertainty=[7.0, 12.0]
+)
+data = pyhf.tensorlib.astensor([55.0, 65.0]) + model.config.auxdata
+```
+
 **Background-only fit (best-fit NPs)**:
 
 ```python
-result = pyhf.infer.mle.fit(data, model)
-bestfit_pars, fit_obj = result
+bestfit_pars = pyhf.infer.mle.fit(data, model)
 print("Best-fit NPs:", dict(zip(model.config.par_names, bestfit_pars)))
+
+bestfit_pars, twice_nll = pyhf.infer.mle.fit(
+    data, model, return_fitted_val=True
+)
 ```
 
 **CLs upper limit on signal strength**:
 
 ```python
-obs_limit, exp_limits, _ = pyhf.infer.intervals.upper_limits.upper_limit(
-    data, model, scan=np.linspace(0, 5, 51), return_expected_set=True
+import numpy as np
+
+obs_limit, exp_limits, (scan, results) = pyhf.infer.intervals.upper_limits.upper_limit(
+    data, model, scan=np.linspace(0, 5, 51), return_expected_set=True, return_results=True
 )
 print(f"Observed: μ < {obs_limit:.2f}")
-print(f"Expected: μ < {exp_limits[2]:.2f} (+1σ: {exp_limits[3]:.2f}, -1σ: {exp_limits[1]:.2f})")
+print(f"Expected: μ < {exp_limits[2]:.2f} (+1σ: {exp_limits[3]:.2f}, −1σ: {exp_limits[1]:.2f})")
 ```
 
 **Discovery significance (q₀ test)**:
 
 ```python
-p_value, test_stat = pyhf.infer.hypotest(
-    0.0,  # test μ=0 (background-only hypothesis)
-    data, model,
-    test_stat="q0",
-    return_expected=True,
+from scipy.stats import norm
+
+p_obs, p_exp = pyhf.infer.hypotest(
+    0.0, data, model, test_stat="q0", return_expected=True
 )
-significance = pyhf.tensorlib.abs(pyhf.tensorlib.normal_cdf(p_value))
+significance = norm.isf(float(p_obs))
+print(f"Observed p-value: {float(p_obs):.4e}, significance: {significance:.2f}σ")
 ```
 
-**Patch a workspace (e.g., inject a new signal)**:
+**Patch a workspace (JSON Patch)**:
 
 ```python
 patch = [
     {"op": "replace", "path": "/channels/0/samples/0/data", "value": [12.0, 18.0, 9.0]}
 ]
-patched_ws = ws.model(patches=patch)
+patched_model = ws.model(patches=patch)
+```
+
+**PatchSet for reinterpretation over signal grid**:
+
+```python
+patchset = pyhf.PatchSet(patchset_json)
+print(patchset)  # lists available signal points
+
+patched_ws = patchset.apply(ws, "signal_500_100")
+model = patched_ws.model()
+data = patched_ws.data(model)
+```
+
+**Brazil band visualization**:
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+import pyhf.contrib.viz.brazil
+
+poi_values = np.linspace(0, 5, 51)
+results = [
+    pyhf.infer.hypotest(
+        mu, data, model, return_expected_set=True
+    )
+    for mu in poi_values
+]
+
+fig, ax = plt.subplots()
+pyhf.contrib.viz.brazil.plot_results(poi_values, results, ax=ax)
 ```
 
 **JAX backend for gradient-based fits**:
 
 ```python
 pyhf.set_backend("jax")
-# All subsequent pyhf operations use JAX
+```
+
+**CLI commands**:
+
+```bash
+pyhf xml2json config/analysis.xml --output-file workspace.json
+pyhf json2xml workspace.json --output-dir xml_output/
+pyhf cls workspace.json                    # run CLs limit
+pyhf cls workspace.json --backend jax      # with specific backend
+pyhf inspect workspace.json                # print workspace summary
+pyhf patchset apply ws.json patchset.json --name "signal_500_100"
+pyhf digest workspace.json                 # SHA256 digest for reproducibility
 ```
 
 ## Modifier Reference
 
-| Modifier     | JSON type                          | Use case                                |
-| ------------ | ---------------------------------- | --------------------------------------- |
-| `normfactor` | Free normalization                 | CR-driven background, signal strength μ |
-| `histosys`   | Shape+norm from ±1σ templates      | JES, JER, generator comparisons         |
-| `normsys`    | Normalization-only from log-normal | Luminosity, cross-section uncertainty   |
-| `staterror`  | Per-bin MC statistical             | Barlow-Beeston lite                     |
-| `shapesys`   | Per-bin free shape                 | Rarely used; use staterror instead      |
+| Modifier      | JSON `data` field                      | Constraint    | Use case                                 |
+| ------------- | -------------------------------------- | ------------- | ---------------------------------------- |
+| `normfactor`  | `null`                                 | Unconstrained | Signal strength μ, CR-driven background  |
+| `histosys`    | `{"hi_data": [...], "lo_data": [...]}` | Gaussian(α)   | JES, JER, generator comparisons          |
+| `normsys`     | `{"hi": float, "lo": float}`           | Gaussian(α)   | Luminosity, cross-section uncertainty    |
+| `staterror`   | `[abs_unc_per_bin]`                    | Gaussian(γ)   | MC statistical (Barlow–Beeston lite)     |
+| `shapesys`    | `[abs_unc_per_bin]`                    | Poisson(γ)    | Uncorrelated per-bin shape               |
+| `lumi`        | `null`                                 | Gaussian(λ)   | Luminosity (global, set via measurement) |
+| `shapefactor` | `null`                                 | Unconstrained | Data-driven shape (free per-bin γ)       |
+
+## Measurement Configuration
+
+Override parameter defaults in `measurements[].config.parameters`:
+
+```json
+{
+  "name": "fit",
+  "config": {
+    "poi": "mu",
+    "parameters": [
+      {
+        "name": "lumi",
+        "auxdata": [1.0],
+        "sigmas": [0.017],
+        "bounds": [[0.915, 1.085]],
+        "inits": [1.0]
+      },
+      { "name": "mu_bkg", "bounds": [[0.5, 2.0]] },
+      { "name": "some_np", "fixed": true }
+    ]
+  }
+}
+```
+
+Available overrides: `inits` (initial values), `bounds` (parameter limits),
+`auxdata` (constraint central values), `sigmas` (constraint widths), `fixed`
+(hold constant during fit).
 
 ## Worked Example: ttbar search with one CR
 
@@ -208,11 +304,14 @@ ws = pyhf.Workspace(spec)
 model = ws.model()
 data = ws.data(model)
 
-bestfit, _ = pyhf.infer.mle.fit(data, model, return_fitted_val=True)
-obs_limit, *_ = pyhf.infer.intervals.upper_limits.upper_limit(
-    data, model, scan=np.linspace(0, 10, 51)
+bestfit, twice_nll = pyhf.infer.mle.fit(data, model, return_fitted_val=True)
+print(f"Best-fit mu: {bestfit[model.config.poi_index]:.3f}")
+
+obs_limit, exp_limits = pyhf.infer.intervals.upper_limits.upper_limit(
+    data, model, scan=np.linspace(0, 10, 51), return_expected_set=True
 )
 print(f"Observed limit: μ < {obs_limit:.2f} @ 95% CL")
+print(f"Expected: {exp_limits[2]:.2f} (+1σ: {exp_limits[3]:.2f}, −1σ: {exp_limits[1]:.2f})")
 ```
 
 ## Troubleshooting
@@ -222,23 +321,30 @@ print(f"Observed limit: μ < {obs_limit:.2f} @ 95% CL")
 | `pyhf.exceptions.InvalidSpecification` | JSON doesn't match HistFactory schema    | Run `pyhf.Workspace(spec)` and read the validation error |
 | Fit converges to boundary              | Parameter bounded away from true minimum | Widen bounds in `measurements.config.parameters`         |
 | `nan` in likelihood                    | Empty bin or division by zero            | Add small regularisation or merge bins                   |
-| Expected limit varies wildly           | Too few Asimov toy statistics            | Check background yields — should be > 10 events/bin      |
+| Expected limit varies wildly           | Background yields too low                | Ensure > 10 events/bin for asymptotic approximation      |
 | NP pulled strongly                     | Template inconsistent with data          | Inspect pre-fit data/MC in that region                   |
+| `InvalidPatchSet` on apply             | Workspace digest mismatch                | Regenerate patches against the current workspace version |
 
 ## Gotchas
 
-- **Channel and sample names must be unique**: duplicate names within a
-  workspace raise `InvalidSpecification` at construction time.
-- **Shared modifier names**: a modifier with the same name and type in multiple
-  channels/samples is treated as a single correlated NP — intentional for
-  luminosity, but accidental sharing causes unexpected correlations.
-- **JAX float32 default**: JAX uses 32-bit floats by default; add
+- `histosys` `hi_data`/`lo_data` are **absolute** event rates, not relative
+  shifts from nominal.
+- `normsys` `hi`/`lo` are **scale factors** (e.g. 1.1 / 0.9), not absolute
+  rates.
+- Modifiers sharing the same `name` share the same underlying parameter — this
+  is how correlated systematics across samples work.
+- `staterror` is per-channel: one parameter set per channel, aggregated across
+  all samples that declare it in that channel.
+- `shapesys` or `staterror` with zero nominal rate or zero uncertainty →
+  parameter allocated but fixed to 1 (multiplicative identity).
+- Channel and sample names must be unique; duplicates raise
+  `InvalidSpecification` at construction time.
+- JAX uses 32-bit floats by default; add
   `jax.config.update("jax_enable_x64", True)` before importing pyhf to avoid
   precision loss in fits.
-- **Empty bins**: a bin with zero expected yield produces `nan` in the
-  log-likelihood. Add a small regularisation value or merge bins.
-- **Integer yields are float internally**: pyhf casts all data to the backend
-  float type; ensure histograms are passed as floats to avoid silent truncation.
+- Set the backend **before** building the model; switching backends mid-fit is
+  not supported.
+- All ATLAS energy and momentum values are in **MeV**.
 
 ## Interop
 
@@ -249,8 +355,8 @@ print(f"Observed limit: μ < {obs_limit:.2f} @ 95% CL")
   construction
 - **atlas:trexfitter**: can export HistFactory XML → convert with
   `pyhf xml2json`
-- **atlas:iminuit**: HEP-standard optimizer that can be used instead of default
-  scipy
+- **atlas:iminuit**: HEP-standard optimizer usable as pyhf backend via
+  `pyhf.set_backend("numpy", "minuit")`
 
 ## Docs
 
