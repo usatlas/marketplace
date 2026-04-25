@@ -25,6 +25,20 @@ complex multi-body decays must be described and inspected.
 - Visualizing a decay tree as a graph for documentation or cross-checks
 - Converting decay descriptors for input to EvtGen, Pythia, or other generators
 
+## Key Concepts
+
+- **DecFile / `.dec` format**: the EvtGen decay descriptor format; each decay is
+  defined as `Decay <particle>\n  <BF> <daughters> <model> <params>;\nEnddecay`.
+- **`DecayMode`**: a single decay mode — branching fraction + list of daughter
+  names + optional amplitude model and parameters.
+- **`DecayChain`**: a tree of `DecayMode` objects rooted at a mother particle;
+  models the full multi-body decay topology.
+- **Descriptor strings**: compact text notation
+  `[B0 -> (D- -> K+ pi- pi-) pi+]cc` used in Gaudi/Gauss job options; `cc` means
+  charge conjugate is implied.
+- **Graphviz rendering**: `DecayChainViewer` converts a chain to a
+  `graphviz.Digraph` for PDF/SVG export.
+
 ## Canonical Patterns
 
 ### Parse a DecFile / EvtGen .dec file
