@@ -1,8 +1,8 @@
 ---
 name: mplhep
 description: >-
-  Use when creating ATLAS publication-quality plots with matplotlib using mplhep:
-  applying the ATLAS experiment style, placing ATLAS labels (Internal,
+  Use when creating ATLAS publication-quality plots with matplotlib using
+  mplhep: applying the ATLAS experiment style, placing ATLAS labels (Internal,
   Preliminary, Simulation), plotting 1D or 2D histograms from hist/uproot/numpy,
   making data/MC comparison plots with ratio panels, using mplhep comparison
   functions (ratio, pull, split_ratio), or customizing ATLAS label positions and
@@ -32,32 +32,32 @@ plotters for data/MC ratio panels. For ATLAS work, `mplhep` replaces the ROOT
 
 ## Key Concepts
 
-| Function / Module         | Purpose                                               |
-| ------------------------- | ----------------------------------------------------- |
-| `mh.style.use("ATLAS")`  | Apply the ATLAS matplotlib style globally             |
-| `mh.atlas.label()`       | Place official ATLAS label with status, lumi, com     |
-| `mh.histplot()`          | Plot 1D histograms (step, fill, errorbar, band, bar)  |
-| `mh.hist2dplot()`        | Plot 2D histograms with optional colorbar             |
-| `mh.comp.hists()`        | Compare two histograms with a ratio/pull panel        |
-| `mh.comp.data_model()`   | Data vs stacked MC with comparison panel              |
-| `mh.comp.comparison()`   | Standalone comparison panel (no main plot)             |
-| `mh.mpl_magic()`         | Auto-fit y-axis for labels and legends                |
-| `mh.add_text()`          | Place arbitrary text at named locations                |
-| `mh.savelabels()`        | Generate plot variations (Preliminary, Final, WIP)    |
-| `mh.subplots()`          | Multi-panel figure with automatic sizing              |
+| Function / Module       | Purpose                                              |
+| ----------------------- | ---------------------------------------------------- |
+| `mh.style.use("ATLAS")` | Apply the ATLAS matplotlib style globally            |
+| `mh.atlas.label()`      | Place official ATLAS label with status, lumi, com    |
+| `mh.histplot()`         | Plot 1D histograms (step, fill, errorbar, band, bar) |
+| `mh.hist2dplot()`       | Plot 2D histograms with optional colorbar            |
+| `mh.comp.hists()`       | Compare two histograms with a ratio/pull panel       |
+| `mh.comp.data_model()`  | Data vs stacked MC with comparison panel             |
+| `mh.comp.comparison()`  | Standalone comparison panel (no main plot)           |
+| `mh.mpl_magic()`        | Auto-fit y-axis for labels and legends               |
+| `mh.add_text()`         | Place arbitrary text at named locations              |
+| `mh.savelabels()`       | Generate plot variations (Preliminary, Final, WIP)   |
+| `mh.subplots()`         | Multi-panel figure with automatic sizing             |
 
 ### ATLAS Label Categories
 
 Label text follows ATLAS publication policy (identical to the ROOT
 `atlasrootstyle` macros covered by the astyle skill):
 
-| Status text           | Usage                                  |
-| --------------------- | -------------------------------------- |
-| `""`                  | Approved results in published papers   |
-| `"Preliminary"`       | Conference results not yet in a paper  |
-| `"Internal"`          | Results not for public distribution    |
-| `"Simulation"`        | Simulation-only results (no real data) |
-| `"Work in Progress"`  | Early-stage results, not for approval  |
+| Status text          | Usage                                  |
+| -------------------- | -------------------------------------- |
+| `""`                 | Approved results in published papers   |
+| `"Preliminary"`      | Conference results not yet in a paper  |
+| `"Internal"`         | Results not for public distribution    |
+| `"Simulation"`       | Simulation-only results (no real data) |
+| `"Work in Progress"` | Early-stage results, not for approval  |
 
 ### Supported Input Formats
 
@@ -185,17 +185,17 @@ fig, ax_main, ax_comp = mh.comp.data_model(
 - **ATLAS luminosity format defaults to integer**: `lumi_format="{0:.0f}"`, so
   `lumi=140` renders as "140 fb^{-1}". Override with `lumi_format="{0:.1f}"` if
   decimal precision is needed.
-- **Automatic error bars with `hist.Hist`**: When a histogram has
-  `.variances()` (i.e. `Weight()` storage), `histplot` shows error bars
-  automatically. Numpy histogram tuples do not carry variance information.
+- **Automatic error bars with `hist.Hist`**: When a histogram has `.variances()`
+  (i.e. `Weight()` storage), `histplot` shows error bars automatically. Numpy
+  histogram tuples do not carry variance information.
 - **`mh.hist()` does not return UHI objects**: Unlike `mh.histplot()`, the
   convenience wrapper `mh.hist()` runs `np.histogram` internally and cannot be
   used with other mplhep histogram functions.
 - **All ATLAS energy/momentum values are in MeV** in the detector/analysis
   framework, but plot axis labels conventionally show GeV or TeV. Divide by 1000
   before filling histograms.
-- **Style is a dict**: Access as `mh.style.ATLAS` to inspect or extend
-  rcParams. Customize via `mh.style.use([mh.style.ATLAS, {"font.size": 14}])`.
+- **Style is a dict**: Access as `mh.style.ATLAS` to inspect or extend rcParams.
+  Customize via `mh.style.use([mh.style.ATLAS, {"font.size": 14}])`.
 
 ## Interop
 

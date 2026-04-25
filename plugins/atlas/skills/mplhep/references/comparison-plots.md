@@ -5,14 +5,14 @@
 All comparison functions in `mh.comp` accept a `comparison` parameter with the
 following options:
 
-| Type                  | Formula                                                          |
-| --------------------- | ---------------------------------------------------------------- |
-| `ratio`               | h1 / h2                                                         |
-| `split_ratio`         | h1 / h2 (uncertainties of h1 and h2 shown separately)           |
-| `pull`                | (h1 - h2) / sqrt(sigma_h1^2 + sigma_h2^2)                      |
-| `difference`          | h1 - h2                                                         |
-| `relative_difference` | (h1 - h2) / h2                                                  |
-| `asymmetry`           | (h1 - h2) / (h1 + h2)                                           |
+| Type                  | Formula                                                                  |
+| --------------------- | ------------------------------------------------------------------------ |
+| `ratio`               | h1 / h2                                                                  |
+| `split_ratio`         | h1 / h2 (uncertainties of h1 and h2 shown separately)                    |
+| `pull`                | (h1 - h2) / sqrt(sigma_h1^2 + sigma_h2^2)                                |
+| `difference`          | h1 - h2                                                                  |
+| `relative_difference` | (h1 - h2) / h2                                                           |
+| `asymmetry`           | (h1 - h2) / (h1 + h2)                                                    |
 | `efficiency`          | h1 / h2 (with proper uncertainty propagation from arXiv:physics/0701199) |
 
 ## mh.comp.hists() -- Two-Histogram Comparison
@@ -178,16 +178,16 @@ panel.
 
 ### Blinding Syntax
 
-| Format                        | Description                         |
-| ----------------------------- | ----------------------------------- |
-| `(-1.0, 1.0)`                | Value-based tuple                   |
-| `"-1j:1j"`                   | String with j suffix for values     |
-| `loc[-1.0:1.0]`              | loc slice notation                  |
-| `19`                          | Single bin index                    |
-| `"15:25"`                     | Range of bin indices                |
-| `[18, 19, 20, 21, 22]`       | List of specific bin indices        |
-| `[(-2.5, -1.5), (1.5, 2.5)]` | Multiple value-based regions        |
-| `"5:1j"`                      | Mixed: index start, value end       |
+| Format                       | Description                     |
+| ---------------------------- | ------------------------------- |
+| `(-1.0, 1.0)`                | Value-based tuple               |
+| `"-1j:1j"`                   | String with j suffix for values |
+| `loc[-1.0:1.0]`              | loc slice notation              |
+| `19`                         | Single bin index                |
+| `"15:25"`                    | Range of bin indices            |
+| `[18, 19, 20, 21, 22]`       | List of specific bin indices    |
+| `[(-2.5, -1.5), (1.5, 2.5)]` | Multiple value-based regions    |
+| `"5:1j"`                     | Mixed: index start, value end   |
 
 ### Blinding in comp.hists()
 
@@ -268,32 +268,32 @@ mh.mpl_magic(soft_fail=True)
 
 ## Histogram Types for histplot
 
-| histtype    | Description                                              |
-| ----------- | -------------------------------------------------------- |
-| `"step"`    | Step line histogram (default)                            |
-| `"fill"`    | Filled histogram                                         |
-| `"errorbar"`| Data points with error bars                              |
-| `"band"`    | Uncertainty band (useful for visualizing errors)         |
-| `"bar"`     | Side-by-side bars when multiple histograms are given     |
-| `"barstep"` | Side-by-side step bars for multiple histograms           |
+| histtype     | Description                                          |
+| ------------ | ---------------------------------------------------- |
+| `"step"`     | Step line histogram (default)                        |
+| `"fill"`     | Filled histogram                                     |
+| `"errorbar"` | Data points with error bars                          |
+| `"band"`     | Uncertainty band (useful for visualizing errors)     |
+| `"bar"`      | Side-by-side bars when multiple histograms are given |
+| `"barstep"`  | Side-by-side step bars for multiple histograms       |
 
 ## Normalization Options
 
-| Parameter   | Effect                                  |
-| ----------- | --------------------------------------- |
-| (default)   | Raw event counts                        |
-| `density=True` | Normalized so integral equals 1      |
-| `binwnorm=True`| Divided by bin width (Events / unit) |
+| Parameter       | Effect                               |
+| --------------- | ------------------------------------ |
+| (default)       | Raw event counts                     |
+| `density=True`  | Normalized so integral equals 1      |
+| `binwnorm=True` | Divided by bin width (Events / unit) |
 
 ## Error Bar Control
 
-| Parameter                       | Effect                                      |
-| ------------------------------- | ------------------------------------------- |
-| `yerr=True`                     | Automatic errors (Poisson or from variance) |
-| `yerr=custom_array`             | Explicit error values                       |
-| `w2method="sqrt"`               | sqrt of sum of weights squared              |
-| `w2method="poisson"`            | Poisson interval                            |
-| `w2method=callable`             | Custom function `f(weights, variances)`     |
+| Parameter            | Effect                                      |
+| -------------------- | ------------------------------------------- |
+| `yerr=True`          | Automatic errors (Poisson or from variance) |
+| `yerr=custom_array`  | Explicit error values                       |
+| `w2method="sqrt"`    | sqrt of sum of weights squared              |
+| `w2method="poisson"` | Poisson interval                            |
+| `w2method=callable`  | Custom function `f(weights, variances)`     |
 
 ## Stacking and Sorting
 

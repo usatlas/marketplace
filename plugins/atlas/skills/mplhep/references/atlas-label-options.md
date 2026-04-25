@@ -20,13 +20,13 @@ mh.atlas.label(
 
 ## Label Positions (loc parameter)
 
-| loc | Description                                                   |
-| --- | ------------------------------------------------------------- |
-| 0   | Above axes (default) -- left-aligned, outside the plot frame  |
-| 1   | Top-left corner, single line -- compact inline format         |
-| 2   | Top-left corner, multiline -- stacked label lines             |
-| 3   | Split layout -- experiment name above, secondary text inside  |
-| 4   | ATLAS-specific -- luminosity placed below the main label      |
+| loc | Description                                                  |
+| --- | ------------------------------------------------------------ |
+| 0   | Above axes (default) -- left-aligned, outside the plot frame |
+| 1   | Top-left corner, single line -- compact inline format        |
+| 2   | Top-left corner, multiline -- stacked label lines            |
+| 3   | Split layout -- experiment name above, secondary text inside |
+| 4   | ATLAS-specific -- luminosity placed below the main label     |
 
 ### Position Examples
 
@@ -117,8 +117,7 @@ txt_obj = mh.add_text("Custom annotation", loc="upper left", ax=ax)
 ```
 
 **loc string options**: `"upper left"`, `"upper right"`, `"lower left"`,
-`"lower right"`, `"over left"`, `"over right"`, `"under left"`,
-`"under right"`
+`"lower right"`, `"over left"`, `"over right"`, `"under left"`, `"under right"`
 
 Alternative positioning via `x` and `y` keyword arguments:
 
