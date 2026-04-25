@@ -204,6 +204,43 @@ prun --exec "python analysis.py %IN" \
 `%OUT` is available inside `--mergeScript` to reference the merged output
 filename.
 
+## Worked Example: Grid analysis with prun
+
+Submit a Python analysis script that processes DAOD_PHYSLITE files, produces
+histograms, and merges output.
+
+```bash
+# 1. Setup
+setupATLAS
+lsetup panda
+voms-proxy-init --voms atlas
+
+# 2. Test locally first (always validate before grid submission)
+python analysis.py input_test.root
+
+# 3. Submit to grid with limited files for validation
+prun --exec "python analysis.py %IN" \
+     --inDS mc23_13p6TeV.DAOD_PHYSLITE.ttbar/ \
+     --outDS user.$RUCIO_ACCOUNT.ttbar_hists_v1 \
+     --output hist.root \
+     --nFilesPerJob 5 \
+     --nFiles 10
+
+# 4. Monitor the task
+pbook show
+
+# 5. After validation, submit full dataset
+prun --exec "python analysis.py %IN" \
+     --inDS mc23_13p6TeV.DAOD_PHYSLITE.ttbar/ \
+     --outDS user.$RUCIO_ACCOUNT.ttbar_hists_v2 \
+     --output hist.root \
+     --nFilesPerJob 5 \
+     --mergeOutput
+
+# 6. Retry any failed jobs
+pbook retry <taskID>
+```
+
 ## Gotchas
 
 - **VOMS proxy must be valid**: all three tools fail silently or cryptically
@@ -241,43 +278,6 @@ filename.
 - **ServiceX**: for column-level data extraction without grid jobs, consider
   ServiceX as a lighter alternative to running prun/pathena for simple
   selections.
-
-## Worked Example: Grid analysis with prun
-
-Submit a Python analysis script that processes DAOD_PHYSLITE files, produces
-histograms, and merges output.
-
-```bash
-# 1. Setup
-setupATLAS
-lsetup panda
-voms-proxy-init --voms atlas
-
-# 2. Test locally first (always validate before grid submission)
-python analysis.py input_test.root
-
-# 3. Submit to grid with limited files for validation
-prun --exec "python analysis.py %IN" \
-     --inDS mc23_13p6TeV.DAOD_PHYSLITE.ttbar/ \
-     --outDS user.$RUCIO_ACCOUNT.ttbar_hists_v1 \
-     --output hist.root \
-     --nFilesPerJob 5 \
-     --nFiles 10
-
-# 4. Monitor the task
-pbook show
-
-# 5. After validation, submit full dataset
-prun --exec "python analysis.py %IN" \
-     --inDS mc23_13p6TeV.DAOD_PHYSLITE.ttbar/ \
-     --outDS user.$RUCIO_ACCOUNT.ttbar_hists_v2 \
-     --output hist.root \
-     --nFilesPerJob 5 \
-     --mergeOutput
-
-# 6. Retry any failed jobs
-pbook retry <taskID>
-```
 
 ## Troubleshooting
 

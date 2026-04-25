@@ -286,6 +286,19 @@ systErr = ROOT.TMath.Sqrt(totErr**2 - statErr**2)
 - **Tolerance ≤ 10**: Setting `Tolerance > 10` has been observed to cause
   incorrect parameter uncertainties even with covQual=3.
 
+## Interop
+
+- **StatAnalysis**: Preferred environment; provides ROOT 6.38 + xRooFit + all
+  ATLAS stat tools on EL9.
+- **TRExFitter**: TRExFitter workspaces are HistFactory/RooStats XML; load with
+  `xRooNode("workspace.root")` after running `trex-fitter w`.
+- **pyhf**: Convert HistFactory XML to pyhf JSON with `pyhf xml2json`; or use
+  pyhf's workspace directly (not xRooFit format).
+- **cabinetry**: Reads pyhf JSON workspaces and produces ROOT-style diagnostic
+  plots; complementary to xRooFit.
+- **xRooBrowser**: Interactive ROOT GUI (`ROOT::Experimental::RooBrowser` in
+  ROOT 6.28+) for exploring workspaces.
+
 ## Additional Resources
 
 For detailed content beyond this overview, consult the reference files:
@@ -300,19 +313,6 @@ For detailed content beyond this overview, consult the reference files:
 - **`references/hypothesis-testing.md`** — Test statistic definitions (tmu, qmu,
   qmutilde, q0, u0), full verbose limit-setting example, toy-based limits, limit
   troubleshooting, hypoPoint methods/fits tables, limit-setting checklist
-
-## Interop
-
-- **StatAnalysis**: Preferred environment; provides ROOT 6.38 + xRooFit + all
-  ATLAS stat tools on EL9.
-- **TRExFitter**: TRExFitter workspaces are HistFactory/RooStats XML; load with
-  `xRooNode("workspace.root")` after running `trex-fitter w`.
-- **pyhf**: Convert HistFactory XML to pyhf JSON with `pyhf xml2json`; or use
-  pyhf's workspace directly (not xRooFit format).
-- **cabinetry**: Reads pyhf JSON workspaces and produces ROOT-style diagnostic
-  plots; complementary to xRooFit.
-- **xRooBrowser**: Interactive ROOT GUI (`ROOT::Experimental::RooBrowser` in
-  ROOT 6.28+) for exploring workspaces.
 
 ## Docs
 

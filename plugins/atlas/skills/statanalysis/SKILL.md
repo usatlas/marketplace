@@ -193,14 +193,6 @@ cmake -DATLAS_BUILD_ROOT=OFF ...    # skip ROOT build (use system ROOT)
 - **All energies in MeV**: Histograms from ATLAS reconstruction have axes in MeV
   (1 GeV = 1000 MeV). Convert explicitly if needed.
 
-## Additional Resources
-
-For detailed content beyond this overview, consult the reference files:
-
-- **`references/statchallenges-guide.md`** — Full implementation workflow
-  (writing solvers, comparing toolkits, writing new suites), test pattern
-  details, environment variables, available suites
-
 ## Interop
 
 - **xRooFit**: Pre-compiled in all StatAnalysis releases; use
@@ -213,6 +205,14 @@ For detailed content beyond this overview, consult the reference files:
 - **uproot / awkward**: Available for Python-based I/O without ROOT.
 - **setupATLAS**: The entry point to load StatAnalysis on any server with
   `/cvmfs/atlas.cern.ch`; see the setupatlas skill.
+
+## Additional Resources
+
+For detailed content beyond this overview, consult the reference files:
+
+- **`references/statchallenges-guide.md`** — Full implementation workflow
+  (writing solvers, comparing toolkits, writing new suites), test pattern
+  details, environment variables, available suites
 
 ## Docs
 
