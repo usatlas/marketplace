@@ -225,6 +225,21 @@ print(f"Observed limit: μ < {obs_limit:.2f} @ 95% CL")
 | Expected limit varies wildly           | Too few Asimov toy statistics            | Check background yields — should be > 10 events/bin      |
 | NP pulled strongly                     | Template inconsistent with data          | Inspect pre-fit data/MC in that region                   |
 
+## Gotchas
+
+- **Channel and sample names must be unique**: duplicate names within a
+  workspace raise `InvalidSpecification` at construction time.
+- **Shared modifier names**: a modifier with the same name and type in multiple
+  channels/samples is treated as a single correlated NP — intentional for
+  luminosity, but accidental sharing causes unexpected correlations.
+- **JAX float32 default**: JAX uses 32-bit floats by default; add
+  `jax.config.update("jax_enable_x64", True)` before importing pyhf to avoid
+  precision loss in fits.
+- **Empty bins**: a bin with zero expected yield produces `nan` in the
+  log-likelihood. Add a small regularisation value or merge bins.
+- **Integer yields are float internally**: pyhf casts all data to the backend
+  float type; ensure histograms are passed as floats to avoid silent truncation.
+
 ## Interop
 
 - **cabinetry**: high-level wrapper that builds pyhf workspaces from config +

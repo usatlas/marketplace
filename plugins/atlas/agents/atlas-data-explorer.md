@@ -7,6 +7,8 @@ description: >-
   file, or checking what variables are available in a DAOD. Also use when a user
   asks "what datasets exist for X", "where is my ttbar mc20 sample", or "what
   branches does this ROOT file have".
+readme_description:
+  Dataset and file discovery via Rucio, AMI, and ATLAS Open Data MCPs
 tools: Read, Bash
 model: sonnet
 color: blue

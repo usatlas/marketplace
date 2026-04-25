@@ -7,6 +7,8 @@ description: >-
   covered by the ATLAS software documentation at atlas-software.docs.cern.ch.
   Also use when the user asks "how does X work in ATLAS software" or "where is
   the documentation for Y CP tool".
+readme_description:
+  Answers ATLAS software questions; cites atlas-software.docs.cern.ch
 tools: Read, Grep, Glob, Bash, WebFetch
 model: sonnet
 color: green

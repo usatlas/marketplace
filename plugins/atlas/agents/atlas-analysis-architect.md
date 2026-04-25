@@ -9,6 +9,8 @@ description: >-
   planning an unblinding strategy, or producing a structured analysis
   specification document. Also use when asked "how should I approach this
   measurement/search" or "what framework should I use for my analysis".
+readme_description:
+  Designs end-to-end analysis pipelines; produces a structured specification
 tools: Read, Write, WebFetch, WebSearch, TodoWrite, Skill, Glob, Grep, Bash
 model: sonnet
 color: purple

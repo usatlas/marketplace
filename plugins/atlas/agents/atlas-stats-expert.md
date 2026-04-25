@@ -7,6 +7,7 @@ description: >-
   profile likelihood fit, computing CLs exclusion limits, setting up an
   unfolding procedure, or debugging a fit that is not converging or has
   unexpected NP pulls.
+readme_description: Statistical model design: pyhf/cabinetry workspaces, TRExFitter configs, limits
 tools: Read, Edit, Write, Bash, WebFetch
 model: sonnet
 color: orange
