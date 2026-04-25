@@ -3,10 +3,10 @@ name: xroofit
 description: >-
   Use when building RooFit statistical models with xRooFit, constructing
   workspaces with channels and samples, adding systematics or nuisance
-  parameters, fitting models to data, constructing NLL functions, diagnosing
-  fit convergence failures (status codes, covariance quality), computing
-  profile likelihood ratios, calculating CLs upper limits or exclusion
-  contours, or computing discovery significance.
+  parameters, fitting models to data, constructing NLL functions, diagnosing fit
+  convergence failures (status codes, covariance quality), computing profile
+  likelihood ratios, calculating CLs upper limits or exclusion contours, or
+  computing discovery significance.
 ---
 
 # xRooFit
@@ -14,10 +14,10 @@ description: >-
 ## Overview
 
 xRooFit is a high-level Python/C++ API for the RooFit statistical analysis
-toolkit, with the same relationship to RooFit as Keras has to TensorFlow:
-RooFit can be used directly, but xRooFit makes building and fitting models
-significantly more concise. xRooFit ships pre-installed with ROOT ≥ 6.30 and
-is also distributed as part of the ATLAS
+toolkit, with the same relationship to RooFit as Keras has to TensorFlow: RooFit
+can be used directly, but xRooFit makes building and fitting models
+significantly more concise. xRooFit ships pre-installed with ROOT ≥ 6.30 and is
+also distributed as part of the ATLAS
 [StatAnalysis](https://gitlab.cern.ch/atlas/StatAnalysis) release.
 
 ## Setup
@@ -45,8 +45,8 @@ cmake -S xroofit -B xroofit_build && cmake --build xroofit_build
 source xroofit_build/setup.sh   # add to PATH each session
 ```
 
-Requires ROOT ≥ 6.32 (6.38+ recommended). The StatAnalysis 0.7 branch
-provides ROOT 6.38 on EL9.
+Requires ROOT ≥ 6.32 (6.38+ recommended). The StatAnalysis 0.7 branch provides
+ROOT 6.38 on EL9.
 
 ## Key Concepts
 
@@ -71,17 +71,17 @@ w["pdfs"]["simPdf"]["SR"]          # equivalent
 
 ### Variable types
 
-| Type | Symbol | xRooNode method | Description |
-|---|---|---|---|
-| Regular observables | x | `robs()` | Column in the dataset |
-| Global observables | a | `globs()` | Auxilliary measurements (constraint nominal values) |
-| All observables | | `obs()` | All of the above |
-| Parameters of interest | μ | `poi()` | Floatable, marked as POI |
-| Nuisance parameters (α) | ν | `np()` | Gaussian-constrained NPs |
-| Nuisance parameters (γ) | ν | `np()` | Poisson-constrained (MC-stat) NPs |
-| All parameters | θ | `pars()` | Everything that is not an observable |
-| Floating | | `floats()` | Currently floating subset |
-| Constant | | `consts()` | Currently constant subset |
+| Type                    | Symbol | xRooNode method | Description                                        |
+| ----------------------- | ------ | --------------- | -------------------------------------------------- |
+| Regular observables     | x      | `robs()`        | Column in the dataset                              |
+| Global observables      | a      | `globs()`       | Auxiliary measurements (constraint nominal values) |
+| All observables         |        | `obs()`         | All of the above                                   |
+| Parameters of interest  | μ      | `poi()`         | Floatable, marked as POI                           |
+| Nuisance parameters (α) | ν      | `np()`          | Gaussian-constrained NPs                           |
+| Nuisance parameters (γ) | ν      | `np()`          | Poisson-constrained (MC-stat) NPs                  |
+| All parameters          | θ      | `pars()`        | Everything that is not an observable               |
+| Floating                |        | `floats()`      | Currently floating subset                          |
+| Constant                |        | `consts()`      | Currently constant subset                          |
 
 Mark or unmark parameters:
 
@@ -174,17 +174,17 @@ fr.floatParsFinal().find("mu_sig").getErrorLo()
 
 ### Fit status and covariance quality
 
-| Code | Meaning |
-|---|---|
-| status=0 | Last algorithm ran successfully (valid fit) |
-| status=1 | Covariance forced positive-definite → try higher Strategy |
-| status=2 | Covariance invalid (Hesse strategy 3 only) |
-| status=3 | EDM above threshold → increase Tolerance (max ~10) |
-| status≥4 | Fit cannot be trusted |
-| covQual=3 | Positive-definite covariance (required) |
-| covQual=2 | Forced positive-definite (status=1) |
-| covQual=1 | Approximation only (status=2) |
-| covQual=0 | Unavailable (no floating parameters) |
+| Code      | Meaning                                                   |
+| --------- | --------------------------------------------------------- |
+| status=0  | Last algorithm ran successfully (valid fit)               |
+| status=1  | Covariance forced positive-definite → try higher Strategy |
+| status=2  | Covariance invalid (Hesse strategy 3 only)                |
+| status=3  | EDM above threshold → increase Tolerance (max ~10)        |
+| status≥4  | Fit cannot be trusted                                     |
+| covQual=3 | Positive-definite covariance (required)                   |
+| covQual=2 | Forced positive-definite (status=1)                       |
+| covQual=1 | Approximation only (status=2)                             |
+| covQual=0 | Unavailable (no floating parameters)                      |
 
 Tune fit hyperparameters:
 
@@ -221,8 +221,8 @@ print(limits)
 print(w.nll("obsData").hypoSpace().limits())
 ```
 
-Available test statistics: `tmu`, `qmu`, `qmutilde` (default for upper
-limits), `q0`, `u0` (for discovery).
+Available test statistics: `tmu`, `qmu`, `qmutilde` (default for upper limits),
+`q0`, `u0` (for discovery).
 
 ### Discovery significance
 
@@ -253,15 +253,14 @@ systErr = ROOT.TMath.Sqrt(totErr**2 - statErr**2)
 
 ## Gotchas
 
-- **Two import styles, one namespace**: Both
-  `import ROOT as XRF` (standalone build) and
-  `from ROOT.Experimental import XRooFit as XRF` (bundled) give you an `XRF`
-  namespace. The standalone build adds methods directly to `ROOT`; the bundled
-  version exposes them under `ROOT.Experimental.XRooFit`.
-- **Bin errors trigger MC-stat ShapeSys**: If you add a histogram with
-  non-zero bin errors, xRooFit automatically creates a `ShapeSys` for MC
-  statistical uncertainties. Suppress this by zeroing out bin errors before
-  adding, or control the prefix with `hBkg.SetOption("statPrefix=stat_SR")`.
+- **Two import styles, one namespace**: Both `import ROOT as XRF` (standalone
+  build) and `from ROOT.Experimental import XRooFit as XRF` (bundled) give you
+  an `XRF` namespace. The standalone build adds methods directly to `ROOT`; the
+  bundled version exposes them under `ROOT.Experimental.XRooFit`.
+- **Bin errors trigger MC-stat ShapeSys**: If you add a histogram with non-zero
+  bin errors, xRooFit automatically creates a `ShapeSys` for MC statistical
+  uncertainties. Suppress this by zeroing out bin errors before adding, or
+  control the prefix with `hBkg.SetOption("statPrefix=stat_SR")`.
 - **Variation histograms must have zero bin errors**: When calling `Vary()`,
   ensure variation histograms have no bin errors to avoid errors-on-errors.
 - **Histogram names encode parameter values**: Variations must be named
@@ -270,8 +269,8 @@ systErr = ROOT.TMath.Sqrt(totErr**2 - statErr**2)
   either `xRooNode.someMethod()` or the underlying RooFit object's method. In
   C++ you must use `w["path"].get<ClassName>()->someMethod()`.
 - **All energies in MeV in ATLAS**: When setting axis ranges for observables
-  derived from reconstructed physics objects, use MeV not GeV unless
-  explicitly converting.
+  derived from reconstructed physics objects, use MeV not GeV unless explicitly
+  converting.
 - **Tolerance ≤ 10**: Setting `Tolerance > 10` has been observed to cause
   incorrect parameter uncertainties even with covQual=3.
 
@@ -279,14 +278,14 @@ systErr = ROOT.TMath.Sqrt(totErr**2 - statErr**2)
 
 - **StatAnalysis**: Preferred environment; provides ROOT 6.38 + xRooFit + all
   ATLAS stat tools on EL9.
-- **TRExFitter**: TRExFitter workspaces are HistFactory/RooStats XML; load
-  with `xRooNode("workspace.root")` after running `trex-fitter w`.
-- **pyhf**: Convert HistFactory XML to pyhf JSON with
-  `pyhf xml2json`; or use pyhf's workspace directly (not xRooFit format).
+- **TRExFitter**: TRExFitter workspaces are HistFactory/RooStats XML; load with
+  `xRooNode("workspace.root")` after running `trex-fitter w`.
+- **pyhf**: Convert HistFactory XML to pyhf JSON with `pyhf xml2json`; or use
+  pyhf's workspace directly (not xRooFit format).
 - **cabinetry**: Reads pyhf JSON workspaces and produces ROOT-style diagnostic
   plots; complementary to xRooFit.
-- **xRooBrowser**: Interactive ROOT GUI
-  (`ROOT::Experimental::RooBrowser` in ROOT 6.28+) for exploring workspaces.
+- **xRooBrowser**: Interactive ROOT GUI (`ROOT::Experimental::RooBrowser` in
+  ROOT 6.28+) for exploring workspaces.
 
 ## Docs
 
