@@ -1,13 +1,8 @@
 ---
 name: pyhf
 description: >-
-  Use when building or running a HistFactory statistical model in Python:
-  creating a pyhf workspace from JSON, defining signal and background samples
-  with systematic modifiers (normfactor, histosys, normsys, staterror, lumi,
-  shapefactor), running a profile likelihood fit, computing CLs exclusion limits
-  or discovery significance, patching or combining workspaces with PatchSet,
-  converting between HistFactory XML and HiFa JSON via the CLI, or using pyhf
-  simplemodels for quick hypothesis tests.
+  Use when you need HistFactory statistical modeling, profile-likelihood fits,
+  CLs limits, or workspace manipulation in Python.
 ---
 
 # pyhf
@@ -47,7 +42,49 @@ significance). It is the preferred fitting framework for new ATLAS analyses.
 | Backends                  | `numpy` (default), `jax`, `pytorch`                   |
 | Test statistics           | `q0`, `qmu`, `qmu_tilde`, `tmu`, `tmu_tilde`          |
 
-## Workspace JSON Structure
+### Modifier Reference
+
+| Modifier      | JSON `data` field                      | Constraint    | Use case                                 |
+| ------------- | -------------------------------------- | ------------- | ---------------------------------------- |
+| `normfactor`  | `null`                                 | Unconstrained | Signal strength μ, CR-driven background  |
+| `histosys`    | `{"hi_data": [...], "lo_data": [...]}` | Gaussian(α)   | JES, JER, generator comparisons          |
+| `normsys`     | `{"hi": float, "lo": float}`           | Gaussian(α)   | Luminosity, cross-section uncertainty    |
+| `staterror`   | `[abs_unc_per_bin]`                    | Gaussian(γ)   | MC statistical (Barlow–Beeston lite)     |
+| `shapesys`    | `[abs_unc_per_bin]`                    | Poisson(γ)    | Uncorrelated per-bin shape               |
+| `lumi`        | `null`                                 | Gaussian(λ)   | Luminosity (global, set via measurement) |
+| `shapefactor` | `null`                                 | Unconstrained | Data-driven shape (free per-bin γ)       |
+
+### Measurement Configuration
+
+Override parameter defaults in `measurements[].config.parameters`:
+
+```json
+{
+  "name": "fit",
+  "config": {
+    "poi": "mu",
+    "parameters": [
+      {
+        "name": "lumi",
+        "auxdata": [1.0],
+        "sigmas": [0.017],
+        "bounds": [[0.915, 1.085]],
+        "inits": [1.0]
+      },
+      { "name": "mu_bkg", "bounds": [[0.5, 2.0]] },
+      { "name": "some_np", "fixed": true }
+    ]
+  }
+}
+```
+
+Available overrides: `inits` (initial values), `bounds` (parameter limits),
+`auxdata` (constraint central values), `sigmas` (constraint widths), `fixed`
+(hold constant during fit).
+
+## Canonical Patterns
+
+### Workspace JSON Structure
 
 ```json
 {
@@ -106,8 +143,6 @@ significance). It is the preferred fitting framework for new ATLAS analyses.
   "version": "1.0.0"
 }
 ```
-
-## Canonical Patterns
 
 **Load workspace and build model**:
 
@@ -270,46 +305,6 @@ pyhf patchset apply ws.json patchset.json --name "signal_500_100"
 pyhf digest workspace.json                 # SHA256 digest for reproducibility
 ```
 
-## Modifier Reference
-
-| Modifier      | JSON `data` field                      | Constraint    | Use case                                 |
-| ------------- | -------------------------------------- | ------------- | ---------------------------------------- |
-| `normfactor`  | `null`                                 | Unconstrained | Signal strength μ, CR-driven background  |
-| `histosys`    | `{"hi_data": [...], "lo_data": [...]}` | Gaussian(α)   | JES, JER, generator comparisons          |
-| `normsys`     | `{"hi": float, "lo": float}`           | Gaussian(α)   | Luminosity, cross-section uncertainty    |
-| `staterror`   | `[abs_unc_per_bin]`                    | Gaussian(γ)   | MC statistical (Barlow–Beeston lite)     |
-| `shapesys`    | `[abs_unc_per_bin]`                    | Poisson(γ)    | Uncorrelated per-bin shape               |
-| `lumi`        | `null`                                 | Gaussian(λ)   | Luminosity (global, set via measurement) |
-| `shapefactor` | `null`                                 | Unconstrained | Data-driven shape (free per-bin γ)       |
-
-## Measurement Configuration
-
-Override parameter defaults in `measurements[].config.parameters`:
-
-```json
-{
-  "name": "fit",
-  "config": {
-    "poi": "mu",
-    "parameters": [
-      {
-        "name": "lumi",
-        "auxdata": [1.0],
-        "sigmas": [0.017],
-        "bounds": [[0.915, 1.085]],
-        "inits": [1.0]
-      },
-      { "name": "mu_bkg", "bounds": [[0.5, 2.0]] },
-      { "name": "some_np", "fixed": true }
-    ]
-  }
-}
-```
-
-Available overrides: `inits` (initial values), `bounds` (parameter limits),
-`auxdata` (constraint central values), `sigmas` (constraint widths), `fixed`
-(hold constant during fit).
-
 ## Worked Example: ttbar search with one CR
 
 ```python
@@ -389,7 +384,6 @@ print(f"Expected: {exp_limits[2]:.2f} (+1σ: {exp_limits[3]:.2f}, −1σ: {exp_l
   precision loss in fits.
 - Set the backend **before** building the model; switching backends mid-fit is
   not supported.
-- All ATLAS energy and momentum values are in **MeV**.
 
 ## Interop
 
