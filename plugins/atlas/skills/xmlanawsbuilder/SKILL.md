@@ -30,7 +30,51 @@ and
 xmlAnaWSBuilder is included in the StatAnalysis release. It can also be built
 standalone from: https://gitlab.cern.ch/atlas-hgam-sw/xmlAnaWSBuilder
 
-## Running XMLReader
+## When to Use
+
+- Building an analytic signal or background model for an ATLAS analysis (e.g.
+  H→γγ with double-sided Crystal Ball signal and polynomial or power-law
+  background)
+- Constructing a counting experiment workspace where no shape information is
+  needed
+- Combining multiple analysis categories into a joint likelihood workspace for
+  downstream fitting with quickFit or workspaceCombiner
+- Implementing a blinded analysis with a configurable veto range in the
+  observable
+- Configuring and correlating systematic uncertainties (yield or shape NPs)
+  across categories using the XML card system
+
+## Key Concepts
+
+### Three-Level XML Structure
+
+```text
+top-level card (.xml)
+  └── category-level cards (one per analysis category)
+        └── pdf-level cards (one per physics process per category)
+```
+
+`AnaWSBuilder.dtd` must be present alongside every XML card file.
+
+### XML Keywords
+
+| Keyword                     | Meaning                                                  |
+| --------------------------- | -------------------------------------------------------- |
+| `response::<NP>`            | Response function for NP (in same domain)                |
+| `:category:`                | Replaced by current category name                        |
+| `:observable:`              | Observable name of current category                      |
+| `:process:`                 | Name of current Sample                                   |
+| `:common:`                  | All ungrouped common systematics                         |
+| `:self:`                    | Only process-specific systematics; suppresses `:common:` |
+| `:lt:` `:le:` `:gt:` `:ge:` | `<` `<=` `>` `>=` (XML-safe math symbols)                |
+| `:and:` `:or:`              | Logic operators for ntuple cuts                          |
+
+`RooFormulaVar` must use indexed syntax `@0, @1, ...` — never variable names
+(renaming during workspace creation breaks name-based references).
+
+## Canonical Patterns
+
+### Running XMLReader
 
 ```bash
 XMLReader -x config/myanalysis/top.xml
@@ -51,17 +95,7 @@ XMLReader -x config/top.xml -v               # verbose debug output
 | `-b` / `--binned`             | Fit to binned (pseudo-binned) dataset |
 | `-o` / `--plotOption`         | Plot options (e.g. `logy`, `rebin10`) |
 
-## Three-Level XML Structure
-
-```
-top-level card (.xml)
-  └── category-level cards (one per analysis category)
-        └── pdf-level cards (one per physics process per category)
-```
-
-`AnaWSBuilder.dtd` must be present alongside every XML card file.
-
-## Top-Level Card
+### Top-Level Card
 
 ```xml
 <!DOCTYPE Combination SYSTEM 'AnaWSBuilder.dtd'>
@@ -86,7 +120,7 @@ top-level card (.xml)
 For blinded analysis set `Blind="true"` and add `BlindRange` to each `Data` node
 (see [Blinded Analysis](#blinded-analysis)).
 
-### Asimov action keywords
+#### Asimov action keywords
 
 | Keyword           | Meaning                                                         |
 | ----------------- | --------------------------------------------------------------- |
@@ -101,7 +135,7 @@ For blinded analysis set `Blind="true"` and add `BlindRange` to each `Data` node
 | `float`           | Float NPs fixed by `fixsyst` or `Setup`                         |
 | `<snapshot name>` | Load a saved snapshot                                           |
 
-## Category-Level Card
+### Category-Level Card
 
 ```xml
 <!DOCTYPE Channel SYSTEM 'AnaWSBuilder.dtd'>
@@ -133,7 +167,7 @@ For blinded analysis set `Blind="true"` and add `BlindRange` to each `Data` node
 </Channel>
 ```
 
-### Data node attributes
+#### Data node attributes
 
 | Attribute     | Description                                           |
 | ------------- | ----------------------------------------------------- |
@@ -151,7 +185,7 @@ For blinded analysis set `Blind="true"` and add `BlindRange` to each `Data` node
 Choose fine enough `Binning` — typically 10× smaller than detector resolution.
 The pseudo-binned dataset introduces bias if bins are too coarse.
 
-### Systematic node attributes
+#### Systematic node attributes
 
 | Attribute      | Description                                                        |
 | -------------- | ------------------------------------------------------------------ |
@@ -174,7 +208,7 @@ The pseudo-binned dataset introduces bias if bins are too coarse.
 Signs in `Mag` matter — always follow the sign convention of the upstream tool.
 For `asym`, only the sign of the upper uncertainty is used.
 
-### Sample node attributes
+#### Sample node attributes
 
 | Attribute                      | Description                                                                           |
 | ------------------------------ | ------------------------------------------------------------------------------------- |
@@ -185,13 +219,13 @@ For `asym`, only the sign of the upper uncertainty is used.
 | `SharePdf`                     | All processes with the same value share a single PDF                                  |
 | `Norm`, `XSection`, `BR`, etc. | Pre-defined constant scale factors on yield                                           |
 
-### NormFactor and ShapeFactor
+#### NormFactor and ShapeFactor
 
 - `NormFactor`: multiplied automatically to process yield.
 - `ShapeFactor`: available as a building block but not auto-multiplied; user
   must incorporate it explicitly.
 
-## PDF-Level Card
+### PDF-Level Card
 
 ```xml
 <!DOCTYPE Model SYSTEM 'AnaWSBuilder.dtd'>
@@ -215,23 +249,7 @@ For an externally provided PDF (e.g. from HistFactory):
 
 Keep observable name consistent with HistFactory when importing external PDFs.
 
-## XML Keywords
-
-| Keyword                     | Meaning                                                  |
-| --------------------------- | -------------------------------------------------------- |
-| `response::<NP>`            | Response function for NP (in same domain)                |
-| `:category:`                | Replaced by current category name                        |
-| `:observable:`              | Observable name of current category                      |
-| `:process:`                 | Name of current Sample                                   |
-| `:common:`                  | All ungrouped common systematics                         |
-| `:self:`                    | Only process-specific systematics; suppresses `:common:` |
-| `:lt:` `:le:` `:gt:` `:ge:` | `<` `<=` `>` `>=` (XML-safe math symbols)                |
-| `:and:` `:or:`              | Logic operators for ntuple cuts                          |
-
-`RooFormulaVar` must use indexed syntax `@0, @1, ...` — never variable names
-(renaming during workspace creation breaks name-based references).
-
-## Counting Experiments
+### Counting Experiments
 
 ```xml
 <Channel Name="sr" Type="counting" Lumi="20.3">
@@ -245,7 +263,7 @@ Keep observable name consistent with HistFactory when importing external PDFs.
 - `Binning` is always 1 and is ignored if provided.
 - `NumData` attribute sets event count directly without a data file.
 
-## Blinded Analysis
+### Blinded Analysis
 
 ```xml
 <!-- Top-level: enable blinding -->
@@ -288,8 +306,6 @@ Remove `SBLo` or `SBHi` if the blinded range touches the observable boundary.
   xmlAnaWSBuilder.
 - **StatAnalysis**: `XMLReader` is available after
   `asetup StatAnalysis,0.7,latest`.
-
-## Support
 
 Contact: xmlanawsbuilder-user@cern.ch
 
