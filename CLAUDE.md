@@ -16,12 +16,27 @@ plugins/
 
 The root `skills/` directory is unused — all skills live under `plugins/`.
 
+## Skills for skill authoring
+
+When authoring or editing skill files in this repository, invoke these installed
+skills for authoritative guidance before writing:
+
+- `plugin-dev:skill-development` — SKILL.md structure, frontmatter rules,
+  progressive disclosure (SKILL.md vs references/ vs scripts/), trigger-phrase
+  writing, and the full creation/validation/iteration workflow
+- `superpowers-developing-for-claude-code:developing-claude-code-plugins` —
+  plugin layout, dev-marketplace testing, and release process
+- `superpowers-developing-for-claude-code:working-with-claude-code` — official
+  Claude Code documentation reference for hooks, MCP, settings, and CLI
+
 ## Adding a skill
 
 1. Create `plugins/<plugin>/skills/<skill-name>/SKILL.md`.
 2. No changes to `marketplace.json` are needed — skills are discovered
    automatically from the `"skills": "./skills/"` path declared per plugin.
-3. Run `pixi run pre-commit` to catch JSON/YAML/Markdown formatting issues.
+3. Stage the new files.
+4. Run `pixi run pre-commit` to catch JSON/YAML/Markdown formatting issues.
+5. Run `pixi run check-skills` to catch updates needed from new skills.
 
 **Skill frontmatter rules (strictly enforced by Claude Code):**
 

@@ -9,6 +9,7 @@ description: >-
   plots. Handles ATLAS Open Data and full-collaboration datasets. Use
   atlas-analysis-architect first to produce a specification when starting a new
   analysis from scratch.
+readme_description: Writes Python analysis code (uproot, ServiceX, coffea, hist)
 tools: Glob, Grep, Read, Edit, Write, Skill, Bash
 model: sonnet
 color: red
