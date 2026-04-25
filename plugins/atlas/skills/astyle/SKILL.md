@@ -220,10 +220,12 @@ myText(0.2, 0.78, 1, "#sqrt{s} = 13.6 TeV");
   macros — see the setupatlas skill for environment setup.
 - **ROOT**: atlasrootstyle targets ROOT 6; functions use ROOT C++ types
   (`TCanvas`, `TH1`, `TLegend`).
-- **hist / uproot / matplotlib**: For Python-native plotting, the
-  [atlas-mpl-style](https://github.com/atlas-open-data/atlas-mpl-style) package
-  provides equivalent ATLAS styling for matplotlib — atlasrootstyle is
-  ROOT-specific.
+- **mplhep (matplotlib)**: For Python-native plotting with matplotlib, the
+  mplhep skill covers `mplhep.style.use("ATLAS")` and `mplhep.atlas.label()` —
+  the matplotlib equivalent of `SetAtlasStyle` and `ATLASLabel`. The label
+  categories and publication policy rules are identical across both tools.
+- **hist / uproot**: Use with mplhep for a pure-Python plotting workflow;
+  atlasrootstyle is ROOT-specific.
 
 ## Docs
 
