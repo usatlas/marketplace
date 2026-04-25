@@ -77,6 +77,7 @@ software orientation.
 | `iminuit`               | You need to minimize a scalar cost function in Python using MINUIT2 via iminuit |
 | `lcgenv`                | Setting up standalone LCG (CERN SFT) software packages via lcgenv or views:     |
 | `managetier3sw`         | Installing, updating, or removing ATLAS software on a local Tier-3 cluster      |
+| `mplhep`                | Creating ATLAS publication-quality plots with matplotlib using mplhep           |
 | `panda`                 | Submitting ATLAS grid jobs with prun or pathena, monitoring tasks with pbook or |
 | `particle`              | Looking up particle properties (mass, charge, PDG ID, lifetime, width) from the |
 | `pyhepmc`               | Reading or writing HepMC3 event records in Python                               |
@@ -141,7 +142,7 @@ plugins/
     .claude-plugin/plugin.json
     .mcp.json
     agents/  # 5 subagents
-    skills/  # 42 skills
+    skills/  # 43 skills
     VENDORED-LICENSES.md
   hep-python-tools/
     .claude-plugin/plugin.json
