@@ -9,7 +9,7 @@ version = "0.1.0"
 pre-commit = { cmd = "pre-commit run --all-files", description = "Run pre-commit hooks on all files" }
 sync-skills = { cmd = "python scripts/sync_skills.py && pre-commit run --all-files", description = "Sync README with current plugins/skills and reformat" }
 lint-skills = { cmd = "python scripts/lint_skills.py", description = "Check SKILL.md section ordering" }
-check-skills = { cmd = "git diff --exit-code", depends-on = [ "lint-skills", "sync-skills", "pre-commit" ], description = "CI: lint skills and verify README is up to date" }
+check-skills = { cmd = "pre-commit run -a || echo '' && git diff --exit-code", depends-on = [ "lint-skills", "sync-skills", "pre-commit" ], description = "CI: lint skills and verify README is up to date" }
 
 [dependencies]
 pre-commit = ">=4.5.1,<5"
