@@ -82,21 +82,19 @@ each suite; the suite checks results against reference values.
 ### Setup on Servers with /cvmfs
 
 Works on CERN lxplus, ATLAS analysis facilities (AF-US, AF-UK, etc.), SWAN, and
-any tier-3 site with `/cvmfs/atlas.cern.ch` mounted.
+any tier-3 site with `/cvmfs/atlas.cern.ch` mounted. First make `asetup`
+available via `setupATLAS` (see the setupatlas skill for full details):
 
 ```bash
-# Make asetup available (on lxplus just run: setupATLAS)
-export ATLAS_LOCAL_ROOT_BASE=/cvmfs/atlas.cern.ch/repo/ATLASLocalRootBase
-source ${ATLAS_LOCAL_ROOT_BASE}/user/atlasLocalSetup.sh --quiet
+setupATLAS   # or source ATLASLocalRootBase manually — see setupatlas skill
+```
 
-# Latest nightly of a branch
-asetup StatAnalysis,0.7,latest
+Then set up the desired StatAnalysis release:
 
-# Latest stable of a branch
-asetup --stable StatAnalysis,0.7,latest
-
-# Specific release
-asetup StatAnalysis,0.7.3
+```bash
+asetup StatAnalysis,0.7,latest          # latest nightly of a branch
+asetup --stable StatAnalysis,0.7,latest # latest stable of a branch
+asetup StatAnalysis,0.7.3               # specific release
 ```
 
 After setup, `$STATCHALLENGES` is automatically set to the CVMFS challenges
@@ -118,11 +116,10 @@ Tags follow the branch name (e.g. `0.7`, `0.7.3`, `main`).
 
 ### Using StatAnalysis in SWAN (Jupyter)
 
-Create a setup script containing:
+Create a SWAN session setup script with the `asetup` call for the desired branch
+(see the setupatlas skill for how to structure SWAN setup scripts):
 
 ```bash
-export ATLAS_LOCAL_ROOT_BASE=/cvmfs/atlas.cern.ch/repo/ATLASLocalRootBase
-source ${ATLAS_LOCAL_ROOT_BASE}/user/atlasLocalSetup.sh
 asetup StatAnalysis,0.7,latest
 ```
 
