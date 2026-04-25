@@ -230,15 +230,10 @@ setupATLAS -c el9 --postsetup "source ~/mysetup.sh"
    asetup StatAnalysis,0.7,latest
    ```
 
-5. Create a container-specific login script so future shells auto-configure:
-
-   ```bash
-   cat > $HOME/.bashrc.container << 'EOF'
-   # Container-specific setup
-   export ATLAS_LOCAL_ROOT_BASE=/cvmfs/atlas.cern.ch/repo/ATLASLocalRootBase
-   alias setupATLAS='source $ATLAS_LOCAL_ROOT_BASE/user/atlasLocalSetup.sh'
-   EOF
-   ```
+5. Create a container-specific login script so future shells auto-configure. Add
+   the standard setupATLAS initialization (see the setupatlas skill) to
+   `$HOME/.bashrc.container` — container shells source this file instead of
+   `~/.bashrc`.
 
 6. Run the analysis:
 
