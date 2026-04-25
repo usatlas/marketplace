@@ -1,9 +1,8 @@
 # StatChallenges Implementation Guide
 
-StatChallenges is a pytest-based framework for comparing statistical
-toolkit implementations. It lives in the StatAnalysis repository under
-`Challenges/` and is installed to `$STATCHALLENGES` (set automatically
-after `asetup`).
+StatChallenges is a pytest-based framework for comparing statistical toolkit
+implementations. It lives in the StatAnalysis repository under `Challenges/` and
+is installed to `$STATCHALLENGES` (set automatically after `asetup`).
 
 ## Writing an Implementation
 
@@ -23,14 +22,14 @@ asetup StatAnalysis,latest,main
 pytest $STATCHALLENGES/suites/test_hist.py --help
 ```
 
-This prints the required function signature, parameters, and return
-dictionary keys.
+This prints the required function signature, parameters, and return dictionary
+keys.
 
 ### Step 3: Write the Solver
 
-Create a local Python file (e.g., `my_toolkit_impl.py`). Define the
-required function with the exact signature from `--help`. The function
-must return a dictionary of computed quantities.
+Create a local Python file (e.g., `my_toolkit_impl.py`). Define the required
+function with the exact signature from `--help`. The function must return a
+dictionary of computed quantities.
 
 Example skeleton for `test_hist.py`:
 
@@ -76,11 +75,11 @@ pytest $STATCHALLENGES/suites/test_hist.py \
 Implementation files may be:
 
 - Local files (path to `.py`)
-- Installed implementations (discovered from `STATANA_IMPL_DIR` or
-  `DATAPATH` environment variables)
+- Installed implementations (discovered from `STATANA_IMPL_DIR` or `DATAPATH`
+  environment variables)
 
-Comparison mode is essential for test answers that lack a reference
-value — passing is based on whether the answer matches the majority.
+Comparison mode is essential for test answers that lack a reference value —
+passing is based on whether the answer matches the majority.
 
 ## Available Suites
 
@@ -92,12 +91,12 @@ pytest $STATCHALLENGES --ls
 
 Current suites include:
 
-- **test_2bin**: Simple two-bin model with post-fit μ calculation.
-  Function: `compute_postfit_mu(bkg_yield, sig_yield_nominal,
-  observed_events)` → `{"mu_hat", "mu_hat_err"}`
-- **test_hist**: Multi-bin histogram model with limit calculation.
-  Function: `compute_simple_histogram_model_limit(hist_file_path)` →
-  yields, uncertainties, NLL values, CLs limits
+- **test_2bin**: Simple two-bin model with post-fit μ calculation. Function:
+  `compute_postfit_mu(bkg_yield, sig_yield_nominal, observed_events)` →
+  `{"mu_hat", "mu_hat_err"}`
+- **test_hist**: Multi-bin histogram model with limit calculation. Function:
+  `compute_simple_histogram_model_limit(hist_file_path)` → yields,
+  uncertainties, NLL values, CLs limits
 
 ## Test Result Evaluation
 
@@ -155,11 +154,11 @@ def test_my_test():
 
 - Test functions must start with `test_` and return a dictionary with
   `"subject_fn"`, `"args"`, and `"solution"` keys
-- The `"solution"` is a callable that receives the same args and returns
-  the reference dictionary. Set to `None` if no analytic reference
-  exists (comparison mode only)
-- Use Python docstrings extensively — the framework extracts them to
-  generate the `--help` output
+- The `"solution"` is a callable that receives the same args and returns the
+  reference dictionary. Set to `None` if no analytic reference exists
+  (comparison mode only)
+- Use Python docstrings extensively — the framework extracts them to generate
+  the `--help` output
 
 ### Step 3: Test Locally
 
@@ -169,8 +168,8 @@ pytest $STATCHALLENGES/suites/test_my_challenge.py --impls my_impl.py
 
 ## Environment Variables
 
-| Variable             | Description |
-| -------------------- | ----------- |
-| `STATCHALLENGES`     | Path to challenges directory (set automatically by asetup) |
-| `STATANA_IMPL_DIR`   | Additional directories to search for implementation files |
-| `PRIMARY_IMPL`       | If set, only this implementation's results affect exit status |
+| Variable           | Description                                                   |
+| ------------------ | ------------------------------------------------------------- |
+| `STATCHALLENGES`   | Path to challenges directory (set automatically by asetup)    |
+| `STATANA_IMPL_DIR` | Additional directories to search for implementation files     |
+| `PRIMARY_IMPL`     | If set, only this implementation's results affect exit status |
