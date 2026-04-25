@@ -13,14 +13,56 @@ description: >-
 
 ## Overview
 
-`setupATLAS` is the entry point to the ATLAS Local Root Base (ATLR/ALRB), a
+`setupATLAS` is the entry point to the ATLAS Local Root Base (ALRB), a
 CVMFS-based framework that provides versioned ATLAS software releases and
 individual tools. After running `setupATLAS`, the `asetup` and `lsetup` commands
 become available.
 
-## Getting the setupATLAS Command
+## When to Use
 
-On machines with CVMFS (lxplus, tier-3 sites):
+- Setting up any ATLAS software on a server with `/cvmfs/atlas.cern.ch` mounted
+  (lxplus, ATLAS analysis facilities, tier-3 sites, SWAN)
+- Getting standalone access to ROOT, rucio, panda, pyami, scikit-hep, or LCG
+  views via `lsetup` — without loading a full ATLAS release
+- Configuring a full ATLAS, Athena, AnalysisBase, or StatAnalysis software
+  release for development or analysis via `asetup`
+- Managing source packages, building with cmake, and running tests via `acm`
+- Submitting grid jobs or accessing distributed ATLAS data via rucio and panda
+- Finding the right mailing list for ATLAS software support
+
+## Key Concepts
+
+**ALRB (ATLASLocalRootBase)**: A CVMFS-based layered environment at
+`/cvmfs/atlas.cern.ch/repo/ATLASLocalRootBase`. Sourcing `atlasLocalSetup.sh`
+bootstraps the environment and exposes `asetup` and `lsetup`. The `setupATLAS`
+alias is a shorthand for this step once configured in `~/.bashrc`.
+
+**Tool categories:**
+
+| Tool category         | Command                      | Purpose                                          |
+| --------------------- | ---------------------------- | ------------------------------------------------ |
+| Environment bootstrap | `setupATLAS`                 | Sources ALRB, exposes asetup/lsetup              |
+| Individual tools      | `lsetup <tool>`              | Standalone ROOT, rucio, panda, LCG views, etc.   |
+| Full releases         | `asetup <project>,<version>` | Athena, AnalysisBase, StatAnalysis, etc.         |
+| Build system          | `acm` / `acmSetup`           | cmake/git package management on top of a release |
+| Grid tools            | `rucio`, `panda`             | Distributed data and job management              |
+
+**Session persistence**: `asetup` saves the active session to
+`$PWD/.asetup.save`. Running `asetup` with no arguments re-applies it in a new
+shell. Use `asetup --printLast` to inspect saved state.
+
+**Platform strings**: `<arch>-<os>-<compiler>-<mode>`, e.g.
+`x86_64-el9-gcc13-opt`. Controlled via `--platform`, `--os`, `--gccversion`,
+`--opt`/`--dbg` flags to `asetup`.
+
+See `references/asetup.md` for the full asetup option reference, configuration
+file format, and environment variables.
+
+## Canonical Patterns
+
+### Getting setupATLAS
+
+On servers with `/cvmfs/atlas.cern.ch` mounted (lxplus, tier-3):
 
 ```bash
 export ATLAS_LOCAL_ROOT_BASE=/cvmfs/atlas.cern.ch/repo/ATLASLocalRootBase
@@ -29,19 +71,16 @@ source ${ATLAS_LOCAL_ROOT_BASE}/user/atlasLocalSetup.sh
 setupATLAS
 ```
 
-On lxplus7/CentOS7 hosts that need EL9 containers:
+On lxplus7/CentOS7 hosts that need an EL9 container:
 
 ```bash
 setupATLAS -c el9
 ```
 
-Documentation:
-https://twiki.atlas-canada.ca/bin/view/AtlasCanada/ATLASLocalRootBase2
+### Setting Up Individual Tools with lsetup
 
-## lsetup — Setting Up Individual Tools
-
-`lsetup` sets up one or more individual tools in the current shell. Tools can be
-listed in sequence; use quotes for tools with version specifiers.
+`lsetup` configures one or more tools in the current shell without loading a
+full ATLAS release. Use quotes for tools with version specifiers.
 
 ```bash
 lsetup root              # latest ROOT
@@ -73,7 +112,7 @@ See all available versions with `lsetup <tool> -h` or `showVersions`.
 | `astyle`   | ATLAS ROOT style macros                | https://gitlab.cern.ch/atlas-publications-committee/atlasrootstyle |
 | `eiclient` | Event Index client                     | https://twiki.cern.ch/twiki/bin/view/AtlasComputing/EventIndex     |
 
-## asetup — ATLAS Software Releases
+### Configuring an ATLAS Release with asetup
 
 `asetup` configures a full ATLAS release (Athena, AnalysisBase, AnalysisTop,
 StatAnalysis, etc.) in the current shell. Arguments can be separated by spaces
@@ -119,56 +158,36 @@ Key environment variables set by `asetup`:
 
 User configuration can be stored in `~/.asetup` or `$PWD/.asetup` (INI format
 with `[defaults]`, `[aliases]`, `[environment]`, `[epilog.sh]` sections). See
-`references/asetup.md` for configuration file details.
+`references/asetup.md` for details.
 
 Quick start: https://twiki.cern.ch/twiki/bin/viewauth/AtlasComputing/AtlasSetup
 Full reference:
 https://twiki.cern.ch/twiki/bin/view/AtlasComputing/AtlasSetupReference
 
-## acm — ATLAS Package Management
+### Package Management with acm
 
-`acm` (AtlasACM) is the ATLAS cmake/git build tool. It wraps `asetup` and
-manages source checkouts, compilation, and testing. Available automatically
-after `setupATLAS`.
-
-### Setup a release with a source area
+`acm` (AtlasACM) is the ATLAS cmake/git build tool that wraps `asetup` and
+manages source checkouts, compilation, and testing.
 
 ```bash
+# Set up a release with a source area
 mkdir source build && cd build
 acmSetup --sourcearea=../source AnalysisBase,24.2,latest
 # or from a GitLab repo:
 acmSetup --sourcerepo=myuser/myrepo AthAnalysis,21.2.14
-```
 
-`acmSetup` calls `asetup`, creates `CMakeLists.txt` in the source area if
-needed, configures the cmake project, and sources `setup.sh`.
+# Restore setup in subsequent shells
+cd build && acmSetup
 
-### Subsequent setups (same release)
-
-```bash
-cd build && acmSetup   # re-sources the last setup
-```
-
-### Core acm workflow
-
-```bash
-# Add packages from athena (sparse clone first, then add)
+# Add and compile packages
 acm sparse_clone_project athena          # sparse-checkout athena
 acm add_pkg athena/Control/AthenaCommon  # include package in build
-
-# Clone an entire private fork
-acm clone_project will/MyAnalysis
+acm clone_project will/MyAnalysis        # clone entire private fork
 acm add_pkg MyAnalysis/.*               # add all packages
-
-# Compile
 acm compile                             # build everything
 acm compile_pkg MyPackage               # build single package
-
-# Create a new skeleton analysis package
-acm new_skeleton MyPackage              # creates algorithm + joboption
+acm new_skeleton MyPackage              # create skeleton analysis package
 ```
-
-### Full acm command reference
 
 | Command                           | Description                                       |
 | --------------------------------- | ------------------------------------------------- |
@@ -190,12 +209,11 @@ acm new_skeleton MyPackage              # creates algorithm + joboption
 
 Contact: atlas-sw-acm-users@cern.ch
 
-## rucio — Data Management
+### Grid Data Access (rucio, panda)
 
 ```bash
 lsetup rucio
-# Requires a valid VOMS proxy:
-voms-proxy-init --voms atlas
+voms-proxy-init --voms atlas   # required before all grid operations
 
 rucio list-dids "user.myname:*"          # list your datasets
 rucio download scope:dataset              # download a dataset
@@ -205,19 +223,17 @@ rucio add-rule scope:dataset 1 SITE_SCRATCHDISK  # create replication rule
 
 Contact: hn-atlas-dist-analysis-help@cern.ch WebUI: https://rucio-ui.cern.ch
 
-## panda — Grid Job Submission
-
 ```bash
 lsetup panda
 pathena MyJobOptions.py --inDS scope:input_dataset --outDS user.me.output
 prun --exec "my_command %IN" --inDS scope:input --outDS user.me.output
-bigpanda  # monitoring at https://bigpanda.cern.ch
+# bigpanda monitoring at https://bigpanda.cern.ch
 ```
 
-Contact: hn-atlas-dist-analysis-help@cern.ch Monitor: https://bigpanda.cern.ch
+Contact: hn-atlas-dist-analysis-help@cern.ch Monitor: https://bigpanda.cern.ch |
 Docs: https://panda-wms.readthedocs.io
 
-## pyami — Dataset Metadata
+### Dataset Metadata with pyami
 
 ```bash
 lsetup pyami
@@ -228,7 +244,7 @@ ami list datasets --project mc20_13TeV --type EVNT "*Ztautau*"
 
 Contact: atlas-bookkeeping@cern.ch
 
-## Additional Commands
+### Utility Commands
 
 ```bash
 showVersions            # show installed software versions
@@ -258,7 +274,20 @@ helpMe                  # extended help with all tool documentation
   asetup, re-sourcing with `asetup` or `acmSetup` (no arguments) re-applies the
   saved configuration.
 
-## Support Contacts
+## Interop
+
+- **StatAnalysis**: `asetup StatAnalysis,0.7,latest` gives access to xRooFit,
+  TRExFitter, cabinetry, quickFit, and the full ATLAS statistics toolkit — see
+  the statanalysis skill.
+- **xRooFit**: Available in all StatAnalysis releases via `import ROOT as XRF` —
+  see the xroofit skill.
+- **pyhf / cabinetry**: Available as Python packages within StatAnalysis — see
+  the pyhf and cabinetry skills.
+- **XRootD / fsspec-xrootd**: `lsetup xrootd` provides standalone XRootD access
+  for reading remote files — see the fsspec-xrootd skill for Python integration.
+- **ATLAS analysis facilities**: setupATLAS is pre-configured on CERN lxplus,
+  ATLAS AF-US, AF-UK, and SWAN; tier-3 sites that mount `/cvmfs/atlas.cern.ch`
+  work identically.
 
 | Domain                                        | Mailing list                        |
 | --------------------------------------------- | ----------------------------------- |

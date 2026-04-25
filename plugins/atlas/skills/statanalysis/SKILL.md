@@ -21,7 +21,21 @@ and compiled external packages, available on CVMFS and as Docker images.
 
 Repository: https://gitlab.cern.ch/atlas/StatAnalysis
 
-## Branches and Platform Support
+## When to Use
+
+- Setting up a reproducible ATLAS statistics environment that includes ROOT,
+  xRooFit, TRExFitter, cabinetry, quickFit, and other tools in one `asetup` call
+- Deciding which StatAnalysis branch to use for a given ROOT version or
+  operating system (EL9 vs CentOS7)
+- Running a Docker-based StatAnalysis environment on a local machine, CI, or
+  cluster without `/cvmfs` access
+- Using SWAN (CERN Jupyter service) for interactive ATLAS statistical analysis
+- Validating a statistical toolkit implementation against the StatChallenges
+  test suite
+
+## Key Concepts
+
+### Branches and Platform Support
 
 | Branch | ROOT version | Platform      | Status          |
 | ------ | ------------ | ------------- | --------------- |
@@ -35,7 +49,36 @@ Repository: https://gitlab.cern.ch/atlas/StatAnalysis
 Use branch 0.7 for all new work. CentOS7 nodes require either `lxplus7.cern.ch`
 or `setupATLAS -c el9` to use the EL9 container.
 
-## Setup on Servers with /cvmfs
+### Included Tools
+
+| Tool               | Description                                        | Usage after asetup                               |
+| ------------------ | -------------------------------------------------- | ------------------------------------------------ |
+| ROOT + RooFit      | Data analysis framework with statistical modelling | `import ROOT`                                    |
+| xRooFit            | High-level RooFit API (see xroofit skill)          | `import ROOT as XRF`                             |
+| TRExFitter         | HistFactory profile-likelihood fitter              | `trex-fitter <actions> config.config`            |
+| HistFitter         | Predecessor to TRExFitter, still supported         | `HistFitter.py -w -f config.py`                  |
+| cabinetry          | Python HistFactory builder and visualizer          | `import cabinetry`                               |
+| quickFit           | Rapid workspace fitting utility                    | `quickFit -f ws.root`                            |
+| quickstats         | Python statistical analysis tools                  | `import quickstats`                              |
+| RooUnfold          | Unfolding package                                  | `import ROOT; ROOT.gSystem.Load("libRooUnfold")` |
+| workspaceCombiner  | Combine HistFactory workspaces                     | `manager -w combine -x card.xml`                 |
+| xmlAnaWSBuilder    | Build workspaces from XML configurations           | `XMLReader -x config.xml`                        |
+| CMSCombine         | CMS Combine tool (for combination studies)         |                                                  |
+| CommonStatTools    | Common ATLAS statistical utilities                 |                                                  |
+| BootstrapGenerator | Bootstrap uncertainty estimation                   |                                                  |
+| RooFitExtensions   | Additional RooFit classes                          |                                                  |
+| PyAnalysis tools   | numpy, scipy, matplotlib, pandas, uproot, etc.     | `import numpy`                                   |
+
+### StatChallenges Framework
+
+StatChallenges is a pytest-based test suite for comparing statistical toolkit
+implementations. It lives at `$STATCHALLENGES` (set automatically after
+`asetup`). Implementations provide a function with the signature required by
+each suite; the suite checks results against reference values.
+
+## Canonical Patterns
+
+### Setup on Servers with /cvmfs
 
 Works on CERN lxplus, ATLAS analysis facilities (AF-US, AF-UK, etc.), SWAN, and
 any tier-3 site with `/cvmfs/atlas.cern.ch` mounted.
@@ -58,7 +101,7 @@ asetup StatAnalysis,0.7.3
 After setup, `$STATCHALLENGES` is automatically set to the CVMFS challenges
 directory.
 
-## Setup via Docker
+### Setup via Docker
 
 ```bash
 # Interactive session
@@ -72,7 +115,7 @@ docker run --pull always -e DISPLAY=host.docker.internal:0 -it \
 
 Tags follow the branch name (e.g. `0.7`, `0.7.3`, `main`).
 
-## Using StatAnalysis in SWAN (Jupyter)
+### Using StatAnalysis in SWAN (Jupyter)
 
 Create a setup script containing:
 
@@ -84,30 +127,7 @@ asetup StatAnalysis,0.7,latest
 
 Use that script as the SWAN session setup script at https://swan.cern.ch.
 
-## Included Tools
-
-| Tool               | Description                                        | Usage after asetup                               |
-| ------------------ | -------------------------------------------------- | ------------------------------------------------ |
-| ROOT + RooFit      | Data analysis framework with statistical modelling | `import ROOT`                                    |
-| xRooFit            | High-level RooFit API (see xroofit skill)          | `import ROOT as XRF`                             |
-| TRExFitter         | HistFactory profile-likelihood fitter              | `trex-fitter <actions> config.config`            |
-| HistFitter         | Predecessor to TRExFitter, still supported         | `HistFitter.py -w -f config.py`                  |
-| cabinetry          | Python HistFactory builder and visualizer          | `import cabinetry`                               |
-| quickFit           | Rapid workspace fitting utility                    | `quickFit -w ws.root`                            |
-| quickstats         | Python statistical analysis tools                  | `import quickstats`                              |
-| RooUnfold          | Unfolding package                                  | `import ROOT; ROOT.gSystem.Load("libRooUnfold")` |
-| workspaceCombiner  | Combine HistFactory workspaces                     | `workspaceCombiner ...`                          |
-| xmlAnaWSBuilder    | Build workspaces from XML configurations           |                                                  |
-| CMSCombine         | CMS Combine tool (for combination studies)         |                                                  |
-| CommonStatTools    | Common ATLAS statistical utilities                 |                                                  |
-| BootstrapGenerator | Bootstrap uncertainty estimation                   |                                                  |
-| RooFitExtensions   | Additional RooFit classes                          |                                                  |
-| PyAnalysis tools   | numpy, scipy, matplotlib, pandas, uproot, etc.     | `import numpy`                                   |
-
-## StatChallenges Framework
-
-StatChallenges is a test suite for comparing statistical toolkit
-implementations. It lives at `$STATCHALLENGES` after setup.
+### Running StatChallenges
 
 ```bash
 # List available challenge suites
@@ -133,7 +153,7 @@ the suite (shown in `--help`). The function returns a dictionary of computed
 quantities. To write a new suite, contribute to the `Challenges/suites/`
 directory of the StatAnalysis repository.
 
-## Building from Source
+### Building from Source
 
 ```bash
 # Requires modern cmake and gcc (e.g. cmake 4.0+, gcc 14.x on CVMFS)
@@ -178,11 +198,15 @@ cmake -DATLAS_BUILD_ROOT=OFF ...    # skip ROOT build (use system ROOT)
 ## Interop
 
 - **xRooFit**: Pre-compiled in all StatAnalysis releases; use
-  `import ROOT as XRF`.
+  `import ROOT as XRF`. See the xroofit skill.
 - **TRExFitter**: Available as `trex-fitter`; see the trexfitter skill.
 - **pyhf / cabinetry**: Both available as Python packages; see the pyhf and
   cabinetry skills.
+- **quickFit / workspaceCombiner / xmlAnaWSBuilder**: All available after
+  `asetup`; see the quickfit, workspacecombiner, and xmlanawsbuilder skills.
 - **uproot / awkward**: Available for Python-based I/O without ROOT.
+- **setupATLAS**: The entry point to load StatAnalysis on any server with
+  `/cvmfs/atlas.cern.ch`; see the setupatlas skill.
 
 ## Docs
 

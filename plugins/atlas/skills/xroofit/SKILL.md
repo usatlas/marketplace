@@ -20,6 +20,17 @@ significantly more concise. xRooFit ships pre-installed with ROOT ≥ 6.30 and i
 also distributed as part of the ATLAS
 [StatAnalysis](https://gitlab.cern.ch/atlas/StatAnalysis) release.
 
+## When to Use
+
+- Building HistFactory-style statistical models programmatically with Python or
+  C++ as an alternative to TRExFitter config files or HistFactory XML
+- Manipulating or inspecting workspaces produced by TRExFitter or HistFitter
+- Performing CLs upper limits, exclusion contours, or discovery significance
+  tests using asymptotic formulae on a RooFit workspace
+- Diagnosing fit convergence problems via status codes and covariance quality
+- Choosing ROOT/RooFit-based statistics over pyhf when C++ performance, custom
+  RooFit classes, or direct RooStats infrastructure access is required
+
 ## Setup
 
 ```python
