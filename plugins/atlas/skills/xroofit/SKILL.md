@@ -63,6 +63,7 @@ w["pdfs"]["simPdf"]["SR"]          # equivalent
 | Nuisance parameters (α) | ν      | `np()`          | Gaussian-constrained NPs                           |
 | Nuisance parameters (γ) | ν      | `np()`          | Poisson-constrained (MC-stat) NPs                  |
 | All parameters          | θ      | `pars()`        | Everything that is not an observable               |
+| Prespecified parameters |        | `pp()`          | Non-floatable (always constant) parameters         |
 | Floating                |        | `floats()`      | Currently floating subset                          |
 | Constant                |        | `consts()`      | Currently constant subset                          |
 
@@ -284,6 +285,21 @@ systErr = ROOT.TMath.Sqrt(totErr**2 - statErr**2)
   converting.
 - **Tolerance ≤ 10**: Setting `Tolerance > 10` has been observed to cause
   incorrect parameter uncertainties even with covQual=3.
+
+## Additional Resources
+
+For detailed content beyond this overview, consult the reference files:
+
+- **`references/workspace-building.md`** — Factor types (Const, Norm, Simple,
+  Density, Shape, Varied, Overall, Histo), interpolation codes, MC stat
+  handling, SetXaxis, log-normal constraints, SetBinData
+- **`references/fitting-diagnostics.md`** — Full fit config settings
+  (StrategySequence, HesseStrategy), impact/ranking (`fr.impact()`), conditional
+  uncertainties (Schur complement), stat/syst/mc-stat breakdown, Shifted GO
+  method, conditional fits (`fr.cfit()`)
+- **`references/hypothesis-testing.md`** — Test statistic definitions (tmu, qmu,
+  qmutilde, q0, u0), full verbose limit-setting example, toy-based limits, limit
+  troubleshooting, hypoPoint methods/fits tables, limit-setting checklist
 
 ## Interop
 

@@ -51,23 +51,24 @@ or `setupATLAS -c el9` to use the EL9 container.
 
 ### Included Tools
 
-| Tool               | Description                                        | Usage after asetup                               |
-| ------------------ | -------------------------------------------------- | ------------------------------------------------ |
-| ROOT + RooFit      | Data analysis framework with statistical modelling | `import ROOT`                                    |
-| xRooFit            | High-level RooFit API (see xroofit skill)          | `import ROOT as XRF`                             |
-| TRExFitter         | HistFactory profile-likelihood fitter              | `trex-fitter <actions> config.config`            |
-| HistFitter         | Predecessor to TRExFitter, still supported         | `HistFitter.py -w -f config.py`                  |
-| cabinetry          | Python HistFactory builder and visualizer          | `import cabinetry`                               |
-| quickFit           | Rapid workspace fitting utility                    | `quickFit -f ws.root`                            |
-| quickstats         | Python statistical analysis tools                  | `import quickstats`                              |
-| RooUnfold          | Unfolding package                                  | `import ROOT; ROOT.gSystem.Load("libRooUnfold")` |
-| workspaceCombiner  | Combine HistFactory workspaces                     | `manager -w combine -x card.xml`                 |
-| xmlAnaWSBuilder    | Build workspaces from XML configurations           | `XMLReader -x config.xml`                        |
-| CMSCombine         | CMS Combine tool (for combination studies)         |                                                  |
-| CommonStatTools    | Common ATLAS statistical utilities                 |                                                  |
-| BootstrapGenerator | Bootstrap uncertainty estimation                   |                                                  |
-| RooFitExtensions   | Additional RooFit classes                          |                                                  |
-| PyAnalysis tools   | numpy, scipy, matplotlib, pandas, uproot, etc.     | `import numpy`                                   |
+| Tool                    | Description                                        | Usage after asetup                               |
+| ----------------------- | -------------------------------------------------- | ------------------------------------------------ |
+| ROOT + RooFit           | Data analysis framework with statistical modelling | `import ROOT`                                    |
+| xRooFit                 | High-level RooFit API (see xroofit skill)          | `import ROOT as XRF`                             |
+| TRExFitter              | HistFactory profile-likelihood fitter              | `trex-fitter <actions> config.config`            |
+| HistFitter              | Predecessor to TRExFitter, still supported         | `HistFitter.py -w -f config.py`                  |
+| cabinetry               | Python HistFactory builder and visualizer          | `import cabinetry`                               |
+| quickFit                | Rapid workspace fitting utility                    | `quickFit -f ws.root`                            |
+| quickstats              | Python statistical analysis tools                  | `import quickstats`                              |
+| RooUnfold               | Unfolding package                                  | `import ROOT; ROOT.gSystem.Load("libRooUnfold")` |
+| workspaceCombiner       | Combine HistFactory workspaces                     | `manager -w combine -x card.xml`                 |
+| xmlAnaWSBuilder         | Build workspaces from XML configurations           | `XMLReader -x config.xml`                        |
+| CMSCombine              | CMS Combine tool (for combination studies)         |                                                  |
+| CommonStatTools         | Common ATLAS statistical utilities                 |                                                  |
+| BootstrapGenerator      | Bootstrap uncertainty estimation                   |                                                  |
+| RooFitExtensions        | Additional RooFit classes                          |                                                  |
+| SystematicSmoothingTool | Smoothing tool for systematic variations           |                                                  |
+| PyAnalysis tools        | numpy, scipy, matplotlib, pandas, uproot, etc.     | `import numpy`                                   |
 
 ### StatChallenges Framework
 
@@ -194,6 +195,14 @@ cmake -DATLAS_BUILD_ROOT=OFF ...    # skip ROOT build (use system ROOT)
   Install with `brew install openssl@1.1` and copy the pkg-config files.
 - **All energies in MeV**: Histograms from ATLAS reconstruction have axes in MeV
   (1 GeV = 1000 MeV). Convert explicitly if needed.
+
+## Additional Resources
+
+For detailed content beyond this overview, consult the reference files:
+
+- **`references/statchallenges-guide.md`** — Full implementation workflow
+  (writing solvers, comparing toolkits, writing new suites), test pattern
+  details, environment variables, available suites
 
 ## Interop
 
