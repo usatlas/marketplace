@@ -34,7 +34,9 @@ skills for authoritative guidance before writing:
 1. Create `plugins/<plugin>/skills/<skill-name>/SKILL.md`.
 2. No changes to `marketplace.json` are needed — skills are discovered
    automatically from the `"skills": "./skills/"` path declared per plugin.
-3. Run `pixi run pre-commit` to catch JSON/YAML/Markdown formatting issues.
+3. Stage the new files.
+4. Run `pixi run pre-commit` to catch JSON/YAML/Markdown formatting issues.
+5. Run `pixi run check-skills` to catch updates needed from new skills.
 
 **Skill frontmatter rules (strictly enforced by Claude Code):**
 
