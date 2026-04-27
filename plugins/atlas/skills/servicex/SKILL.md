@@ -38,26 +38,6 @@ ServiceX supports two query backends:
 - Analysis facility workflows where ATLAS grid access is not available locally
 - ATLAS Open Data workflows (atlasopenmagic-mcp provides dataset containers)
 
-## Setup
-
-**Install required packages:**
-
-```bash
-pip install servicex servicex-analysis-utils awkward
-# For FuncADL xAOD queries only:
-pip install func_adl_servicex_xaodr25
-```
-
-**Initialize the client (one-time per environment):**
-
-```bash
-servicex init
-```
-
-This launches a wizard: select your analysis facility, follow the sign-in link,
-copy the token from the page, and paste it when prompted. Accept the default
-downloads directory. You'll see "Configuration Complete" when done.
-
 ## Key Concepts
 
 | Concept                   | Notes                                                                                   |
@@ -76,6 +56,26 @@ downloads directory. You'll see "Configuration Complete" when done.
 |                           | only suitable for small datasets                                                        |
 
 ## Canonical Patterns
+
+### Setup
+
+**Install required packages:**
+
+```bash
+pip install servicex servicex-analysis-utils awkward
+# For FuncADL xAOD queries only:
+pip install func_adl_servicex_xaodr25
+```
+
+**Initialize the client (one-time per environment):**
+
+```bash
+servicex init
+```
+
+This launches a wizard: select your analysis facility, follow the sign-in link,
+copy the token from the page, and paste it when prompted. Accept the default
+downloads directory. You'll see "Configuration Complete" when done.
 
 ### Uproot Backend (NTuples — recommended starting point)
 
@@ -310,36 +310,6 @@ note that PHYSLITE has no uncalibrated objects.
 | Photons   | `e.Photons()`            |
 | MET       | `e.MissingETContainer()` |
 
-## Gotchas
-
-- **Units are MeV in xAOD**: `j.pt()` returns MeV. Divide by 1000 before any
-  GeV-scale comparisons or histograms.
-- **Units in UprootRaw cuts are native**: NTuple branch cuts use whatever units
-  are in the tree (often MeV for ATLAS NTuples — check your sample).
-- **Cache is aggressive**: If you fix a query bug but get the same result, use
-  `ignore_local_cache=True`. Do not use `ignore_cache=True` (old API, no-op).
-- **`NFiles=None` means all files**: `NFiles=0` behavior is undefined — use
-  `None` for full dataset or a positive integer for testing.
-- **Call `deliver` once**: Put all samples in one `ServiceXSpec`. Multiple
-  `deliver` calls waste round trips.
-- **No awkward in FuncADL queries**: Use `Select` / `Where` instead — awkward
-  functions are not available inside the lambda DSL.
-- **PHYSLITE vs PHYS collection names differ**: Using the wrong collection name
-  (e.g. `AntiKt4EMPFlowJets` on PHYSLITE) returns empty results silently.
-- **FuncADL requires `func_adl_servicex_xaodr25`**: Install separately; not
-  included in the base `servicex` package.
-- **FuncADL output tree is always `"servicex"`**: When opening FuncADL result
-  files with uproot, use `f["servicex"]`. For UprootRaw, the tree name is
-  whatever you set in the `treename` field of your query dict.
-- **Default output format is `root-ttree`**: This can silently fail on PHYSLITE
-  skims. Prefer `General={"OutputFormat": "root-rntuple"}` in all UprootRaw
-  specs.
-- **URL delivery expires**: Files served via `Delivery: URLs` typically expire
-  within 7 days or less. Download them if persistence beyond that is needed.
-- **Transform failures**: "Transform completed with failures" errors need the
-  user to click the provided link — only the job owner can see the logs. If you
-  see this after fixing type errors, involve the user.
-
 ## Worked Example — UprootRaw Histogram
 
 ```python
@@ -392,6 +362,36 @@ plt.show()
 | "Transform completed with failures"    | C++ error in backend                 | Involve user — only they can see logs                  |
 | "Method xxx not found on object"       | Wrong accessor for this derivation   | Check xAOD object schema for your type                 |
 | `servicex init` not found              | CLI not installed                    | `pip install servicex` then retry                      |
+
+## Gotchas
+
+- **Units are MeV in xAOD**: `j.pt()` returns MeV. Divide by 1000 before any
+  GeV-scale comparisons or histograms.
+- **Units in UprootRaw cuts are native**: NTuple branch cuts use whatever units
+  are in the tree (often MeV for ATLAS NTuples — check your sample).
+- **Cache is aggressive**: If you fix a query bug but get the same result, use
+  `ignore_local_cache=True`. Do not use `ignore_cache=True` (old API, no-op).
+- **`NFiles=None` means all files**: `NFiles=0` behavior is undefined — use
+  `None` for full dataset or a positive integer for testing.
+- **Call `deliver` once**: Put all samples in one `ServiceXSpec`. Multiple
+  `deliver` calls waste round trips.
+- **No awkward in FuncADL queries**: Use `Select` / `Where` instead — awkward
+  functions are not available inside the lambda DSL.
+- **PHYSLITE vs PHYS collection names differ**: Using the wrong collection name
+  (e.g. `AntiKt4EMPFlowJets` on PHYSLITE) returns empty results silently.
+- **FuncADL requires `func_adl_servicex_xaodr25`**: Install separately; not
+  included in the base `servicex` package.
+- **FuncADL output tree is always `"servicex"`**: When opening FuncADL result
+  files with uproot, use `f["servicex"]`. For UprootRaw, the tree name is
+  whatever you set in the `treename` field of your query dict.
+- **Default output format is `root-ttree`**: This can silently fail on PHYSLITE
+  skims. Prefer `General={"OutputFormat": "root-rntuple"}` in all UprootRaw
+  specs.
+- **URL delivery expires**: Files served via `Delivery: URLs` typically expire
+  within 7 days or less. Download them if persistence beyond that is needed.
+- **Transform failures**: "Transform completed with failures" errors need the
+  user to click the provided link — only the job owner can see the logs. If you
+  see this after fixing type errors, involve the user.
 
 ## Interop
 
