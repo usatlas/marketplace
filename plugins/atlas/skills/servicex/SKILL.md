@@ -43,7 +43,7 @@ ServiceX supports two query backends:
 **Install required packages:**
 
 ```bash
-pip install servicex servicex-analysis-utils awkward matplotlib
+pip install servicex servicex-analysis-utils awkward
 # For FuncADL xAOD queries only:
 pip install func_adl_servicex_xaodr25
 ```
@@ -60,25 +60,28 @@ downloads directory. You'll see "Configuration Complete" when done.
 
 ## Key Concepts
 
-| Concept                   | Notes                                                                     |
-| ------------------------- | ------------------------------------------------------------------------- |
-| `deliver(spec)`           | Main entry point — returns `{sample_name: [Path, ...]}` of result files   |
-| `ServiceXSpec` / `Sample` | Wrap dataset + query + options into a typed spec object                   |
-| `dataset.Rucio(...)`      | Dataset stored in Rucio (GRID); pass the full DID string                  |
-| `dataset.FileList([...])` | Dataset accessible via URL (EOS, xrootd, https)                           |
-| `query.UprootRaw([...])`  | Uproot backend: select branches and cuts from a ROOT tree                 |
-| `FuncADLQueryPHYSLITE`    | FuncADL backend: LINQ-style queries against ATLAS xAOD derivations        |
-| `NFiles=1`                | Limit files for testing — always use `NFiles=1` in development            |
-| `ignore_local_cache=True` | Forces re-delivery; use when debugging stale results                      |
-| `to_awk(results)`         | From `servicex_analysis_utils` — loads result files into an awkward array |
+| Concept                   | Notes                                                                                   |
+| ------------------------- | --------------------------------------------------------------------------------------- |
+| `deliver(spec)`           | Main entry point — returns `{sample_name: [Path, ...]}` of result files                 |
+| `ServiceXSpec` / `Sample` | Wrap dataset + query + options into a typed spec object                                 |
+| `dataset.Rucio(...)`      | Dataset stored in Rucio (GRID); pass the full DID string                                |
+| `dataset.FileList([...])` | Dataset accessible via URL (EOS, xrootd, https)                                         |
+| `query.UprootRaw([...])`  | Uproot backend: select branches and cuts from a ROOT tree                               |
+| `FuncADLQueryPHYSLITE`    | FuncADL backend: LINQ-style queries against ATLAS xAOD derivations                      |
+| `NFiles=1`                | Limit files for testing — always use `NFiles=1` in development                          |
+| `ignore_local_cache=True` | Forces re-delivery; use when debugging stale results                                    |
+| `OutputFormat`            | `General` option: `root-rntuple` (recommended), `root-ttree` (default), or `parquet`    |
+| `Delivery`                | `General` option: omit to download files; `"URLs"` to stream remotely (expires ~7 days) |
+| `to_awk(results)`         | Convenience from `servicex_analysis_utils` — loads **all** files into memory at once;   |
+|                           | only suitable for small datasets                                                        |
 
 ## Canonical Patterns
 
 ### Uproot Backend (NTuples — recommended starting point)
 
 ```python
+import uproot
 from servicex import deliver, ServiceXSpec, Sample, dataset, query
-from servicex_analysis_utils import to_awk
 
 # Dataset in Rucio:
 ntuple_dataset = dataset.Rucio("user.atlas:my-ntuple-dataset.root")
@@ -88,32 +91,35 @@ ntuple_dataset = dataset.Rucio("user.atlas:my-ntuple-dataset.root")
 uproot_query = query.UprootRaw([{
     "treename": "reco",
     "filter_name": ["jet_pt", "jet_eta", "met"],
-    "cut": "(jet_pt > 20000)"   # cuts use branch names directly, in native units
+    "cut": "(jet_pt > 20000)",  # cuts use branch names directly, in native units
 }])
 
 spec = ServiceXSpec(
+    General={"OutputFormat": "root-rntuple"},  # avoids TTree failures on PHYSLITE skims
     Sample=[
         Sample(
             Name="my_sample",
             Dataset=ntuple_dataset,
             Query=uproot_query,
-            NFiles=1,           # always 1 during development
+            NFiles=1,  # always 1 during development
         )
-    ]
+    ],
 )
 
 results = deliver(spec)
 
-# Load into awkward array
-arr = to_awk(results)["my_sample"]
-jet_pt_GeV = arr["jet_pt"] / 1000.0  # convert MeV → GeV
+# results["my_sample"] is a list of local file paths
+for path in results["my_sample"]:
+    with uproot.open(path) as f:
+        arr = f["reco"].arrays(library="ak")
+        jet_pt_GeV = arr["jet_pt"] / 1000.0  # convert MeV → GeV
 ```
 
 ### FuncADL Backend (xAOD / PHYSLITE)
 
 ```python
+import uproot
 from servicex import deliver, ServiceXSpec, Sample, dataset
-from servicex_analysis_utils import to_awk
 from func_adl_servicex_xaodr25 import FuncADLQueryPHYSLITE
 
 rucio_dataset = dataset.Rucio(
@@ -145,21 +151,25 @@ spec = ServiceXSpec(
 )
 
 results = deliver(spec)
-arr = to_awk(results)["jet_pt_fetch"]
+
+# results["jet_pt_fetch"] is a list of local file paths — open with uproot
+for path in results["jet_pt_fetch"]:
+    with uproot.open(path) as f:
+        arr = f["servicex"].arrays(library="ak")
 ```
 
 ### Multiple Samples in One Call
 
 ```python
 spec = ServiceXSpec(
+    General={"OutputFormat": "root-rntuple"},
     Sample=[
-        Sample(Name="signal",  Dataset=dataset.Rucio(sig_did),  Query=query, NFiles=5),
-        Sample(Name="ttbar",   Dataset=dataset.Rucio(tt_did),   Query=query, NFiles=5),
-    ]
+        Sample(Name="signal", Dataset=dataset.Rucio(sig_did), Query=q, NFiles=5),
+        Sample(Name="ttbar",  Dataset=dataset.Rucio(tt_did),  Query=q, NFiles=5),
+    ],
 )
 results = deliver(spec)
-sig_arr  = to_awk(results)["signal"]
-ttbar_arr = to_awk(results)["ttbar"]
+# results["signal"] and results["ttbar"] are each lists of file paths
 ```
 
 ### Working with Result Files Directly
@@ -180,6 +190,37 @@ for path in file_paths:
 ```python
 results = deliver(spec, ignore_local_cache=True)
 ```
+
+### Output Format (UprootRaw)
+
+The default output is `root-ttree`, which can silently fail on PHYSLITE skims.
+Use `root-rntuple` instead:
+
+```python
+spec = ServiceXSpec(
+    General={"OutputFormat": "root-rntuple"},
+    Sample=[Sample(Name="data", Dataset=ds, Query=q, NFiles=1)],
+)
+```
+
+Allowed values: `root-rntuple`, `root-ttree`, `parquet`.
+
+### URL Delivery (Remote Streaming)
+
+Instead of downloading files, receive URLs for direct remote access:
+
+```python
+spec = ServiceXSpec(
+    General={"Delivery": "URLs"},
+    Sample=[Sample(Name="data", Dataset=ds, Query=q, NFiles=1)],
+)
+results = deliver(spec)
+# results["data"] contains URLs rather than local paths
+# Open directly with uproot using xrootd or https
+```
+
+**Warning**: URLs from the ServiceX server expire — typically within 7 days or
+less. Download the files if long-term access is needed.
 
 ### CLI `--n-files` Pattern
 
@@ -287,6 +328,11 @@ note that PHYSLITE has no uncalibrated objects.
   (e.g. `AntiKt4EMPFlowJets` on PHYSLITE) returns empty results silently.
 - **FuncADL requires `func_adl_servicex_xaodr25`**: Install separately; not
   included in the base `servicex` package.
+- **Default output format is `root-ttree`**: This can silently fail on PHYSLITE
+  skims. Prefer `General={"OutputFormat": "root-rntuple"}` in all UprootRaw
+  specs.
+- **URL delivery expires**: Files served via `Delivery: URLs` typically expire
+  within 7 days or less. Download them if persistence beyond that is needed.
 - **Transform failures**: "Transform completed with failures" errors need the
   user to click the provided link — only the job owner can see the logs. If you
   see this after fixing type errors, involve the user.
@@ -294,10 +340,10 @@ note that PHYSLITE has no uncalibrated objects.
 ## Worked Example — UprootRaw Histogram
 
 ```python
-from servicex import deliver, ServiceXSpec, Sample, dataset, query
-from servicex_analysis_utils import to_awk
 import awkward as ak
 import matplotlib.pyplot as plt
+import uproot
+from servicex import deliver, ServiceXSpec, Sample, dataset, query
 
 ntuple_dataset = dataset.Rucio("user.atlas:my-displaced-signal.root")
 
@@ -306,15 +352,21 @@ uproot_query = query.UprootRaw([{
     "filter_name": ["truth_alp_decayVtxX", "truth_alp_decayVtxY",
                     "truth_alp_pt", "truth_alp_eta",
                     "jet_EMFrac_NOSYS", "jet_pt_NOSYS"],
-    "cut": "(num(jet_pt_NOSYS) < 2) & any((truth_alp_pt > 20) & (abs(truth_alp_eta) < 0.8))"
+    "cut": "(num(jet_pt_NOSYS) < 2) & any((truth_alp_pt > 20) & (abs(truth_alp_eta) < 0.8))",
 }])
 
 results = deliver(ServiceXSpec(
-    Sample=[Sample(Name="signal", Dataset=ntuple_dataset, Query=uproot_query, NFiles=1)]
+    General={"OutputFormat": "root-rntuple"},
+    Sample=[Sample(Name="signal", Dataset=ntuple_dataset, Query=uproot_query, NFiles=1)],
 ))
 
-arr = to_awk(results)["signal"]
-displacement = (arr["truth_alp_decayVtxX"]**2 + arr["truth_alp_decayVtxY"]**2)**0.5
+arrays = []
+for path in results["signal"]:
+    with uproot.open(path) as f:
+        arrays.append(f["reco"].arrays(library="ak"))
+arr = ak.concatenate(arrays)
+
+displacement = (arr["truth_alp_decayVtxX"] ** 2 + arr["truth_alp_decayVtxY"] ** 2) ** 0.5
 
 fig, axes = plt.subplots(1, 2, figsize=(9, 4))
 axes[0].hist(ak.flatten(arr["jet_EMFrac_NOSYS"]), bins=50, range=[0, 1])
@@ -327,20 +379,22 @@ plt.show()
 
 ## Troubleshooting
 
-| Symptom                                | Likely Cause                         | Fix                                     |
-| -------------------------------------- | ------------------------------------ | --------------------------------------- |
-| Same result after query fix            | Cached result returned               | Add `ignore_local_cache=True`           |
-| Empty array for a collection           | Wrong collection name for derivation | Check PHYSLITE vs PHYS names            |
-| `ModuleNotFoundError: func_adl...`     | FuncADL package not installed        | `pip install func_adl_servicex_xaodr25` |
-| `ModuleNotFoundError: servicex_anal..` | Utils package missing                | `pip install servicex-analysis-utils`   |
-| "Transform completed with failures"    | C++ error in backend                 | Involve user — only they can see logs   |
-| "Method xxx not found on object"       | Wrong accessor for this derivation   | Check xAOD object schema for your type  |
-| `servicex init` not found              | CLI not installed                    | `pip install servicex` then retry       |
+| Symptom                                | Likely Cause                         | Fix                                                    |
+| -------------------------------------- | ------------------------------------ | ------------------------------------------------------ |
+| Same result after query fix            | Cached result returned               | Add `ignore_local_cache=True`                          |
+| UprootRaw transform fails on PHYSLITE  | Default TTree output incompatible    | Add `General={"OutputFormat": "root-rntuple"}` to spec |
+| Empty array for a collection           | Wrong collection name for derivation | Check PHYSLITE vs PHYS names                           |
+| `ModuleNotFoundError: func_adl...`     | FuncADL package not installed        | `pip install func_adl_servicex_xaodr25`                |
+| `ModuleNotFoundError: servicex_anal..` | Utils package missing                | `pip install servicex-analysis-utils`                  |
+| "Transform completed with failures"    | C++ error in backend                 | Involve user — only they can see logs                  |
+| "Method xxx not found on object"       | Wrong accessor for this derivation   | Check xAOD object schema for your type                 |
+| `servicex init` not found              | CLI not installed                    | `pip install servicex` then retry                      |
 
 ## Interop
 
-- **servicex_analysis_utils**: `to_awk(results)` is the standard way to load
-  ServiceX output into an awkward array for in-memory analyses
+- **servicex_analysis_utils**: `to_awk(results)` is a convenience helper that
+  loads all result files into a single in-memory awkward array — only suitable
+  for small datasets; for large data iterate over file paths with uproot instead
 - **uproot**: For local ROOT files, use uproot directly — ServiceX only adds
   value for remote or large datasets
 - **awkward**: Results from `to_awk` are `ak.Array` — use awkward operations for
