@@ -86,7 +86,7 @@ software orientation.
 | `pylhe`                 | Reading Les Houches Event (LHE) files in Python                                 |
 | `quickfit`              | Fitting a RooWorkspace dataset with quickFit, generating an Asimov dataset with |
 | `roounfold`             | Performing statistical unfolding for an ATLAS cross-section measurement:        |
-| `servicex`              | Querying ATLAS xAOD data remotely via ServiceX                                  |
+| `servicex`              | Querying ATLAS data remotely via ServiceX                                       |
 | `setupatlas`            | Setting up the ATLAS software environment with setupATLAS or                    |
 | `statanalysis`          | Setting up the ATLAS StatAnalysis software release with asetup, choosing the    |
 | `topcptoolkit`          | Using TopCPToolkit to process ATLAS DAOD files into analysis NTuples            |
