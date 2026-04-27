@@ -328,6 +328,9 @@ note that PHYSLITE has no uncalibrated objects.
   (e.g. `AntiKt4EMPFlowJets` on PHYSLITE) returns empty results silently.
 - **FuncADL requires `func_adl_servicex_xaodr25`**: Install separately; not
   included in the base `servicex` package.
+- **FuncADL output tree is always `"servicex"`**: When opening FuncADL result
+  files with uproot, use `f["servicex"]`. For UprootRaw, the tree name is
+  whatever you set in the `treename` field of your query dict.
 - **Default output format is `root-ttree`**: This can silently fail on PHYSLITE
   skims. Prefer `General={"OutputFormat": "root-rntuple"}` in all UprootRaw
   specs.
