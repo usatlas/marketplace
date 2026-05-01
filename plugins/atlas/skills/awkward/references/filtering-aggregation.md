@@ -15,5 +15,6 @@ Notes:
 
 - `ak.max` and `ak.min` exist as reducers; pass `axis=` to control the reduction
   axis. `axis=None` flattens everything and returns a scalar.
-- `axis=None` is valid for all awkward reducers (`ak.sum`, `ak.max`, `ak.min`,
-  `ak.any`, `ak.all`); choose deliberately since it collapses across all events.
+- `axis=None` is valid for all reducers (`ak.sum`, `ak.max`, `ak.min`, `ak.any`,
+  `ak.all`) and `ak.flatten`, but it collapses all structure — choose a concrete
+  axis deliberately to preserve per-event semantics.

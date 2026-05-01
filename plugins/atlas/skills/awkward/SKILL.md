@@ -5,7 +5,7 @@ description: >-
   building event records with ak.zip, filtering nested arrays, computing
   combinatorics (cartesian products or combinations), flattening ragged arrays,
   using argmin/argmax with keepdims, broadcasting per-event weights to
-  per-object, or debugging OptionType/None-padding issues in awkward-array 2.x
+  per-object, or debugging OptionType/None-padding issues in Awkward 2.x
   workflows.
 ---
 
@@ -91,8 +91,8 @@ h.fill(pt=ak.to_numpy(flat_pt), weight=ak.to_numpy(flat_w))
   fixed depth first.
 - **Behavior registration is global**: Call `vector.register_awkward()` once at
   module level; it mutates the global dict.
-- **2.x breaking changes from 1.x**: `ak.ArrayBuilder` → `ak.from_iter`; many
-  behavior patterns changed; do not copy 1.x examples verbatim.
+- **2.x breaking changes from 1.x**: Many top-level functions were renamed or
+  removed; behavior registration changed. Do not copy 1.x examples verbatim.
 
 ## Interop
 
