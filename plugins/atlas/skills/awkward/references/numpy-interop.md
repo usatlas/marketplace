@@ -13,7 +13,7 @@ import awkward as ak
 ak.to_numpy(ak.Array([[1, 2], [3, 4]]))   # shape (2, 2)
 
 # Ragged fails — flatten first
-flat = ak.to_numpy(ak.flatten(jets.pt))
+flat = ak.to_numpy(ak.flatten(jets.pt, axis=1))
 
 # Missing values produce a NumPy masked array by default
 ak.to_numpy(ak.Array([1, None, 3]))
