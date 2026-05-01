@@ -13,8 +13,9 @@ description: >-
 ## Overview
 
 hepunits provides physical unit constants and physical constants as plain Python
-floats, following the CLHEP/Geant4 convention. The base units are **MeV**
-(energy), **mm** (length), and **ns** (time). Multiplying by a unit constant
+floats, following the CLHEP/Geant4 convention. Base units include **MeV**
+(energy), **mm** (length), **ns** (time), **eplus** (charge), and **kelvin**
+(temperature) — see the full table below. Multiplying by a unit constant
 converts a value into the system base; dividing converts back out.
 
 ## When to Use
@@ -232,4 +233,4 @@ Note: `to_clhep` raises `ValueError` for unsupported dimensions (e.g. kelvin).
 
 ## Docs
 
-https://scikit-hep.org/hepunits/
+https://github.com/scikit-hep/hepunits/#readme
