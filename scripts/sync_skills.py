@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import json
 import re
+import shlex
 import sys
 from pathlib import Path
 
@@ -171,20 +172,11 @@ def _plugins_section(marketplace: dict) -> list[str]:
                 )
                 rows = []
                 for sname, cfg in servers.items():
-                    cmd = " ".join([cfg.get("command", "")] + cfg.get("args", []))
+                    cmd = shlex.join([cfg.get("command", "")] + cfg.get("args", []))
                     rows.append([f"`{sname}`", f"`{cmd}`", cfg.get("description", "")])
                 parts.append(_md_table(["Server", "Launch command", "Purpose"], rows))
                 parts.append("")
 
-                if "rucio" in servers and servers["rucio"].get("env"):
-                    parts.extend([
-                        "**Required environment variables for Rucio MCP:**\n",
-                        "```bash",
-                        "export RUCIO_ACCOUNT=yourusername        # required — no default",
-                        'export RUCIO_AUTH_TYPE=x509_proxy        # default; or "oidc" / "userpass"',
-                        "voms-proxy-init --voms atlas             # obtain a valid proxy first",
-                        "```\n",
-                    ])
 
         parts.append("---\n")
 

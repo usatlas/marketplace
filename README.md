@@ -106,22 +106,6 @@ software orientation.
 | `ami`            | `pixi exec --spec ami-mcp sh -c 'ami-mcp serve'`                 | AMI metadata (cross-sections, tags) |
 | `atlasopenmagic` | `uvx atlasopenmagic-mcp serve`                                   | ATLAS Open Data catalog             |
 
-**First-time setup for Rucio MCP:**
-
-```bash
-rucio-mcp init atlas                          # one-time: writes ~/.config/rucio-mcp/rucio.cfg
-export RUCIO_ACCOUNT=yourusername             # required — no default
-pixi exec --spec rucio-mcp sh -c 'voms-proxy-init -voms atlas'  # obtain a valid proxy first
-```
-
-Health check: `RUCIO_ACCOUNT=yourusername rucio-mcp ping`
-
-If ping fails with a CRL expiry error, refresh the CRLs:
-
-```bash
-pixi exec --spec rucio-mcp sh -c '$X509_CERT_DIR/refresh_crls.sh'
-```
-
 ---
 
 ### `hep-python-tools`
@@ -160,6 +144,22 @@ plugins/
 ```
 
 <!-- UPDATE:END -->
+
+## Rucio MCP setup
+
+```bash
+rucio-mcp init atlas                          # one-time: writes ~/.config/rucio-mcp/rucio.cfg
+export RUCIO_ACCOUNT=yourusername             # required — no default
+pixi exec --spec rucio-mcp sh -c 'voms-proxy-init -voms atlas'  # obtain a valid proxy first
+```
+
+Health check: `RUCIO_ACCOUNT=yourusername rucio-mcp ping`
+
+If ping fails with a CRL expiry error, refresh the CRLs:
+
+```bash
+pixi exec --spec rucio-mcp sh -c '$X509_CERT_DIR/refresh_crls.sh'
+```
 
 ## Contributing
 
