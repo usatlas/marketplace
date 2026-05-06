@@ -129,18 +129,24 @@ Configured in `plugins/atlas/.mcp.json`. First-time setup:
 ```bash
 rucio-mcp init atlas                # one-time: writes ~/.config/rucio-mcp/rucio.cfg
 export RUCIO_ACCOUNT=yourusername   # required, no default
-voms-proxy-init -voms atlas         # valid proxy required for rucio MCP
+pixi exec --spec rucio-mcp sh -c 'voms-proxy-init -voms atlas'  # valid proxy required
 ```
 
 Health check: `RUCIO_ACCOUNT=yourusername rucio-mcp ping`
 
+If ping fails with a CRL expiry error, refresh the CRLs:
+
+```bash
+pixi exec --spec rucio-mcp sh -c '$X509_CERT_DIR/refresh_crls.sh'
+```
+
 The three servers:
 
-| Key              | Launch                                  | Notes                     |
-| ---------------- | --------------------------------------- | ------------------------- |
-| `rucio`          | `pixi exec rucio-mcp serve --read-only` | RUCIO_ACCOUNT must be set |
-| `ami`            | `pixi exec ami-mcp serve`               | no extra env vars         |
-| `atlasopenmagic` | `uvx atlasopenmagic-mcp serve`          | no extra env vars         |
+| Key              | Launch                                                           | Notes                     |
+| ---------------- | ---------------------------------------------------------------- | ------------------------- |
+| `rucio`          | `pixi exec --spec rucio-mcp sh -c 'rucio-mcp serve --read-only'` | RUCIO_ACCOUNT must be set |
+| `ami`            | `pixi exec --spec ami-mcp sh -c 'ami-mcp serve'`                 | no extra env vars         |
+| `atlasopenmagic` | `uvx atlasopenmagic-mcp serve`                                   | no extra env vars         |
 
 ## ATLAS software docs
 
