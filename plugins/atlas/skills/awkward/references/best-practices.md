@@ -5,4 +5,6 @@
   calculations.
 - Build an event data model (EDM) with `ak.zip`/records, then add derived fields
   back into the EDM.
-- Avoid `axis=None` for Awkward functions; choose a concrete axis deliberately.
+- `axis=None` is valid for reducers and `ak.flatten`, but it collapses all
+  structure — choose a concrete axis deliberately to preserve per-event
+  semantics.
