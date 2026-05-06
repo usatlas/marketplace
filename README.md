@@ -106,13 +106,15 @@ software orientation.
 | `ami`            | `pixi exec ami-mcp serve`               | AMI metadata (cross-sections, tags) |
 | `atlasopenmagic` | `uvx atlasopenmagic-mcp serve`          | ATLAS Open Data catalog             |
 
-**Required environment variables for Rucio MCP:**
+**First-time setup for Rucio MCP:**
 
 ```bash
-export RUCIO_ACCOUNT=yourusername        # required — no default
-export RUCIO_AUTH_TYPE=x509_proxy        # default; or "oidc" / "userpass"
-voms-proxy-init --voms atlas             # obtain a valid proxy first
+rucio-mcp init atlas                          # one-time: writes ~/.config/rucio-mcp/rucio.cfg
+export RUCIO_ACCOUNT=yourusername             # required — no default
+voms-proxy-init -voms atlas                   # obtain a valid proxy first
 ```
+
+Health check: `RUCIO_ACCOUNT=yourusername rucio-mcp ping`
 
 ---
 

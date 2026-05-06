@@ -124,13 +124,15 @@ is still valid.
 
 ## MCP servers (atlas plugin only)
 
-Configured in `plugins/atlas/.mcp.json`. Users must set:
+Configured in `plugins/atlas/.mcp.json`. First-time setup:
 
 ```bash
+rucio-mcp init atlas                # one-time: writes ~/.config/rucio-mcp/rucio.cfg
 export RUCIO_ACCOUNT=yourusername   # required, no default
-export RUCIO_AUTH_TYPE=x509_proxy   # default; alternatives: oidc, userpass
-voms-proxy-init --voms atlas        # valid proxy required for rucio MCP
+voms-proxy-init -voms atlas         # valid proxy required for rucio MCP
 ```
+
+Health check: `RUCIO_ACCOUNT=yourusername rucio-mcp ping`
 
 The three servers:
 
