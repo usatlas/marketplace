@@ -3,16 +3,22 @@
     "rucio": {
       "description": "Dataset and replica discovery",
       "command": "pixi",
-      "args": ["exec", "rucio-mcp", "serve", "--read-only"],
+      "args": [
+        "exec",
+        "--spec",
+        "rucio-mcp",
+        "sh",
+        "-c",
+        "rucio-mcp serve --read-only"
+      ],
       "env": {
-        "RUCIO_ACCOUNT": "${RUCIO_ACCOUNT}",
-        "RUCIO_AUTH_TYPE": "${RUCIO_AUTH_TYPE:-x509_proxy}"
+        "RUCIO_ACCOUNT": "${RUCIO_ACCOUNT}"
       }
     },
     "ami": {
       "description": "AMI metadata (cross-sections, tags)",
       "command": "pixi",
-      "args": ["exec", "ami-mcp", "serve"]
+      "args": ["exec", "--spec", "ami-mcp", "sh", "-c", "ami-mcp serve"]
     },
     "atlasopenmagic": {
       "description": "ATLAS Open Data catalog",

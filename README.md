@@ -100,19 +100,11 @@ software orientation.
 
 **MCP servers** (configured in `plugins/atlas/.mcp.json`):
 
-| Server           | Launch command                          | Purpose                             |
-| ---------------- | --------------------------------------- | ----------------------------------- |
-| `rucio`          | `pixi exec rucio-mcp serve --read-only` | Dataset and replica discovery       |
-| `ami`            | `pixi exec ami-mcp serve`               | AMI metadata (cross-sections, tags) |
-| `atlasopenmagic` | `uvx atlasopenmagic-mcp serve`          | ATLAS Open Data catalog             |
-
-**Required environment variables for Rucio MCP:**
-
-```bash
-export RUCIO_ACCOUNT=yourusername        # required — no default
-export RUCIO_AUTH_TYPE=x509_proxy        # default; or "oidc" / "userpass"
-voms-proxy-init --voms atlas             # obtain a valid proxy first
-```
+| Server           | Launch command                                                   | Purpose                             |
+| ---------------- | ---------------------------------------------------------------- | ----------------------------------- |
+| `rucio`          | `pixi exec --spec rucio-mcp sh -c 'rucio-mcp serve --read-only'` | Dataset and replica discovery       |
+| `ami`            | `pixi exec --spec ami-mcp sh -c 'ami-mcp serve'`                 | AMI metadata (cross-sections, tags) |
+| `atlasopenmagic` | `uvx atlasopenmagic-mcp serve`                                   | ATLAS Open Data catalog             |
 
 ---
 
@@ -152,6 +144,22 @@ plugins/
 ```
 
 <!-- UPDATE:END -->
+
+## Rucio MCP setup
+
+```bash
+rucio-mcp init atlas                          # one-time: writes ~/.config/rucio-mcp/rucio.cfg
+export RUCIO_ACCOUNT=yourusername             # required — no default
+pixi exec --spec rucio-mcp sh -c 'voms-proxy-init -voms atlas'  # obtain a valid proxy first
+```
+
+Health check: `RUCIO_ACCOUNT=yourusername rucio-mcp ping`
+
+If ping fails with a CRL expiry error, refresh the CRLs:
+
+```bash
+pixi exec --spec rucio-mcp sh -c '$X509_CERT_DIR/refresh_crls.sh'
+```
 
 ## Contributing
 
