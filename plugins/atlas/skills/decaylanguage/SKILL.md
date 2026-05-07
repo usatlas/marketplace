@@ -20,6 +20,15 @@ Python objects, lets you build and inspect decay chains programmatically, and
 renders them as Graphviz diagrams. It is most commonly used in generator-level
 studies and decay chain validation for B-physics and charm analyses.
 
+## When to Use
+
+- Parsing EvtGen `.dec` files to inspect or modify decay branching fractions
+- Building a decay chain description programmatically (e.g. for generator job
+  options)
+- Visualizing a decay tree as a graph for documentation or cross-checks
+- Computing the visible branching fraction of a multi-step decay chain
+- Converting AmpGen amplitude models to GooFit CUDA format
+
 ## Key Concepts
 
 - **DecFile / `.dec` format**: EvtGen decay descriptor format. Each block is
