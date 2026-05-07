@@ -83,7 +83,7 @@ software orientation.
 | `pyhepmc`               | Reading or writing HepMC3 event records in Python                               |
 | `pyhf`                  | You need HistFactory statistical modeling, profile-likelihood fits, CLs limits  |
 | `pyhs3`                 | Reading, writing, or validating binned and/or unbinned statistical models in    |
-| `pylhe`                 | Reading Les Houches Event (LHE) files in Python                                 |
+| `pylhe`                 | Reading or writing Les Houches Event (LHE) files in Python                      |
 | `quickfit`              | Fitting a RooWorkspace dataset with quickFit, generating an Asimov dataset with |
 | `roounfold`             | Performing statistical unfolding for an ATLAS cross-section measurement:        |
 | `servicex`              | Querying ATLAS data remotely via ServiceX                                       |
@@ -100,11 +100,11 @@ software orientation.
 
 **MCP servers** (configured in `plugins/atlas/.mcp.json`):
 
-| Server           | Launch command                                                   | Purpose                             |
-| ---------------- | ---------------------------------------------------------------- | ----------------------------------- |
-| `rucio`          | `pixi exec --spec rucio-mcp sh -c 'rucio-mcp serve --read-only'` | Dataset and replica discovery       |
-| `ami`            | `pixi exec --spec ami-mcp sh -c 'ami-mcp serve'`                 | AMI metadata (cross-sections, tags) |
-| `atlasopenmagic` | `uvx atlasopenmagic-mcp serve`                                   | ATLAS Open Data catalog             |
+| Server           | Launch command                                                             | Purpose                             |
+| ---------------- | -------------------------------------------------------------------------- | ----------------------------------- |
+| `rucio`          | `pixi exec --spec rucio-mcp sh -c ''"'"'rucio-mcp serve --read-only'"'"''` | Dataset and replica discovery       |
+| `ami`            | `pixi exec --spec ami-mcp sh -c ''"'"'ami-mcp serve'"'"''`                 | AMI metadata (cross-sections, tags) |
+| `atlasopenmagic` | `uvx atlasopenmagic-mcp serve`                                             | ATLAS Open Data catalog             |
 
 ---
 

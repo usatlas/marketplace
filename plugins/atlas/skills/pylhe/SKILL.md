@@ -1,22 +1,27 @@
 ---
 name: pylhe
 description: >-
-  Use when reading Les Houches Event (LHE) files in Python: iterating over
-  parton-level events from MadGraph or other generators, extracting initial- and
-  final-state parton four-vectors, reading event weights, or cross- checking
-  hard-process kinematics before showering.
+  Use when reading or writing Les Houches Event (LHE) files in Python: reading
+  parton-level events from MadGraph, Powheg, Sherpa, Pythia, or Whizard
+  generators, iterating over initial- and final-state parton four-vectors,
+  accessing event weights and scale/PDF reweighting blocks, counting events
+  efficiently, writing modified LHE files back to disk, visualising event
+  topologies with graphviz, or converting events to awkward arrays for
+  vectorized analysis. Also use when the user mentions `LHEFile`, `LHEEvent`,
+  `LHEParticle`, or parsing `.lhe` / `.lhe.gz` files.
 ---
 
 # pylhe
 
 ## Overview
 
-pylhe reads Les Houches Event (LHE) files — the standard ASCII format for
-parton-level events produced by matrix-element generators such as
-MadGraph5_aMC@NLO, Sherpa, and Powheg. It exposes events, particles, and header
-metadata as Python objects and integrates with awkward for vectorized
-processing. It is used for parton-level studies, cross-section validation, and
-checking generator weights before showering.
+pylhe reads and writes Les Houches Event (LHE) files — the standard XML-like
+ASCII format for parton-level events produced by matrix-element generators such
+as MadGraph5_aMC@NLO, Powheg-BOX, Sherpa, Pythia, and Whizard. Since v1.0.0 the
+primary interface is the `LHEFile` dataclass, which exposes the init block and
+an iterable of events as typed dataclass attributes. All older module-level
+functions (`read_lhe`, `read_lhe_init`, `to_awkward`, …) are deprecated — they
+still work but emit `DeprecationWarning`.
 
 ## When to Use
 
@@ -25,89 +30,175 @@ checking generator weights before showering.
 - Computing parton-level kinematic distributions to compare with NLO
   cross-sections
 - Reading event weights (scale and PDF variations) from LHE reweighting blocks
-- Checking that the generator configuration (process, cuts) matches expectations
+- Counting events without loading the whole file into memory
+- Writing modified or synthetic LHE files
+- Visualising parton-level decay topologies interactively in a notebook
 
 ## Key Concepts
 
-| Concept                     | Notes                                         |
-| --------------------------- | --------------------------------------------- |
-| `pylhe.read_lhe(path)`      | Iterator over `LHEEvent` objects              |
-| `LHEEvent.particles`        | List of `LHEParticle` objects                 |
-| `LHEParticle.status`        | -1 = incoming, 1 = outgoing, 2 = intermediate |
-| `LHEParticle.id`            | PDG ID                                        |
-| `LHEParticle.px/py/pz/e/m`  | Four-momentum + mass (GeV)                    |
-| `pylhe.read_lhe_init(path)` | Reads header metadata (process info, xsec)    |
-| `pylhe.to_awkward(events)`  | Converts event iterator to awkward array      |
+| Concept                              | Notes                                                    |
+| ------------------------------------ | -------------------------------------------------------- |
+| `LHEFile.fromfile(path)`             | Load file; returns `LHEFile` (lazy generator)            |
+| `LHEFile.frombuffer(fileobj)`        | Same, from an already-open file object                   |
+| `LHEFile.fromstring(text)`           | Parse an LHE string directly                             |
+| `LHEFile.count_events(path)`         | Counts events without loading them                       |
+| `lhef.init`                          | `LHEInit` dataclass (beam info, xsec, groups)            |
+| `lhef.events`                        | Iterator of `LHEEvent` objects                           |
+| `lhef.tofile(path)` / `lhef.tolhe()` | Write back to file or to a string                        |
+| `LHEEvent.eventinfo`                 | `LHEEventInfo` (nparticles, pid, weight, …)              |
+| `LHEEvent.particles`                 | List of `LHEParticle` objects                            |
+| `LHEEvent.weights`                   | Dict `{weight_id: float}` (needs `with_attributes=True`) |
+| `LHEEvent.graph`                     | `graphviz.Digraph` of the event topology                 |
+| `LHEParticle.status`                 | -1 = incoming, +1 = outgoing, +2 = intermediate          |
+| `LHEParticle.id`                     | PDG ID                                                   |
+| `LHEParticle.px/py/pz/e/m`           | Four-momentum + mass (GeV)                               |
+| `LHEParticle.event`                  | Back-reference to the parent `LHEEvent`                  |
+| `LHEInit.initInfo`                   | `LHEInitInfo` (beam PDG IDs, energies, PDFs)             |
+| `LHEInit.procInfo`                   | List of `LHEProcInfo` (xSection, error, …)               |
+| `LHEInit.weightgroup`                | Dict of `LHEWeightGroup` (reweighting groups)            |
+| `pylhe.to_awkward(events)`           | Converts event iterator to an awkward array              |
 
 ## Canonical Patterns
 
-### Iterate over events
+### Load a file and iterate over events
 
 ```python
 import pylhe
 
-for event in pylhe.read_lhe("events.lhe.gz"):   # .gz supported
+lhef = pylhe.LHEFile.fromfile("events.lhe.gz")   # .gz auto-detected
+for event in lhef.events:
     outgoing = [p for p in event.particles if p.status == 1]
     for p in outgoing:
         pt = (p.px**2 + p.py**2)**0.5
         print(p.id, pt, p.e)
 ```
 
-### Read header (cross-section, generator metadata)
+### Read header (cross-section, beam info)
 
 ```python
-init = pylhe.read_lhe_init("events.lhe.gz")
-print(init["initInfo"])   # dict with beam energies, PDF IDs, etc.
-for proc in init["procInfo"]:
-    print(proc["xSection"], proc["xSecErr"])   # in pb
+lhef = pylhe.LHEFile.fromfile("events.lhe.gz")
+init = lhef.init
+print(init.initInfo.beamA, init.initInfo.energyA)   # PDG ID, GeV
+for proc in init.procInfo:
+    print(proc.xSection, proc.error)   # in pb
+```
+
+### Access reweighting blocks (scale/PDF variations)
+
+Pass `with_attributes=True` (the default) to populate `event.weights`:
+
+```python
+lhef = pylhe.LHEFile.fromfile("events.lhe.gz", with_attributes=True)
+for event in lhef.events:
+    central = event.eventinfo.weight
+    for wid, w in event.weights.items():
+        print(wid, w / central)
+```
+
+### Count events efficiently (no full load)
+
+```python
+n = pylhe.LHEFile.count_events("events.lhe.gz")
+print(f"{n} events")
 ```
 
 ### Convert to awkward for vectorized analysis
 
+`to_awkward` requires `with_attributes=True` to capture weights; the momentum
+components live under `arr.particles.vector`:
+
 ```python
-import pylhe, awkward as ak
+import pylhe
 
-events = pylhe.to_awkward(pylhe.read_lhe("events.lhe.gz"))
+lhef = pylhe.LHEFile.fromfile("events.lhe.gz", with_attributes=True)
+arr = pylhe.to_awkward(lhef.events)
 
-# events["particles"] is a jagged array
-outgoing = events["particles"][events["particles", "status"] == 1]
-pt = (outgoing["px"]**2 + outgoing["py"]**2)**0.5
+# arr.particles is a jagged array; momenta under .vector
+outgoing = arr.particles[arr.particles.status == 1]
+pt = (outgoing.vector.px**2 + outgoing.vector.py**2)**0.5
+
+# vector library behavior is registered; use shorthand:
+pt = outgoing.vector.pt
+eta = outgoing.vector.eta
 ```
 
-### Parton-level invariant mass
+### Parton-level invariant mass (pure Python loop)
 
 ```python
-import pylhe, numpy as np
+import pylhe, math
 
+lhef = pylhe.LHEFile.fromfile("events.lhe.gz")
 masses = []
-for event in pylhe.read_lhe("events.lhe.gz"):
-    outgoing = [p for p in event.particles if p.status == 1]
-    e   = sum(p.e  for p in outgoing)
-    px  = sum(p.px for p in outgoing)
-    py  = sum(p.py for p in outgoing)
-    pz  = sum(p.pz for p in outgoing)
-    m2  = e**2 - px**2 - py**2 - pz**2
-    masses.append(m2**0.5 if m2 > 0 else 0.0)
+for event in lhef.events:
+    fs = [p for p in event.particles if p.status == 1]
+    e  = sum(p.e  for p in fs)
+    px = sum(p.px for p in fs)
+    py = sum(p.py for p in fs)
+    pz = sum(p.pz for p in fs)
+    m2 = e**2 - px**2 - py**2 - pz**2
+    masses.append(math.sqrt(m2) if m2 > 0 else 0.0)
+```
+
+### Write a modified LHE file
+
+```python
+import pylhe
+
+lhef = pylhe.LHEFile.fromfile("events.lhe.gz", with_attributes=True)
+
+# Collect events you want to keep (materialise the iterator first)
+lhef.events = [e for e in lhef.events if e.eventinfo.weight > 0]
+
+lhef.tofile("filtered.lhe")          # plain text
+lhef.tofile("filtered.lhe.gz")       # gzip auto-detected from suffix
+```
+
+### Visualise an event topology (notebook)
+
+```python
+lhef = pylhe.LHEFile.fromfile("events.lhe.gz")
+event = next(iter(lhef.events))
+event.graph   # renders inline in Jupyter; uses graphviz + particle names
+# Or save to PDF:
+event.graph.render("event_topology", format="pdf", view=True, cleanup=True)
 ```
 
 ## Gotchas
 
 - **LHE units are GeV** (not MeV): consistent with HepMC3 and fastjet, but
   opposite to ATLAS NTuples.
-- **Compressed files**: `.lhe.gz` is supported; plain `.lhe` and `.lhe.gz` are
-  auto-detected.
-- **LHE does not contain shower/hadronization**: particles in LHE are
-  parton-level — no hadrons, no pile-up.
-- **Reweighting blocks (rwgt)**: MadGraph NLO LHE files contain reweighting
-  blocks for scale/PDF variations; `pylhe` exposes these in `event.reweight`.
+- **Compressed files**: `.lhe.gz` is auto-detected by magic bytes; plain `.lhe`
+  also works. Pass a path-like object, not an open file handle, to
+  `LHEFile.fromfile`.
+- **LHE does not contain shower/hadronization**: particles are parton-level — no
+  hadrons, no pile-up.
+- **Deprecated API**: `pylhe.read_lhe()`, `pylhe.read_lhe_init()`,
+  `pylhe.read_lhe_with_attributes()`, `pylhe.read_num_events()`, and
+  `pylhe.read_lhe_file()` all emit `DeprecationWarning`. Use `LHEFile.fromfile`
+  instead.
+- **`with_attributes=True`** (the default) is required to populate
+  `event.weights`; if you used the old `read_lhe()` (which set
+  `with_attributes=False`) event weights will be empty dicts.
+- **Awkward structure**: momentum fields are nested under
+  `arr.particles.vector`, not directly on `arr.particles`. Use
+  `arr.particles.vector.px`, etc., or the vector shorthand (`.pt`, `.eta`,
+  `.phi`, `.mass`).
+- **Generator iterator**: `lhef.events` is a lazy generator by default. It can
+  only be consumed once. Pass `generator=False` to `LHEFile.fromfile` to
+  materialise into a list, or wrap with `list()`.
+- **Status codes vary by generator**: v1-era generators sometimes use status=0
+  for all particles; v3 files follow the standard (-1/+1/+2).
 
 ## Interop
 
 - **particle**: Identify parton PDG IDs with `Particle.from_pdgid(p.id)`.
 - **pyhepmc**: pylhe handles pre-shower parton-level events; pyhepmc handles
   post-shower truth records.
-- **fastjet**: After extracting parton four-vectors, build PseudoJets for
+- **fastjet**: Extract parton four-vectors and build `PseudoJet` objects for
   parton-jet matching studies.
+- **vector**: The awkward array registers `vector` behaviors so
+  `outgoing.vector` gives access to `.pt`, `.eta`, `.phi`, `.mass`,
+  `.to_rhophithetatau()`, etc.
 
 ## Docs
 
