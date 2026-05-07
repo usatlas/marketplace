@@ -83,7 +83,7 @@ software orientation.
 | `pyhepmc`               | Reading or writing HepMC3 event records in Python                               |
 | `pyhf`                  | You need HistFactory statistical modeling, profile-likelihood fits, CLs limits  |
 | `pyhs3`                 | Reading, writing, or validating binned and/or unbinned statistical models in    |
-| `pylhe`                 | Reading Les Houches Event (LHE) files in Python                                 |
+| `pylhe`                 | Reading or writing Les Houches Event (LHE) files in Python                      |
 | `quickfit`              | Fitting a RooWorkspace dataset with quickFit, generating an Asimov dataset with |
 | `roounfold`             | Performing statistical unfolding for an ATLAS cross-section measurement:        |
 | `servicex`              | Querying ATLAS data remotely via ServiceX                                       |
