@@ -79,7 +79,7 @@ software orientation.
 | `managetier3sw`         | Installing, updating, or removing ATLAS software on a local Tier-3 cluster      |
 | `mplhep`                | Creating ATLAS publication-quality plots with matplotlib using mplhep           |
 | `panda`                 | Submitting ATLAS grid jobs with prun or pathena, monitoring tasks with pbook or |
-| `particle`              | Looking up particle properties (mass, charge, PDG ID, lifetime, width) from the |
+| `particle`              | Looking up particle properties                                                  |
 | `pyhepmc`               | Reading or writing HepMC3 event records in Python                               |
 | `pyhf`                  | You need HistFactory statistical modeling, profile-likelihood fits, CLs limits  |
 | `pyhs3`                 | Reading, writing, or validating binned and/or unbinned statistical models in    |
