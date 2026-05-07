@@ -100,11 +100,11 @@ software orientation.
 
 **MCP servers** (configured in `plugins/atlas/.mcp.json`):
 
-| Server           | Launch command                                                             | Purpose                             |
-| ---------------- | -------------------------------------------------------------------------- | ----------------------------------- |
-| `rucio`          | `pixi exec --spec rucio-mcp sh -c ''"'"'rucio-mcp serve --read-only'"'"''` | Dataset and replica discovery       |
-| `ami`            | `pixi exec --spec ami-mcp sh -c ''"'"'ami-mcp serve'"'"''`                 | AMI metadata (cross-sections, tags) |
-| `atlasopenmagic` | `uvx atlasopenmagic-mcp serve`                                             | ATLAS Open Data catalog             |
+| Server           | Launch command                                                   | Purpose                             |
+| ---------------- | ---------------------------------------------------------------- | ----------------------------------- |
+| `rucio`          | `pixi exec --spec rucio-mcp sh -c 'rucio-mcp serve --read-only'` | Dataset and replica discovery       |
+| `ami`            | `pixi exec --spec ami-mcp sh -c 'ami-mcp serve'`                 | AMI metadata (cross-sections, tags) |
+| `atlasopenmagic` | `uvx atlasopenmagic-mcp serve`                                   | ATLAS Open Data catalog             |
 
 ---
 
