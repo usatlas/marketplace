@@ -89,7 +89,7 @@ software orientation.
 | `servicex`              | Querying ATLAS data remotely via ServiceX                                       |
 | `setupatlas`            | Setting up the ATLAS software environment with setupATLAS or                    |
 | `statanalysis`          | Setting up the ATLAS StatAnalysis software release with asetup, choosing the    |
-| `topcptoolkit`          | Using TopCPToolkit to process ATLAS DAOD files into analysis NTuples            |
+| `topcptoolkit`          | Using TopCPToolkit (TCT) to produce ATLAS analysis NTuples from DAOD files:     |
 | `trexfitter`            | Setting up or running a TRExFitter statistical analysis                         |
 | `uproot`                | Reading or writing ROOT files in Python without a ROOT installation, or when    |
 | `vector`                | Computing 4-vector quantities in Python                                         |
