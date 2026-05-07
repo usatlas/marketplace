@@ -10,8 +10,9 @@ efficiency map. The trigger you are looking for, year and mc are not consistent,
 or the trigger is unavailable in this data period. Returning efficiency = 0.
 ```
 
-**Cause**: Mismatch between Run 2 and Run 3 muon ID working-point recommendations,
-or a trigger chain that is unavailable for the specified data period.
+**Cause**: Mismatch between Run 2 and Run 3 muon ID working-point
+recommendations, or a trigger chain that is unavailable for the specified data
+period.
 
 **Fix**: Check that your muon ID WP is supported — see
 [MuonCP docs](https://atlas-mcp.docs.cern.ch/guidelines/release22/index.html#wps-for-run3).
@@ -64,9 +65,10 @@ the correct value for your sample.
 
 ### `Unknown trigger 'my_jet_trigger' found while parsing trigger combination`
 
-**Cause**: Jet triggers are not supported by `TrigGlobalEfficiencyCorrectionTool`
-for matching/scale factors. Passing jet triggers in `triggerChainsPerYear` causes
-TCT to attempt setting up matching, which fails.
+**Cause**: Jet triggers are not supported by
+`TrigGlobalEfficiencyCorrectionTool` for matching/scale factors. Passing jet
+triggers in `triggerChainsPerYear` causes TCT to attempt setting up matching,
+which fails.
 
 **Fix**: For jet triggers that need only selection (not matching/SFs), use
 `triggerChainsForSelection` instead of `triggerChainsPerYear`, or set
@@ -101,7 +103,8 @@ as data.
 **Symptom**: The `SimFlavour` field may be missing (observed in p5631). Events
 pass GRL for data but fail for this MC.
 
-**Fix**: Report the issue. As a workaround, inspect the flags printout (`metaConfig.pretty_print`) to confirm what TCT detected.
+**Fix**: Report the issue. As a workaround, inspect the flags printout
+(`metaConfig.pretty_print`) to confirm what TCT detected.
 
 ### Systematically-varied vector branches contain default values
 
@@ -112,8 +115,9 @@ corresponding `object_select_NAME_%SYS%` flag** before using object kinematics.
 
 ### Objects not sorted by pT
 
-Also expected: CP algorithms cannot preserve pT ordering across systematics. Sort
-offline if needed (e.g. `jets = jets[ak.argsort(jets.pt, ascending=False)]`).
+Also expected: CP algorithms cannot preserve pT ordering across systematics.
+Sort offline if needed (e.g.
+`jets = jets[ak.argsort(jets.pt, ascending=False)]`).
 
 ## Migrating from AnalysisTop
 
@@ -135,14 +139,14 @@ not work with `TTree::Draw` — use FastFrames, uproot, or coffea instead.
 Write a `ConfigBlock` in Python and register it with `AddConfigBlocks`. For a
 single large algorithm, follow the
 [AnalysisSWTutorial](https://atlas-software.docs.cern.ch/analysis/analysis_tutorial/AnalysisSWTutorial/alg_basic_algorithm/)
-and add it via `AddConfigBlocks`. Split complex savers into separate single-purpose
-algorithms — it makes them easier to debug and reuse.
+and add it via `AddConfigBlocks`. Split complex savers into separate
+single-purpose algorithms — it makes them easier to debug and reuse.
 
 ### Equivalent of `CustomObjectLoader`
 
-Standard CP algorithms cover most object-definition needs. If you need a radically
-non-standard object type, discuss it with your PA group first — most cases can be
-handled by configuring the existing `WorkingPoint` options.
+Standard CP algorithms cover most object-definition needs. If you need a
+radically non-standard object type, discuss it with your PA group first — most
+cases can be handled by configuring the existing `WorkingPoint` options.
 
 ## Debugging tips
 
