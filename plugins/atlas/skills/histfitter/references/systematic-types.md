@@ -127,7 +127,7 @@ The `allowedSys` list in HistFitter source defines all valid methods:
 
 ## Choosing a method — decision flowchart
 
-```
+```text
 Is it a pure normalization uncertainty (no shape)?
 ├── Yes → Does the sample have normRegions/normFactor?
 │   ├── Yes → overallNormSys (normalized to CRs)

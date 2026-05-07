@@ -352,7 +352,7 @@ Constraint types: `"Gaussian"`, `"Poisson"`, `"LogNormal"`, `"Uniform"`,
 
 ## Object hierarchy
 
-```
+```text
 configMgr (singleton)
 ├── fitConfig ("BkgOnly", "Exclusion", "Discovery")
 │   ├── Measurement

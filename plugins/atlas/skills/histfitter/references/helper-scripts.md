@@ -6,7 +6,7 @@ plots, or upper limit results from a HistFitter workspace.
 All scripts are in `$HISTFITTER/scripts/` and operate on the after-fit workspace
 ROOT file typically found at:
 
-```
+```text
 results/<analysisName>/<FitConfig>_combined_<MeasName>_model_afterFit.root
 ```
 
