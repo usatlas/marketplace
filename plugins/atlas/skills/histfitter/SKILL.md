@@ -86,7 +86,28 @@ background process. Systematic uncertainties partially cancel in this ratio —
 this is why "normalized" systematic types (`normHistoSys`,
 `overallNormHistoSys`) exist.
 
-## Config Script Structure
+## Canonical Patterns
+
+### CLI Workflow
+
+```bash
+# Typical three-step sequence (histograms → workspace → fit)
+HistFitter.py -t -w -f -F bkg config.py
+
+# Re-run fit only (cuts/weights unchanged since last -t)
+HistFitter.py -w -f -F bkg config.py
+
+# Exclusion fit + CLs hypothesis test
+HistFitter.py -t -w -f -p -F excl config.py
+
+# Discovery fit + p₀ significance
+HistFitter.py -t -w -f -z -F disc config.py
+
+# Produce post-fit plots and tables
+HistFitter.py -d -F bkg config.py
+```
+
+### Exclusion fit config
 
 ```python
 from configManager import configMgr
@@ -423,6 +444,19 @@ pyhf xml2json config/MyAnalysis/TopLevelXML.xml --basedir results/ \
 pyhf cls workspace.json
 ```
 
+## Troubleshooting
+
+| Problem                         | Cause / Fix                                                                |
+| ------------------------------- | -------------------------------------------------------------------------- |
+| Upper limit scan returns 0s     | Scan range too wide; set `configMgr.scanRange = (0., 1.)`                  |
+| `All fits seem to have failed`  | Check log for which fit failed; reproduce with `-f -C "mu_Sig:<val>"`      |
+| Negative yields after fit       | Over-aggressive systematic; check with `-D systematics`                    |
+| MINOS errors < 1 on alpha param | Fit is constraining ("profiling") that syst; expected if CR has high stats |
+| Pruning removes too much        | Lower `prunThreshold`; validate total uncertainty unchanged                |
+| `Cannot open workspace`         | Wrong path; check `results/` directory structure                           |
+| Histograms not found in cache   | Run with `-t` to rebuild, or check `histBackupCacheFile` path              |
+| Slow histogram building         | Use parallelization (split samples with `-u`), or histogram recycling      |
+
 ## Gotchas
 
 - **ROOT version**: HistFitter is tied to specific ROOT versions; use the LCG
@@ -442,19 +476,6 @@ pyhf cls workspace.json
   only when reusing existing histograms
 - **Workspace naming**: Results are in
   `results/<analysisName>/<FitType>_combined_<MeasName>_model_afterFit.root`
-
-## Troubleshooting
-
-| Problem                         | Cause / Fix                                                                |
-| ------------------------------- | -------------------------------------------------------------------------- |
-| Upper limit scan returns 0s     | Scan range too wide; set `configMgr.scanRange = (0., 1.)`                  |
-| `All fits seem to have failed`  | Check log for which fit failed; reproduce with `-f -C "mu_Sig:<val>"`      |
-| Negative yields after fit       | Over-aggressive systematic; check with `-D systematics`                    |
-| MINOS errors < 1 on alpha param | Fit is constraining ("profiling") that syst; expected if CR has high stats |
-| Pruning removes too much        | Lower `prunThreshold`; validate total uncertainty unchanged                |
-| `Cannot open workspace`         | Wrong path; check `results/` directory structure                           |
-| Histograms not found in cache   | Run with `-t` to rebuild, or check `histBackupCacheFile` path              |
-| Slow histogram building         | Use parallelization (split samples with `-u`), or histogram recycling      |
 
 ## Interop
 
