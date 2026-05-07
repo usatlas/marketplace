@@ -66,7 +66,7 @@ software orientation.
 | `centralpage`           | Searching for ATLAS Monte Carlo or data samples                                 |
 | `coffea`                | Writing a columnar ATLAS analysis with coffea                                   |
 | `cpp-bindings`          | Writing Python bindings for C++ HEP code with nanobind or pybind11              |
-| `decaylanguage`         | Working with decay chain descriptions in Python                                 |
+| `decaylanguage`         | Working with particle decay chains in Python                                    |
 | `eiclient`              | Working with the ATLAS Event Index                                              |
 | `fastframes`            | You need a supported RDataFrame-based framework to process CP-algorithm NTuples |
 | `fastjet`               | Running jet clustering in Python with fastjet or pyjet                          |
