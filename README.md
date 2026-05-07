@@ -66,7 +66,7 @@ software orientation.
 | `centralpage`           | Searching for ATLAS Monte Carlo or data samples                                 |
 | `coffea`                | Writing a columnar ATLAS analysis with coffea                                   |
 | `cpp-bindings`          | Writing Python bindings for C++ HEP code with nanobind or pybind11              |
-| `decaylanguage`         | Working with decay chain descriptions in Python                                 |
+| `decaylanguage`         | Working with particle decay chains in Python                                    |
 | `eiclient`              | Working with the ATLAS Event Index                                              |
 | `fastframes`            | You need a supported RDataFrame-based framework to process CP-algorithm NTuples |
 | `fastjet`               | Running jet clustering in Python with fastjet or pyjet                          |
@@ -100,11 +100,11 @@ software orientation.
 
 **MCP servers** (configured in `plugins/atlas/.mcp.json`):
 
-| Server           | Launch command                                                   | Purpose                             |
-| ---------------- | ---------------------------------------------------------------- | ----------------------------------- |
-| `rucio`          | `pixi exec --spec rucio-mcp sh -c 'rucio-mcp serve --read-only'` | Dataset and replica discovery       |
-| `ami`            | `pixi exec --spec ami-mcp sh -c 'ami-mcp serve'`                 | AMI metadata (cross-sections, tags) |
-| `atlasopenmagic` | `uvx atlasopenmagic-mcp serve`                                   | ATLAS Open Data catalog             |
+| Server           | Launch command                                                             | Purpose                             |
+| ---------------- | -------------------------------------------------------------------------- | ----------------------------------- |
+| `rucio`          | `pixi exec --spec rucio-mcp sh -c ''"'"'rucio-mcp serve --read-only'"'"''` | Dataset and replica discovery       |
+| `ami`            | `pixi exec --spec ami-mcp sh -c ''"'"'ami-mcp serve'"'"''`                 | AMI metadata (cross-sections, tags) |
+| `atlasopenmagic` | `uvx atlasopenmagic-mcp serve`                                             | ATLAS Open Data catalog             |
 
 ---
 
