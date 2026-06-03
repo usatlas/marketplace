@@ -1,8 +1,8 @@
 # USATLAS Marketplace
 
-Claude Code plugin marketplace for ATLAS physics analysis. Three plugins cover
-USATLAS Analysis Facilities, the full ATLAS software and analysis stack, and
-generic HEP Python tooling.
+Claude Code plugin marketplace for ATLAS physics analysis. Four plugins cover
+USATLAS Analysis Facilities, BNL LOCALGROUPDISK storage migration, the full
+ATLAS software and analysis stack, and generic HEP Python tooling.
 
 ## Installation
 
@@ -108,6 +108,28 @@ software orientation.
 
 ---
 
+### `bnl-localgroupdisk`
+
+Migrate local ROOT files to `BNL-OSG2_LOCALGROUPDISK` via Rucio, with
+symlink-farm access for transparent analysis use on BNL SDCC nodes. Grid proxy
+and VOMS are only needed during migration; after migration, the symlink farm is
+readable without any proxy. See
+[BNL storage docs](https://usatlas.github.io/af-docs/bnl/storage/) and
+[standalone repo](https://github.com/FlamyFlame/claude-bnl-localgroupdisk) for
+full documentation.
+
+**Skills:**
+
+| Skill            | Description                                                                       |
+| ---------------- | --------------------------------------------------------------------------------- |
+| `migrate`        | End-to-end migration: upload to scratchdisk, replicate to LOCALGROUPDISK, build   |
+|                  | symlink farm with same-path swap (default) or full codebase integration           |
+| `preflight`      | Pre-flight checks: Rucio account, grid proxy, quotas, RSE names, pnfs mount      |
+| `check-rule`     | Monitor a Rucio replication rule until completion                                 |
+| `build-symlinks` | Build a symlink farm from an already-replicated dataset on LOCALGROUPDISK          |
+
+---
+
 ### `hep-python-tools`
 
 Generic Python tooling skills used across HEP workflows: Typer CLIs with
@@ -136,6 +158,9 @@ plugins/
     agents/  # 5 subagents
     skills/  # 43 skills
     VENDORED-LICENSES.md
+  bnl-localgroupdisk/
+    .claude-plugin/plugin.json
+    skills/  # 4 skills
   hep-python-tools/
     .claude-plugin/plugin.json
     skills/  # 5 skills
