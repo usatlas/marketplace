@@ -1,47 +1,59 @@
 ---
-description: >
-  Monitor a Rucio replication rule until it completes (state OK) or gets stuck.
-  Use after adding a replication rule to BNL-OSG2_LOCALGROUPDISK.
-disable-model-invocation: false
-arguments: [rule_id]
-argument-hint: "<rule_id>"
-allowed-tools: Bash
+name: bnl-localgroupdisk-check-rule
+description: >-
+  Use when monitoring a Rucio replication rule until it completes (state OK) or
+  gets stuck after adding a rule to BNL-OSG2_LOCALGROUPDISK.
 ---
 
-# Check Rucio replication rule status
+## Overview
 
-Monitor rule `$rule_id` until replication completes.
+Monitor a Rucio replication rule by polling `rucio rule-info` until the
+state reaches OK (complete) or STUCK (failed). Use after adding a
+replication rule to BNL-OSG2_LOCALGROUPDISK, or to resume monitoring a
+rule from a previous session.
 
-If `$rule_id` is not provided, ask the user.
+If the rule ID is not provided, ask the user.
 
-## Quick check
+## When to Use
 
-Substitute the rule ID from the argument into this command:
+- After `rucio add-rule` returns a rule ID and you need to wait for
+  replication to finish
+- When a previous migration session was interrupted during replication and
+  you need to check whether it completed
+- Inside `/bnl-localgroupdisk:migrate`, this logic runs automatically —
+  call standalone only when resuming or troubleshooting
+
+## Key Concepts
+
+- **State: OK** — all files replicated to LOCALGROUPDISK. Proceed to PFN
+  extraction and symlink farm.
+- **State: REPLICATING** — transfers in progress. Locks field shows
+  `OK/REPLICATING/STUCK: X/Y/Z` — X files done, Y transferring, Z
+  failed. X=0, Y>0 for >1 hour is normal (FTS queue delay).
+- **State: STUCK** — some transfers failed repeatedly. Check the `Error:`
+  field. Common causes: source replica expired, RSE unavailable, quota
+  exceeded.
+- **Locks** — per-file transfer status. The three numbers are
+  OK/REPLICATING/STUCK counts.
+
+## Canonical Patterns
+
+### Quick check
 
 ```bash
 export ATLAS_LOCAL_ROOT_BASE=/cvmfs/atlas.cern.ch/repo/ATLASLocalRootBase
 source $ATLAS_LOCAL_ROOT_BASE/user/atlasLocalSetup.sh >/dev/null 2>&1
 lsetup rucio >/dev/null 2>&1
-rucio rule-info <RULE_ID> 2>/dev/null | grep -E "State:|Locks|Error|Updated|Name"
+rucio rule-info <RULE_ID> 2>/dev/null \
+  | grep -E "State:|Locks|Error|Updated|Name"
 ```
 
-Replace `<RULE_ID>` with the `$rule_id` argument value.
+Replace `<RULE_ID>` with the rule ID argument.
 
-## Interpreting the output
+### Long-running monitor
 
-- **State: OK** — replication complete. All files are on LOCALGROUPDISK. Proceed
-  to PFN extraction and symlink farm.
-- **State: REPLICATING, Locks OK/REPLICATING/STUCK: X/Y/0** — transfers in
-  progress. X files done, Y still transferring. If Y>0 and X=0 for >1 hour,
-  the FTS queue is just slow (normal for user-priority transfers).
-- **State: STUCK** — some transfers failed repeatedly. Check `Error:` field.
-  Common causes: source replica expired, RSE unavailable, quota exceeded.
-- **Error: not None** — report the error text to the user.
-
-## Long-running monitor
-
-If the rule is still REPLICATING, set up a Monitor to watch for completion.
-Substitute the `$rule_id` argument value for `<RULE_ID>` below:
+If the rule is still REPLICATING, set up a Monitor to watch for
+completion:
 
 ```bash
 export ATLAS_LOCAL_ROOT_BASE=/cvmfs/atlas.cern.ch/repo/ATLASLocalRootBase
@@ -70,5 +82,30 @@ while true; do
 done
 ```
 
-The script uses `$rule_id` from the skill argument. Use `timeout: 3600000` on the Bash tool call (1 hour). If it times out, re-run. FTS queue waits
-of 1–12 hours are normal for user transfers at BNL.
+Use `timeout: 3600000` on the Bash tool call (1 hour). If it times out,
+re-run.
+
+## Gotchas
+
+- **STUCK does not always mean permanent failure**: FTS can mark transfers
+  stuck temporarily. Check the `Error:` field — if it mentions a transient
+  issue (e.g., "source busy"), the rule may auto-recover. Report the error
+  text to the user rather than assuming the worst.
+- **0/N locks for hours is normal**: user-priority FTS transfers are
+  deprioritized. Queue waits of 1–12 hours are expected at BNL. Actual
+  data transfer once FTS picks it up takes only minutes (~5 min per
+  100 GB).
+- **Error: not None** — always report the full error text to the user.
+
+## Interop
+
+- FTS queue wait for user-priority transfers: typically 1–12 hours at
+  BNL; actual transfer is minutes per 100 GB.
+- After replication reaches OK, use
+  `/bnl-localgroupdisk:build-symlinks` to create a symlink farm, or let
+  `/bnl-localgroupdisk:migrate` continue to the next phase automatically.
+
+## Docs
+
+- [bnl-localgroupdisk plugin](https://github.com/FlamyFlame/claude-bnl-localgroupdisk)
+- [BNL SDCC storage documentation](https://usatlas.github.io/af-docs/bnl/storage/)

@@ -160,6 +160,7 @@ plugins/
     VENDORED-LICENSES.md
   bnl-localgroupdisk/
     .claude-plugin/plugin.json
+    .cursor-plugin/plugin.json
     skills/  # 4 skills
   hep-python-tools/
     .claude-plugin/plugin.json

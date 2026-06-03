@@ -9,5 +9,5 @@
   "license": "MIT",
   "keywords": ["atlas", "rucio", "bnl", "localgroupdisk", "sdcc", "pnfs", "dcache", "migration"],
   "homepage": "https://usatlas.github.io/af-docs/bnl/storage/",
-  "repository": "https://github.com/FlamyFlame/claude-bnl-localgroupdisk"
+  "repository": "https://github.com/usatlas/marketplace"
 }
