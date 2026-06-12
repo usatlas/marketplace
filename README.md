@@ -73,7 +73,7 @@ software orientation.
 | `fsspec-xrootd`         | Accessing ROOT files on EOS, WLCG grid storage, or any XRootD endpoint from     |
 | `hepunits`              | Writing unit-safe HEP code in Python                                            |
 | `hist`                  | Creating, filling, slicing, or plotting histograms with the scikit-hep hist     |
-| `histfitter`            | Setting up or running a HistFitter-based statistical analysis                   |
+| `histfitter`            | Setting up, running, or debugging a HistFitter statistical analysis             |
 | `iminuit`               | You need to minimize a scalar cost function in Python using MINUIT2 via iminuit |
 | `lcgenv`                | Setting up standalone LCG (CERN SFT) software packages via lcgenv or views:     |
 | `managetier3sw`         | Installing, updating, or removing ATLAS software on a local Tier-3 cluster      |

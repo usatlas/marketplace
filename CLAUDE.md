@@ -58,12 +58,47 @@ description: >-
 
 - Section order: Overview → When to Use → Key Concepts → Canonical Patterns →
   Gotchas → Interop → Docs.
-- Deep skills (uproot, coffea, pyhf) add a Worked Example and Troubleshooting
-  table (~300–400 lines). Medium skills target ~150–250 lines.
+- Deep skills (uproot, coffea, pyhf, histfitter) add a Worked Example and
+  Troubleshooting table (~300–500 lines). Medium skills target ~150–250 lines.
 - All ATLAS energy/momentum values are in MeV — note this in Gotchas.
 - End with a `## Docs` section linking the canonical upstream documentation URL.
 - No `attribution:` or vendoring comments inside skill files. Legal attribution
   for upstream content lives only in `plugins/atlas/VENDORED-LICENSES.md`.
+
+**Progressive disclosure with `references/`:**
+
+Skills that cover a broad API or deep domain knowledge should use the
+three-level loading pattern:
+
+1. **SKILL.md** (<500 lines) — decision guide: overview, when to use, key
+   concepts, canonical patterns, gotchas, and a "Reference Files" section with
+   pointers.
+2. **`references/*.md`** — deep content loaded on demand. Each file covers one
+   topic (e.g., `systematic-types.md`, `config-api.md`, `helper-scripts.md`).
+   Each reference file should include a trigger sentence ("Read this reference
+   when…") followed by a Table of Contents near the top.
+3. **`scripts/`** — executable code for deterministic/repetitive tasks (rare).
+
+The "Reference Files" section in SKILL.md should list each reference with a
+one-line description of its content and **when to read it** (e.g., "Read when
+the user asks which systematic type to use"). This lets the model decide at
+runtime whether loading the reference is worthwhile.
+
+Good examples of this pattern: `awkward`, `xroofit`, `histfitter`.
+
+**Writing style for skills:**
+
+- Verify all API methods, CLI flags, and code examples against the actual source
+  code. Do not invent methods or flags — grep the source to confirm they exist.
+- Use imperative form in instructions ("Set `configMgr.analysisName`", not "You
+  should set...").
+- Prefer tables for reference material (CLI flags, method lists, property
+  tables).
+- Include realistic code examples that can be copy-pasted. Mark deprecated APIs
+  and point to the replacement.
+- When drawing from TWiki pages, tutorials, or upstream docs, rewrite from
+  expert knowledge rather than copying verbatim. Cross-reference against source
+  code to catch outdated or incorrect TWiki content.
 
 ## Adding a subagent
 
