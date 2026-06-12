@@ -1,30 +1,43 @@
 ---
-name: bnl-localgroupdisk-migrate
+name: migrate
 description: >-
-  Use when you need to migrate a directory of local ROOT files to
-  BNL-OSG2_LOCALGROUPDISK via Rucio on BNL SDCC nodes.
+  Use when migrating a directory of local ROOT files to BNL-OSG2_LOCALGROUPDISK
+  via Rucio on BNL SDCC nodes, or for any sub-step of that workflow: pre-flight
+  checks (Rucio account, grid proxy, quotas, RSE names, pnfs mount), monitoring
+  a Rucio replication rule until it reaches OK/STUCK, or building a symlink farm
+  from an already-replicated dataset for transparent proxy-free access.
 ---
 
 ## Overview
 
-End-to-end migration of a directory of ROOT files to BNL LOCALGROUPDISK.
-Handles pre-flight checks, upload to scratchdisk, replication, symlink
-farm creation, and optional codebase path adaptation with safe rollback.
+End-to-end migration of a directory of ROOT files to BNL LOCALGROUPDISK. Handles
+pre-flight checks, upload to scratchdisk, replication, symlink farm creation,
+and optional codebase path adaptation with safe rollback.
+
+For a **partial workflow** (run one phase standalone — e.g. you already
+replicated and only need the symlink farm, or you just want to re-check your
+proxy, or resume monitoring an existing rule), follow the bundled reference for
+that phase instead of the full pipeline:
+
+- `references/preflight.md` — the 5 prerequisite checks, standalone
+- `references/check-rule.md` — monitor a Rucio rule ID to OK/STUCK
+- `references/build-symlinks.md` — build a symlink farm from an
+  already-replicated dataset
 
 Arguments:
 
 - `$source_dir` — absolute path to the directory containing `.root` files
-- `$dataset_name` — Rucio dataset name (no scope prefix),
-  e.g. `powheg_cc_evgen_truth`
+- `$dataset_name` — Rucio dataset name (no scope prefix), e.g.
+  `powheg_cc_evgen_truth`
 
 If any argument is missing, ask the user before proceeding.
 
 ### Autonomous mode
 
-If the user's message includes **any** of these phrases
-(case-insensitive): "no confirmation", "no confirm", "autonomous",
-"proceed without confirmation", "all steps without confirmation",
-"no questions" — then **skip all interactive prompts** and use defaults:
+If the user's message includes **any** of these phrases (case-insensitive): "no
+confirmation", "no confirm", "autonomous", "proceed without confirmation", "all
+steps without confirmation", "no questions" — then **skip all interactive
+prompts** and use defaults:
 
 - Survey (Step 1): proceed without asking
 - Decision Point 1: **upload + symlink swap**
@@ -32,41 +45,63 @@ If the user's message includes **any** of these phrases
 - `_orig` guard (Step 7): remove existing `_orig` and proceed
 - DID conflict (Step 2): still STOP — real problem, not a preference
 
-The user can pre-answer individual decision points in their message
-(e.g., "using same-path swap" or "upload only"). Honor explicit choices
-over defaults. Autonomous mode only suppresses the *prompt* — all checks,
-verifications, and error stops still run.
+The user can pre-answer individual decision points in their message (e.g.,
+"using same-path swap" or "upload only"). Honor explicit choices over defaults.
+Autonomous mode only suppresses the _prompt_ — all checks, verifications, and
+error stops still run.
 
 ## When to Use
 
-- Migrating ROOT files from personal pnfs/dCache or local storage to
-  permanent LOCALGROUPDISK storage at BNL
+- Migrating ROOT files from personal pnfs/dCache or local storage to permanent
+  LOCALGROUPDISK storage at BNL
 - The skill presents three decision points:
   1. **Upload + symlink swap** (default) vs **upload only**
   2. **Same-path swap** (default, zero code changes) vs **different path**
-  3. If different path: **full integration** (scan code, update paths,
-     test, rollback-safe) vs **symlink only**
+  3. If different path: **full integration** (scan code, update paths, test,
+     rollback-safe) vs **symlink only**
 
 ## Key Concepts
 
-- **Phase 1 (upload + replicate)**: always runs — uploads files to
-  scratchdisk, creates a Rucio dataset, adds a replication rule to
-  LOCALGROUPDISK, waits for completion.
+- **Phase 1 (upload + replicate)**: always runs — uploads files to scratchdisk,
+  creates a Rucio dataset, adds a replication rule to LOCALGROUPDISK, waits for
+  completion.
 - **Phase 2 (symlink farm)**: builds a directory of symlinks pointing to
-  LOCALGROUPDISK pnfs paths. For same-path swap, renames the original
-  directory to `_orig` and places the farm at the original path (atomic
-  swap via staging directory).
-- **Phase 3 (full integration)**: different-path only — creates a git
-  branch, scans codebase for path references (including constructed
-  paths, config files, aliases), proposes edits, tests compilation and
-  TTree entry counts, rolls back on failure.
+  LOCALGROUPDISK pnfs paths. For same-path swap, renames the original directory
+  to `_orig` and places the farm at the original path (atomic swap via staging
+  directory).
+- **Phase 3 (full integration)**: different-path only — creates a git branch,
+  scans codebase for path references (including constructed paths, config files,
+  aliases), proposes edits, tests compilation and TTree entry counts, rolls back
+  on failure.
 - **Rucio scope**: `user.<account>` — derived from `rucio whoami`.
-- **PFN prefix**: `root://dcgftp.usatlas.bnl.gov:1094/` — strip this to
-  get the local pnfs path for symlinks.
-- **FTS queue**: user-priority transfers wait 1–12 hours; actual transfer
-  is ~5 min per 100 GB.
+- **PFN prefix**: `root://dcgftp.usatlas.bnl.gov:1094/` — strip this to get the
+  local pnfs path for symlinks.
+- **FTS queue**: user-priority transfers wait 1–12 hours; actual transfer is ~5
+  min per 100 GB.
 
 ## Canonical Patterns
+
+### Environment setup
+
+All `rucio` and `voms-proxy-*` commands below require the ATLAS environment.
+Bootstrap it **once per shell** as documented in the `setupatlas` skill (sources
+ALRB, exposes `lsetup`), then set up Rucio:
+
+```bash
+# Bootstrap per the setupatlas skill, then:
+lsetup rucio >/dev/null 2>&1
+```
+
+In a non-interactive shell where the `setupATLAS` alias is not defined, source
+ALRB directly first (see the `setupatlas` skill for details):
+
+```bash
+export ATLAS_LOCAL_ROOT_BASE=/cvmfs/atlas.cern.ch/repo/ATLASLocalRootBase
+source $ATLAS_LOCAL_ROOT_BASE/user/atlasLocalSetup.sh >/dev/null 2>&1
+lsetup rucio >/dev/null 2>&1
+```
+
+Subsequent code blocks assume the environment is already set up.
 
 ### Prerequisites (5 pre-flight checks)
 
@@ -75,9 +110,6 @@ Before starting, run all checks. STOP and report if any fails.
 **Check 1 — Rucio account:**
 
 ```bash
-export ATLAS_LOCAL_ROOT_BASE=/cvmfs/atlas.cern.ch/repo/ATLASLocalRootBase
-source $ATLAS_LOCAL_ROOT_BASE/user/atlasLocalSetup.sh >/dev/null 2>&1
-lsetup rucio >/dev/null 2>&1
 rucio whoami 2>/dev/null
 ```
 
@@ -89,11 +121,10 @@ Record the `account` name — used as `user.<account>` scope throughout.
 voms-proxy-info --all 2>&1
 ```
 
-- Must have >2 hours remaining (>24h recommended). If <2h, tell user to
-  run `voms-proxy-init -voms atlas -valid 96:00`.
-- VOMS attributes must include `/atlas/usatlas` — **required for
-  LOCALGROUPDISK quota**. If missing, direct user to
-  `https://atlas-auth.cern.ch/`.
+- Must have >2 hours remaining (>24h recommended). If <2h, tell user to run
+  `voms-proxy-init -voms atlas -valid 96:00`.
+- VOMS attributes must include `/atlas/usatlas` — **required for LOCALGROUPDISK
+  quota**. If missing, direct user to `https://atlas-auth.cern.ch/`.
 
 **Check 3 — RSE names:**
 
@@ -113,8 +144,8 @@ rucio list-account-usage $ACCOUNT 2>/dev/null \
   | grep BNL-OSG2_SCRATCHDISK
 ```
 
-- LOCALGROUPDISK must show a limit (default 50 TB). If missing, the user
-  needs `/atlas/usatlas` VOMS group membership.
+- LOCALGROUPDISK must show a limit (default 50 TB). If missing, the user needs
+  `/atlas/usatlas` VOMS group membership.
 - SCRATCHDISK: check available space for staging the upload.
 
 **Check 5 — pnfs mount:**
@@ -141,8 +172,8 @@ STOP if any check is FAIL.
 
 ### Phase 1: Upload and replicate (always runs)
 
-Execute sequentially. Stop on any error and report. Derive `$SCOPE` from
-the Rucio account (e.g., account `jdoe` → `$SCOPE` = `user.jdoe`).
+Execute sequentially. Stop on any error and report. Derive `$SCOPE` from the
+Rucio account (e.g., account `jdoe` → `$SCOPE` = `user.jdoe`).
 
 **Step 1 — Survey source files:**
 
@@ -175,8 +206,8 @@ If any non-`.root` files are found, **warn the user**:
 >
 > In autonomous mode: proceed with warning noted in output.
 
-Report: number of `.root` files, total size, any non-`.root` files.
-Confirm with the user before proceeding.
+Report: number of `.root` files, total size, any non-`.root` files. Confirm with
+the user before proceeding.
 
 **Step 2 — Check for DID conflicts:**
 
@@ -184,9 +215,9 @@ Confirm with the user before proceeding.
 rucio list-dids "$SCOPE:$(basename <first_file>)" 2>&1
 ```
 
-If any file already exists as a DID under the user's scope, STOP and
-warn. Options: (a) reuse existing DID if it has a scratchdisk replica —
-skip to Step 4; (b) rename with a suffix (last resort).
+If any file already exists as a DID under the user's scope, STOP and warn.
+Options: (a) reuse existing DID if it has a scratchdisk replica — skip to Step
+4; (b) rename with a suffix (last resort).
 
 **Step 3 — Upload to scratchdisk:**
 
@@ -196,7 +227,8 @@ rucio upload --rse BNL-OSG2_SCRATCHDISK --scope $SCOPE \
 ```
 
 **Source files are NOT modified or deleted.** ~30s per 4 GB file. For
->50 files, upload in batches. STOP on any error — nothing to clean up.
+
+> 50 files, upload in batches. STOP on any error — nothing to clean up.
 
 **Step 4 — Create dataset and attach files:**
 
@@ -244,41 +276,39 @@ while true; do
 done
 ```
 
-Use `timeout: 3600000` (1 hour). If it times out, re-run — FTS queue
-waits of 1–12 hours are normal. If `STUCK`, report the error and STOP.
+Use `timeout: 3600000` (1 hour). If it times out, re-run — FTS queue waits of
+1–12 hours are normal. If `STUCK`, report the error and STOP.
 
 ### Decision Points
 
 **Decision Point 1 — Migration mode** (after replication reaches OK):
 
-> 1. **Upload + symlink swap** (default) — build a symlink farm for
->    transparent local access
+> 1. **Upload + symlink swap** (default) — build a symlink farm for transparent
+>    local access
 > 2. **Upload only** — data is on LOCALGROUPDISK, stop here
 
 Upload only → report rule ID, dataset name, total size. **DONE.**
 
 **Decision Point 2 — Symlink placement:**
 
-> 1. **Same-path swap** (default) — rename `source_dir` to
->    `source_dir_orig`, place symlink farm at `source_dir`. Analysis code
->    works without any changes.
+> 1. **Same-path swap** (default) — rename `source_dir` to `source_dir_orig`,
+>    place symlink farm at `source_dir`. Analysis code works without any
+>    changes.
 > 2. **Different path** — place symlink farm at a separate location (user
 >    provides the path).
 
-Same-path swap → set `$farm_dir = $source_dir`, go to Phase 2.
-Different path → ask user for `$farm_dir`, go to Decision Point 3.
+Same-path swap → set `$farm_dir = $source_dir`, go to Phase 2. Different path →
+ask user for `$farm_dir`, go to Decision Point 3.
 
 **Decision Point 3 — Code integration** (different-path only):
 
-> 1. **Full integration** (default) — build symlink farm, scan codebase
->    for references to the old path, update code, test with safe
->    rollback. All changes on a git branch
->    (`lgd-migrate-<dataset>`).
-> 2. **Symlink only** — build symlink farm at the new path, no code
->    changes.
+> 1. **Full integration** (default) — build symlink farm, scan codebase for
+>    references to the old path, update code, test with safe rollback. All
+>    changes on a git branch (`lgd-migrate-<dataset>`).
+> 2. **Symlink only** — build symlink farm at the new path, no code changes.
 
-Symlink only → go to Phase 2 (skip rename step).
-Full integration → go to Phase 3.
+Symlink only → go to Phase 2 (skip rename step). Full integration → go to
+Phase 3.
 
 ### Phase 2: Symlink farm
 
@@ -299,8 +329,8 @@ Build the farm in a staging directory first, then do an atomic swap.
 Guard checks:
 
 1. If `${source_dir}_lgd_staging` exists (leftover), remove it.
-2. If `${source_dir}_orig` exists (previous backup), STOP and ask:
-   (a) Remove it and proceed, or (b) Abort.
+2. If `${source_dir}_orig` exists (previous backup), STOP and ask: (a) Remove it
+   and proceed, or (b) Abort.
 
 ```bash
 STAGING="${source_dir}_lgd_staging"
@@ -347,8 +377,7 @@ done < /tmp/pfns_${dataset_name}.txt
 
 **Step 8 — Verify:**
 
-1. Symlink count matches source file count:
-   `ls -1 "$farm_dir" | wc -l`
+1. Symlink count matches source file count: `ls -1 "$farm_dir" | wc -l`
 2. Spot-check one symlink resolves:
    `ls -la "$farm_dir"/$(ls "$farm_dir" | head -1)`
 3. ROOT readability check:
@@ -393,10 +422,10 @@ root -b -l -q -e '
 '
 ```
 
-- **PASSED**: ask whether to delete `${source_dir}_orig` to free space
-  (default yes; autonomous mode: auto-delete). Report disk space freed.
-- **FAILED**: report the mismatch. Do NOT delete `_orig`. Offer to roll
-  back: `mv "$farm_dir" "${farm_dir}_lgd"; mv "${source_dir}_orig" "$source_dir"`.
+- **PASSED**: ask whether to delete `${source_dir}_orig` to free space (default
+  yes; autonomous mode: auto-delete). Report disk space freed.
+- **FAILED**: report the mismatch. Do NOT delete `_orig`. Offer to roll back:
+  `mv "$farm_dir" "${farm_dir}_lgd"; mv "${source_dir}_orig" "$source_dir"`.
 
 **DONE for Phase 2.**
 
@@ -424,42 +453,38 @@ Record `$BASE_BRANCH` — used for rollback (never hardcode `main`).
 
 **Step 7 — Get PFNs and build symlink farm:**
 
-Same as Phase 2 Steps 6–8, different-path variant (do NOT rename
-`$source_dir`).
+Same as Phase 2 Steps 6–8, different-path variant (do NOT rename `$source_dir`).
 
 **Step 8 — Find and update path references:**
 
-Search the codebase for references to `$source_dir`. Do not stop at
-literal string matches — handle these edge cases:
+Search the codebase for references to `$source_dir`. Do not stop at literal
+string matches — handle these edge cases:
 
-- **Constructed paths**: `base_dir + subdir + filename`. Search for
-  directory basename, parent name, and representative filenames.
-- **Multiple indirection levels**: a base directory set in one file, used
-  in another, passed as argument to a third.
-- **Config files and scripts**: `.cfg`, `.json`, `.yaml`, `.sh`, job
-  submission files.
+- **Constructed paths**: `base_dir + subdir + filename`. Search for directory
+  basename, parent name, and representative filenames.
+- **Multiple indirection levels**: a base directory set in one file, used in
+  another, passed as argument to a third.
+- **Config files and scripts**: `.cfg`, `.json`, `.yaml`, `.sh`, job submission
+  files.
 - **Relative vs absolute**: `~/`, `$HOME`, or symlinks resolving to
   `$source_dir`.
 
-For each match, classify the hit and propose the edit. Present the list
-to the user for confirmation before applying. Show `git diff --stat`
-after editing.
+For each match, classify the hit and propose the edit. Present the list to the
+user for confirmation before applying. Show `git diff --stat` after editing.
 
-If no references found, ask the user which file defines the path. If
-unknown, exit with manual instructions and skip to Step 10 with
-`Test result: SKIPPED`.
+If no references found, ask the user which file defines the path. If unknown,
+exit with manual instructions and skip to Step 10 with `Test result: SKIPPED`.
 
 **Step 9 — Test run:**
 
-*Level 1 — ROOT-level verification (always run):* Open a sample file,
-verify not zombie, compare TTree entry counts via TChain between original
-and farm. MISMATCH → STOP and roll back.
+_Level 1 — ROOT-level verification (always run):_ Open a sample file, verify not
+zombie, compare TTree entry counts via TChain between original and farm.
+MISMATCH → STOP and roll back.
 
-*Level 2 — Analysis-level test (if code was changed):* Attempt
-compilation (ACLiC for ROOT macros, framework build system otherwise).
-If possible without disruption, run minimal test in a temp directory
-(never overwrite original outputs). If test would require Condor or long
-runtime, report:
+_Level 2 — Analysis-level test (if code was changed):_ Attempt compilation
+(ACLiC for ROOT macros, framework build system otherwise). If possible without
+disruption, run minimal test in a temp directory (never overwrite original
+outputs). If test would require Condor or long runtime, report:
 
 ```text
 Verified: compilation OK, TChain entry counts match (<N> entries).
@@ -469,11 +494,11 @@ Recommended: run <specific command> and compare output.
 
 **Step 9b — Finalize or roll back:**
 
-If tests pass: commit changes, restore stash (report conflicts if any),
-suggest merging `lgd-migrate-<dataset>` into `$BASE_BRANCH`.
+If tests pass: commit changes, restore stash (report conflicts if any), suggest
+merging `lgd-migrate-<dataset>` into `$BASE_BRANCH`.
 
-If tests fail: report error, revert all changes, delete branch, restore
-stash, report:
+If tests fail: report error, revert all changes, delete branch, restore stash,
+report:
 
 ```text
 ## Migration test FAILED: <dataset_name>
@@ -504,8 +529,8 @@ stash, report:
 ## Worked Example
 
 Suppose you have 25 Monte Carlo ROOT files (98 GB total) at
-`/pnfs/usatlas.bnl.gov/users/<you>/mc_sample/` and want them on
-LOCALGROUPDISK with a symlink farm at the original path.
+`/pnfs/usatlas.bnl.gov/users/<you>/mc_sample/` and want them on LOCALGROUPDISK
+with a symlink farm at the original path.
 
 ```text
 /bnl-localgroupdisk:migrate /pnfs/usatlas.bnl.gov/users/<you>/mc_sample mc_sample_truth
@@ -518,42 +543,42 @@ LOCALGROUPDISK with a symlink farm at the original path.
 5. **Replication rule**: returns rule ID. FTS queue: 1–12 hours.
 6. **Decision Point 1**: upload + symlink swap (default).
 7. **Decision Point 2**: same-path swap (default).
-8. **Symlink farm**: renames original to `mc_sample_orig`, creates
-   symlinks at the original path.
+8. **Symlink farm**: renames original to `mc_sample_orig`, creates symlinks at
+   the original path.
 9. **Smoke test**: TTree entry counts match — PASSED.
 10. **Cleanup**: delete `mc_sample_orig` (default yes).
 
-After migration: analysis code reads from the same path — no changes
-needed. No grid proxy required.
+After migration: analysis code reads from the same path — no changes needed. No
+grid proxy required.
 
 ## Troubleshooting
 
-| Step | Problem                      | What happens                                           |
-| ---- | ---------------------------- | ------------------------------------------------------ |
-| 2    | `Database error` (dup DID)   | Stops, offers reuse or rename                          |
-| 5    | `insufficient quota`         | Stops, directs to ATLAS IAM for VOMS group             |
-| 5b   | Rule stuck at 0/N for hours  | Normal FTS queue delay; skill documents expected timing |
-| 8    | Symlinks don't resolve       | Checks pnfs mount; reports if unavailable              |
-| 8    | Crash between rename and build | Farm built in staging dir first, then atomic swap      |
-| 8    | ROOT can't open file         | Reports failure; original at `_orig` is intact         |
-| 8    | Code search finds nothing    | Asks user; exits with manual instructions if unknown   |
-| 9    | Test fails after code edits  | Rolls back all changes, deletes branch, restores stash |
-| 9b   | Stash pop has merge conflict | Reports conflicting files, asks user to resolve        |
+| Step | Problem                        | What happens                                            |
+| ---- | ------------------------------ | ------------------------------------------------------- |
+| 2    | `Database error` (dup DID)     | Stops, offers reuse or rename                           |
+| 5    | `insufficient quota`           | Stops, directs to ATLAS IAM for VOMS group              |
+| 5b   | Rule stuck at 0/N for hours    | Normal FTS queue delay; skill documents expected timing |
+| 8    | Symlinks don't resolve         | Checks pnfs mount; reports if unavailable               |
+| 8    | Crash between rename and build | Farm built in staging dir first, then atomic swap       |
+| 8    | ROOT can't open file           | Reports failure; original at `_orig` is intact          |
+| 8    | Code search finds nothing      | Asks user; exits with manual instructions if unknown    |
+| 9    | Test fails after code edits    | Rolls back all changes, deletes branch, restores stash  |
+| 9b   | Stash pop has merge conflict   | Reports conflicting files, asks user to resolve         |
 
 ## Gotchas
 
-- **`_orig` directory exists**: if `${source_dir}_orig` already exists
-  from a previous migration, the skill stops and asks before overwriting.
-  In autonomous mode, it removes the old `_orig` and proceeds.
-- **DID conflict**: if filenames are already registered in Rucio, the
-  skill stops even in autonomous mode — this indicates a real problem.
-- **Non-`.root` files**: the skill only uploads `.root` files. If the
-  source directory contains metadata, logs, or config files, the symlink
-  farm will be missing them. The skill warns about this.
-- **Source files are never deleted**: `rucio upload` copies files. The
-  original directory is only renamed (to `_orig`) during same-path swap,
-  never removed automatically unless the smoke test passes and the user
-  (or autonomous mode) confirms deletion.
+- **`_orig` directory exists**: if `${source_dir}_orig` already exists from a
+  previous migration, the skill stops and asks before overwriting. In autonomous
+  mode, it removes the old `_orig` and proceeds.
+- **DID conflict**: if filenames are already registered in Rucio, the skill
+  stops even in autonomous mode — this indicates a real problem.
+- **Non-`.root` files**: the skill only uploads `.root` files. If the source
+  directory contains metadata, logs, or config files, the symlink farm will be
+  missing them. The skill warns about this.
+- **Source files are never deleted**: `rucio upload` copies files. The original
+  directory is only renamed (to `_orig`) during same-path swap, never removed
+  automatically unless the smoke test passes and the user (or autonomous mode)
+  confirms deletion.
 
 ### Rollback
 
@@ -579,8 +604,7 @@ git branch -D lgd-migrate-${dataset_name}
   transparently with symlinks — zero code changes needed.
 - RSE names: `BNL-OSG2_LOCALGROUPDISK`, `BNL-OSG2_SCRATCHDISK` (note
   hyphen/underscore positions).
-- LOCALGROUPDISK pnfs mount on SDCC:
-  `/pnfs/usatlas.bnl.gov/LOCALGROUPDISK/`.
+- LOCALGROUPDISK pnfs mount on SDCC: `/pnfs/usatlas.bnl.gov/LOCALGROUPDISK/`.
 - Files land at:
   `/pnfs/usatlas.bnl.gov/LOCALGROUPDISK/rucio/user/<username>/<2-char-hash>/<2-char-hash>/<filename>`.
 - Default quota: 50 TB per user.
