@@ -75,7 +75,8 @@ three-level loading pattern:
    pointers.
 2. **`references/*.md`** — deep content loaded on demand. Each file covers one
    topic (e.g., `systematic-types.md`, `config-api.md`, `helper-scripts.md`).
-   Include a Table of Contents at the top of each reference file.
+   Each reference file should include a trigger sentence ("Read this reference
+   when…") followed by a Table of Contents near the top.
 3. **`scripts/`** — executable code for deterministic/repetitive tasks (rare).
 
 The "Reference Files" section in SKILL.md should list each reference with a

@@ -40,13 +40,13 @@ YieldsTable.py -s <samples> -c <channels> -w <workspace.root> -o <output.tex>
 
 ### Optional arguments
 
-| Flag | Description                                      |
-| ---- | ------------------------------------------------ |
-| `-b` | Show before-fit yields alongside after-fit       |
-| `-S` | Show sum of all regions as an additional column  |
-| `-B` | Blind mode: hide observed event counts           |
-| `-P` | Per-bin yields (split bins into separate rows)   |
-| `-a` | Use asymmetric errors from MINOS (default: True) |
+| Flag | Description                                                  |
+| ---- | ------------------------------------------------------------ |
+| `-b` | Show before-fit yields alongside after-fit                   |
+| `-S` | Show sum of all regions as an additional column              |
+| `-B` | Blind mode: hide observed event counts                       |
+| `-P` | Per-bin yields (split bins into separate rows)               |
+| `-a` | Use Asimov dataset instead of observed data (off by default) |
 
 ### Python API
 
@@ -316,7 +316,7 @@ Extracts observed/expected contours from a harvest JSON file:
 
 After running `HistFitter.py -t -w -f -F <type> config.py`, results are in:
 
-```
+```text
 results/<analysisName>/
 ├── <FitConfig>_combined_<MeasName>_model.root         # workspace
 ├── <FitConfig>_combined_<MeasName>_model_afterFit.root # after-fit

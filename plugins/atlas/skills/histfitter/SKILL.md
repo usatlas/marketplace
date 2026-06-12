@@ -193,7 +193,7 @@ For counting experiments without input trees:
 
 ```python
 bkg = Sample("Bkg", kGreen-9)
-bkg.buildHisto([5.0], "SR", "cuts", 0.5)
+bkg.buildHisto([5.0], "SR", "cuts", 0.5, 1.)
 bkg.buildStatErrors([1.0], "SR", "cuts")
 bkg.addSystematic(Systematic("ucb", configMgr.weights,
                              1.2, 0.8, "user", "userOverallSys"))
@@ -400,8 +400,8 @@ points). Run with `-w` (not `-t`) to activate the fallback.
 ### Fixing parameters in a fit
 
 ```bash
-HistFitter.py -f -C "mu_Sig:0." config.py   # bkg-only equivalent
-HistFitter.py -f -C "mu_Sig:1." config.py   # S+B with mu=1
+HistFitter.py -f -C "mu_SIG:0." config.py   # bkg-only equivalent
+HistFitter.py -f -C "mu_SIG:1." config.py   # S+B with mu=1
 ```
 
 Useful for reproducing individual fits from `-p` for debugging.
