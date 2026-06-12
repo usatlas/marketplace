@@ -42,12 +42,13 @@ prompts** and use defaults:
 - Survey (Step 1): proceed without asking
 - Decision Point 1: **upload + symlink swap**
 - Decision Point 2: **same-path swap**
-- `_orig` guard (Step 7): remove existing `_orig` and proceed
+- `_orig` guard (Step 7): **does not stop** — a pre-existing
+  `${source_dir}_orig` is never overwritten; the backup goes to a unique name
 - DID conflict (Step 2): still STOP — real problem, not a preference
-- `_orig` cleanup after smoke test (Step 8b): **never auto-deleted** — the
-  backup is the only rollback path and deleting it is irreversible, so even in
-  autonomous mode the run ends by asking whether the agent should delete it or
-  the user will remove it manually
+
+The one exception to "no questions": the **Final step** always asks whether to
+delete the `$BACKUP_DIR` backup (never automatic — irreversible and the only
+rollback path). This runs once, at the very end, after all work is done.
 
 The user can pre-answer individual decision points in their message (e.g.,
 "using same-path swap" or "upload only"). Honor explicit choices over defaults.
@@ -297,7 +298,8 @@ Use `timeout: 3600000` (1 hour). If it times out, re-run — FTS queue waits of
 >    local access
 > 2. **Upload only** — data is on LOCALGROUPDISK, stop here
 
-Upload only → report rule ID, dataset name, total size. **DONE.**
+Upload only → no symlink farm and no backup. **Go to the Final step** (summary
+only; no cleanup decision).
 
 **Decision Point 2 — Symlink placement:**
 
@@ -336,11 +338,21 @@ rucio list-file-replicas $SCOPE:$dataset_name \
 
 Build the farm in a staging directory first, then do an atomic swap.
 
-Guard checks:
+Guard checks (these **never stop** the run — the only `_orig` decision is the
+deletion at the very end, see the Final step):
 
 1. If `${source_dir}_lgd_staging` exists (leftover), remove it.
-2. If `${source_dir}_orig` exists (previous backup), STOP and ask: (a) Remove it
-   and proceed, or (b) Abort.
+2. Choose a backup directory `$BACKUP_DIR` that does not clobber any existing
+   one, so a leftover `${source_dir}_orig` from a previous migration is never
+   overwritten and never halts the run:
+
+```bash
+BACKUP_DIR="${source_dir}_orig"
+[ -e "$BACKUP_DIR" ] && BACKUP_DIR="${source_dir}_orig.$(date +%Y%m%d_%H%M%S)"
+echo "Backup directory: $BACKUP_DIR"
+```
+
+Build the staging farm:
 
 ```bash
 STAGING="${source_dir}_lgd_staging"
@@ -363,14 +375,14 @@ echo "Original: $ORIG_COUNT files, Farm: $FARM_COUNT symlinks"
 If counts match, perform the swap:
 
 ```bash
-mv "$source_dir" "${source_dir}_orig"
+mv "$source_dir" "$BACKUP_DIR"
 mv "$STAGING" "$source_dir"
 ```
 
 If the second `mv` fails, immediately restore:
 
 ```bash
-mv "${source_dir}_orig" "$source_dir"
+mv "$BACKUP_DIR" "$source_dir"
 rm -rf "$STAGING"
 ```
 
@@ -400,15 +412,15 @@ done < /tmp/pfns_${dataset_name}.txt
 
 **Step 8b — Smoke test (same-path swap only):**
 
-Three checks compare the backup `${source_dir}_orig` (original local files)
-against the farm `$farm_dir` (symlinks to the LOCALGROUPDISK replicas). Run them
-in order and STOP at the first failure. The smoke test PASSES only if all three
-pass.
+Three checks compare the backup `$BACKUP_DIR` (original local files, renamed in
+Step 7) against the farm `$farm_dir` (symlinks to the LOCALGROUPDISK replicas).
+Run them in order and STOP at the first failure. The smoke test PASSES only if
+all three pass.
 
 **(1) Filename set** — nothing dropped, added, or duplicated:
 
 ```bash
-diff <(cd "${source_dir}_orig" && ls -1 *.root | sort) \
+diff <(cd "$BACKUP_DIR" && ls -1 *.root | sort) \
      <(cd "$farm_dir" && ls -1 *.root | sort) \
   && echo "FILENAMES MATCH" || echo "FILENAMES MISMATCH"
 ```
@@ -426,7 +438,7 @@ root -b -l -q -e '
   #include <TKey.h>
   #include <iostream>
   using namespace std;
-  TString od = "'"${source_dir}_orig"'", fd = "'"$farm_dir"'";
+  TString od = "'"$BACKUP_DIR"'", fd = "'"$farm_dir"'";
   TSystemDirectory dir(od, od);
   TIter nf(dir.GetListOfFiles());
   TSystemFile *sf; bool ok = true;
@@ -463,7 +475,7 @@ from LOCALGROUPDISK:
 # Rucio-registered checksums (NAME + ADLER32 columns)
 rucio list-files $SCOPE:$dataset_name 2>/dev/null
 # Local source checksums (xrdadler32 ships with xrootd; `lsetup xrootd` if absent)
-for f in "${source_dir}_orig"/*.root; do
+for f in "$BACKUP_DIR"/*.root; do
   printf '%s %s\n' "$(basename "$f")" "$(xrdadler32 "$f" | awk '{print $1}')"
 done
 ```
@@ -475,21 +487,13 @@ the farm replicas directly instead (reads from LOCALGROUPDISK, slower), run
 Checks (1)+(3) together guarantee file-by-file content equality; (2) is a fast,
 checksum-free cross-check.
 
-- **PASSED**: migration is complete. **Never auto-delete the backup** — removing
-  `${source_dir}_orig` is irreversible, so deletion always requires an explicit
-  user choice:
-  - **Interactive mode**: ask the user to choose — (a) delete
-    `${source_dir}_orig` now to reclaim space, or (b) keep it and remove it
-    manually later. Delete only on explicit confirmation; report space freed.
-  - **Autonomous mode**: do NOT delete. Put a warning in the final summary that
-    the backup is retained at `${source_dir}_orig` and can be removed to reclaim
-    local/pnfs space (the likely motivation for migrating), then end the turn by
-    asking the user to choose: (a) have the agent delete it now, or (b) inspect
-    and delete it manually.
-- **FAILED**: report the mismatch. Do NOT delete `_orig`. Offer to roll back:
-  `mv "$farm_dir" "${farm_dir}_lgd"; mv "${source_dir}_orig" "$source_dir"`.
+- **PASSED**: data verified on LOCALGROUPDISK. Do **not** delete the backup here
+  — the `$BACKUP_DIR` deletion decision is deferred to the **Final step**.
+  Proceed there.
+- **FAILED**: report the mismatch. Do NOT delete the backup. Offer to roll back:
+  `mv "$farm_dir" "${farm_dir}_lgd"; mv "$BACKUP_DIR" "$source_dir"`.
 
-**DONE for Phase 2.**
+**DONE for Phase 2 → go to the Final step.**
 
 ### Phase 3: Full integration (different-path with code changes)
 
@@ -571,7 +575,16 @@ report:
 - Original files at $source_dir unchanged
 ```
 
-**Step 10 — Write summary:**
+**DONE for Phase 3 → go to the Final step.** (Phase 3 keeps the source dir in
+place and creates no `$BACKUP_DIR`, so the Final step only writes the summary.)
+
+### Final step — Summary and backup cleanup
+
+Every path ends here. Write the migration summary, then make the backup-cleanup
+decision. This is the **last** action of the run, and in autonomous mode it is
+the **only** question asked — nothing earlier stops for it.
+
+**Summary** (include the fields that apply to the path taken):
 
 ```text
 ## LOCALGROUPDISK Migration: <dataset_name>
@@ -579,14 +592,25 @@ report:
 - Dataset: $SCOPE:$dataset_name
 - Rule ID: $RULE_ID
 - Symlink farm: $farm_dir
-- Code files modified: <list or "none">
-- Test result: PASS / FAIL / SKIPPED
-- Branch: lgd-migrate-${dataset_name} (base: $BASE_BRANCH)
-- Stash: <committed before / stashed+restored / none>
-- Original preserved at: $source_dir (unchanged)
+- Backup (same-path swap only): $BACKUP_DIR
+- Code files modified (full integration only): <list or "none">
+- Test result (full integration only): PASS / FAIL / SKIPPED
+- Branch (full integration only): lgd-migrate-<dataset> (base: $BASE_BRANCH)
 ```
 
-**DONE for Phase 3.**
+**Backup cleanup** — only when a same-path swap created `$BACKUP_DIR`
+(upload-only and different-path runs have no backup; skip this and finish):
+
+The original files are preserved at `$BACKUP_DIR`. Deleting it is irreversible
+and it is the only rollback path, so it is **never deleted automatically**. Ask
+the user — a plain question, not a stop, in every mode including autonomous:
+
+- Warn that the backup is retained at `$BACKUP_DIR`, and that removing it
+  reclaims the local/pnfs space the migration was likely meant to free.
+- Offer the choice: (a) have the agent delete `$BACKUP_DIR` now (then report
+  space freed), or (b) keep it and remove it manually later.
+- Delete only on explicit choice (a). This is the single end-of-run question in
+  autonomous mode.
 
 ## Worked Example
 
@@ -609,8 +633,9 @@ with a symlink farm at the original path.
    the original path.
 9. **Smoke test**: filename set, per-file entry counts, and adler32 all match —
    PASSED.
-10. **Cleanup**: backup `mc_sample_orig` is retained (never auto-deleted); the
-    skill prompts whether to delete it now or leave it for manual removal.
+10. **Final step**: prints the summary; backup `mc_sample_orig` is retained
+    (never auto-deleted) and the run ends by asking whether to delete it now or
+    leave it for manual removal.
 
 After migration: analysis code reads from the same path — no changes needed. No
 grid proxy required.
@@ -624,28 +649,28 @@ grid proxy required.
 | 5b   | Rule stuck at 0/N for hours    | Normal FTS queue delay; skill documents expected timing |
 | 8    | Symlinks don't resolve         | Checks pnfs mount; reports if unavailable               |
 | 8    | Crash between rename and build | Farm built in staging dir first, then atomic swap       |
-| 8    | ROOT can't open file           | Reports failure; original at `_orig` is intact          |
+| 8    | ROOT can't open file           | Reports failure; original at `$BACKUP_DIR` is intact    |
 | 8    | Code search finds nothing      | Asks user; exits with manual instructions if unknown    |
 | 9    | Test fails after code edits    | Rolls back all changes, deletes branch, restores stash  |
 | 9b   | Stash pop has merge conflict   | Reports conflicting files, asks user to resolve         |
 
 ## Gotchas
 
-- **`_orig` directory exists**: if `${source_dir}_orig` already exists from a
-  previous migration, the skill stops and asks before overwriting. In autonomous
-  mode, it removes the old `_orig` and proceeds.
+- **Pre-existing `_orig` never stops the run**: if `${source_dir}_orig` already
+  exists from a previous migration, the skill does not stop or overwrite it — it
+  backs up to a unique `${source_dir}_orig.<timestamp>` (`$BACKUP_DIR`) instead.
 - **DID conflict**: if filenames are already registered in Rucio, the skill
   stops even in autonomous mode — this indicates a real problem.
 - **Non-`.root` files**: the skill only uploads `.root` files. If the source
   directory contains metadata, logs, or config files, the symlink farm will be
   missing them. The skill warns about this.
 - **Source files are never deleted**: `rucio upload` copies files. The original
-  directory is only renamed (to `_orig`) during same-path swap.
-- **`_orig` backup is never auto-deleted**: even after a passing smoke test, and
-  even in autonomous mode, the skill never removes `${source_dir}_orig` on its
-  own — deletion is irreversible and the backup is the sole rollback path, so it
-  always requires an explicit user choice (in autonomous mode, surfaced as a
-  final prompt).
+  directory is only renamed (to `$BACKUP_DIR`) during same-path swap.
+- **Backup is never auto-deleted**: even after a passing smoke test, and even in
+  autonomous mode, the skill never removes `$BACKUP_DIR` on its own — deletion
+  is irreversible and the backup is the sole rollback path. The decision is made
+  once, in the Final step, as a plain question (the single end-of-run prompt in
+  autonomous mode).
 - **Smoke test depth**: Step 8b verifies the filename set, per-file TTree entry
   counts, and per-file adler32 (local source vs Rucio-registered, which FTS
   validated against the replica). adler32 + matching filenames already prove
@@ -657,7 +682,7 @@ At no point are source files modified or deleted. Full rollback:
 
 ```bash
 rm -rf "$farm_dir"
-mv "${source_dir}_orig" "$source_dir"   # if same-path swap
+mv "$BACKUP_DIR" "$source_dir"   # if same-path swap
 rucio delete-rule $RULE_ID
 rucio erase $SCOPE:$dataset_name
 # If full integration:
