@@ -25,7 +25,7 @@ by your physics group or for legacy analyses.
 
 - Legacy ATLAS analyses already using HistFitter
 - Physics groups that mandate HistFactory XML or RooWorkspace output
-- Producing exclusion contours over signal grids (mass-mass planes)
+- Producing exclusion contours over signal grids
 - Debugging or extending an existing HistFitter config
 
 ## Setup
@@ -53,7 +53,8 @@ cd ../run
 source ../install/bin/setup_histfitter.sh
 ```
 
-Re-run `source setup_histfitter.sh` in every new shell session.
+Re-run `source setup_histfitter.sh` from the `run/` folder in every new shell
+session; HistFitter uses the current working directory as its work directory.
 
 ## Key Concepts
 
@@ -94,14 +95,19 @@ this is why "normalized" systematic types (`normHistoSys`,
 # Typical three-step sequence (histograms → workspace → fit)
 HistFitter.py -t -w -f -F bkg config.py
 
-# Re-run fit only (cuts/weights unchanged since last -t)
+# Re-run fit only (cuts/weights unchanged since last -t and -w)
+HistFitter.py -f -F bkg config.py
+
+# Re-run workspace + fit (norm factor or workspace config changed, but histograms unchanged)
 HistFitter.py -w -f -F bkg config.py
 
-# Exclusion fit + CLs hypothesis test
-HistFitter.py -t -w -f -p -F excl config.py
+# Exclusion: build workspace then run CLs hypothesis test separately
+HistFitter.py -t -w -F excl config.py
+HistFitter.py -p -F excl config.py
 
-# Discovery fit + p₀ significance
-HistFitter.py -t -w -f -z -F disc config.py
+# Discovery: build workspace then run p₀ significance separately
+HistFitter.py -t -w -F disc config.py
+HistFitter.py -z -F disc config.py
 
 # Produce post-fit plots and tables
 HistFitter.py -d -F bkg config.py
@@ -140,6 +146,8 @@ else:
 # --- Systematics ---
 jes = Systematic("JES", "_NoSys", "_JESup", "_JESdown",
                  "tree", "histoSys")
+highWeights = configMgr.weights + ("ktScaleUp",)
+lowWeights  = configMgr.weights + ("ktScaleDown",)
 ktScale = Systematic("KtScale", configMgr.weights,
                      highWeights, lowWeights,
                      "weight", "overallNormHistoSys")
@@ -153,6 +161,7 @@ topSample.addInputs(bgdFiles)
 
 dataSample = Sample("Data", kBlack)
 dataSample.setData()
+dataSample.addInputs(["samples/data.root"])
 
 # --- Fit configuration ---
 if myFitType == FitType.Exclusion:
@@ -164,7 +173,7 @@ if myFitType == FitType.Exclusion:
     excl.addSystematic(jes)
     excl.getSample("Top").addSystematic(ktScale)
 
-    cr = excl.addChannel("nJet", ["CR"], 4, 2, 6)
+    cr = excl.addChannel("nJet", ["CR"], 2, 4, 6)
     sr = excl.addChannel("met", ["SR"], 5, 400, 900)
     excl.addBkgConstrainChannels([cr])
     excl.addSignalChannels([sr])
@@ -172,6 +181,7 @@ if myFitType == FitType.Exclusion:
     sigSample = Sample("Signal", kPink)
     sigSample.setNormFactor("mu_SIG", 1., 0., 10.)
     sigSample.setNormByTheory()
+    sigSample.setStatConfig(True)
     sigSample.addInputs(["samples/signal.root"])
     excl.addSamples(sigSample)
     excl.setSignalSample(sigSample)
@@ -313,7 +323,7 @@ SysTable.py -c SR_cuts \
 ```
 
 Options: `-s <sample>` (per-sample), `-%` (show percentages), `-m 2` (method 2:
-refit with parameter fixed).
+refit with parameter fixed), `-z` (shade systematic based on size).
 
 ### Systematics ranking plot
 

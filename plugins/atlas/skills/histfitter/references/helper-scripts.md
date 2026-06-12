@@ -281,23 +281,6 @@ PrintFitResult.py -w <workspace.root>
 
 Useful for quick checks of fit convergence and parameter values.
 
-### contourPlotter.py
-
-Converts harvest output (JSON from signal grid scans) to exclusion contour
-plots:
-
-```bash
-contourPlotter.py -i harvest.json -o contour.pdf
-```
-
-### harvestToContours.py
-
-Extracts observed/expected contours from a harvest JSON file:
-
-```bash
-harvestToContours.py -i <harvest.json> -o <output.root>
-```
-
 ### pull_maker.py
 
 Creates pull distributions from toy fits for coverage studies.
@@ -314,7 +297,8 @@ Steps to produce contours:
 2. Merge output hypotest files with hadd
 3. Generate json files with `GenerateJSONOutput.py`
 4. Produce contours with `harvestToContours.py`
-5. Plot contours following example in `macros/Examples/contourPlotterExample/contourPlotterExample.py`
+5. Plot contours following example in
+   `macros/Examples/contourPlotterExample/contourPlotterExample.py`
 
 ### GenerateJSONOutput.py
 
@@ -327,8 +311,6 @@ Converts hypostest ROOT files to json.
 Extracts observed/expected contours from a harvest JSON file:
 
 `harvestToContours.py -i <harvest.json> -o <output.root>`
-
-
 
 ## Workspace file naming
 
