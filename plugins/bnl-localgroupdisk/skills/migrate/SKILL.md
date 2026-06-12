@@ -400,37 +400,80 @@ done < /tmp/pfns_${dataset_name}.txt
 
 **Step 8b — Smoke test (same-path swap only):**
 
-Compare TTree entry counts between `${source_dir}_orig` and the farm:
+Three checks compare the backup `${source_dir}_orig` (original local files)
+against the farm `$farm_dir` (symlinks to the LOCALGROUPDISK replicas). Run them
+in order and STOP at the first failure. The smoke test PASSES only if all three
+pass.
+
+**(1) Filename set** — nothing dropped, added, or duplicated:
+
+```bash
+diff <(cd "${source_dir}_orig" && ls -1 *.root | sort) \
+     <(cd "$farm_dir" && ls -1 *.root | sort) \
+  && echo "FILENAMES MATCH" || echo "FILENAMES MISMATCH"
+```
+
+**(2) Per-file TTree entry counts** — compared file-by-file (not a single
+chained total, so offsetting errors across files cannot cancel). Reads only
+TTree metadata, so it is fast even for large datasets:
 
 ```bash
 root -b -l -q -e '
-  #include <TChain.h>
+  #include <TSystemDirectory.h>
+  #include <TSystemFile.h>
   #include <TFile.h>
+  #include <TTree.h>
   #include <TKey.h>
   #include <iostream>
   using namespace std;
-  auto f = TFile::Open(
-    "'"${source_dir}_orig"'/$(ls "${source_dir}_orig" | head -1)");
-  if (!f || f->IsZombie()) {
-    cout << "FAIL: cannot open original" << endl; return; }
-  TIter next(f->GetListOfKeys());
-  TKey *key;
-  bool all_ok = true;
-  while ((key = (TKey*)next())) {
-    if (TString(key->GetClassName()) != "TTree") continue;
-    TString name = key->GetName();
-    TChain orig(name), farm(name);
-    orig.Add("'"${source_dir}_orig"'/*.root");
-    farm.Add("'"$farm_dir"'/*.root");
-    Long64_t n_orig = orig.GetEntries(), n_farm = farm.GetEntries();
-    cout << name << ": orig=" << n_orig << " farm=" << n_farm
-         << (n_orig == n_farm ? " MATCH" : " MISMATCH") << endl;
-    if (n_orig != n_farm) all_ok = false;
+  TString od = "'"${source_dir}_orig"'", fd = "'"$farm_dir"'";
+  TSystemDirectory dir(od, od);
+  TIter nf(dir.GetListOfFiles());
+  TSystemFile *sf; bool ok = true;
+  while ((sf = (TSystemFile*)nf())) {
+    TString fn = sf->GetName();
+    if (sf->IsDirectory() || !fn.EndsWith(".root")) continue;
+    TFile *fo = TFile::Open(od+"/"+fn), *ff = TFile::Open(fd+"/"+fn);
+    if (!fo || fo->IsZombie() || !ff || ff->IsZombie()) {
+      cout << fn << ": FAIL open" << endl; ok = false; continue; }
+    TIter nk(fo->GetListOfKeys()); TKey *k;
+    while ((k = (TKey*)nk())) {
+      if (TString(k->GetClassName()) != "TTree") continue;
+      TString tn = k->GetName();
+      TTree *to = (TTree*)fo->Get(tn), *tf = (TTree*)ff->Get(tn);
+      Long64_t no = to ? to->GetEntries() : -1;
+      Long64_t ne = tf ? tf->GetEntries() : -2;
+      if (no != ne) {
+        cout << fn << ":" << tn << " orig=" << no << " farm=" << ne
+             << " MISMATCH" << endl; ok = false; }
+    }
+    fo->Close(); ff->Close();
   }
-  f->Close();
-  cout << (all_ok ? "SMOKE TEST PASSED" : "SMOKE TEST FAILED") << endl;
+  cout << (ok ? "PER-FILE COUNTS MATCH" : "PER-FILE COUNTS MISMATCH") << endl;
 '
 ```
+
+**(3) Content checksum (adler32)** — authoritative byte-level check. Rucio
+registers an adler32 per file at upload and FTS verifies the replica against it
+before the rule reaches `OK`, so comparing each **local source** file's adler32
+to its **Rucio-registered** adler32 proves source ≡ replica without re-reading
+from LOCALGROUPDISK:
+
+```bash
+# Rucio-registered checksums (NAME + ADLER32 columns)
+rucio list-files $SCOPE:$dataset_name 2>/dev/null
+# Local source checksums (xrdadler32 ships with xrootd; `lsetup xrootd` if absent)
+for f in "${source_dir}_orig"/*.root; do
+  printf '%s %s\n' "$(basename "$f")" "$(xrdadler32 "$f" | awk '{print $1}')"
+done
+```
+
+Every file's local adler32 must equal its Rucio-registered adler32. To compare
+the farm replicas directly instead (reads from LOCALGROUPDISK, slower), run
+`xrdadler32 "$farm_dir"/*.root` and match against the source values.
+
+Checks (1)+(3) together guarantee file-by-file content equality; (2) is a fast,
+checksum-free cross-check.
 
 - **PASSED**: migration is complete. **Never auto-delete the backup** — removing
   `${source_dir}_orig` is irreversible, so deletion always requires an explicit
@@ -564,7 +607,8 @@ with a symlink farm at the original path.
 7. **Decision Point 2**: same-path swap (default).
 8. **Symlink farm**: renames original to `mc_sample_orig`, creates symlinks at
    the original path.
-9. **Smoke test**: TTree entry counts match — PASSED.
+9. **Smoke test**: filename set, per-file entry counts, and adler32 all match —
+   PASSED.
 10. **Cleanup**: backup `mc_sample_orig` is retained (never auto-deleted); the
     skill prompts whether to delete it now or leave it for manual removal.
 
@@ -601,9 +645,11 @@ grid proxy required.
   even in autonomous mode, the skill never removes `${source_dir}_orig` on its
   own — deletion is irreversible and the backup is the sole rollback path, so it
   always requires an explicit user choice (in autonomous mode, surfaced as a
-  final prompt). The smoke test only compares TTree entry counts, not full
-  content, which is another reason to keep the backup until the user is
-  satisfied.
+  final prompt).
+- **Smoke test depth**: Step 8b verifies the filename set, per-file TTree entry
+  counts, and per-file adler32 (local source vs Rucio-registered, which FTS
+  validated against the replica). adler32 + matching filenames already prove
+  byte-level content equality; it is not just an entry-count check.
 
 ### Rollback
 
