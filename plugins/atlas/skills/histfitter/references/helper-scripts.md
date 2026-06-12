@@ -306,6 +306,30 @@ Creates pull distributions from toy fits for coverage studies.
 
 Plots up/down systematic variations against the nominal for visual inspection.
 
+## Producing exclusion contours
+
+Steps to produce contours:
+
+1. Run exclusion tests over all signal models with `-p`
+2. Merge output hypotest files with hadd
+3. Generate json files with `GenerateJSONOutput.py`
+4. Produce contours with `harvestToContours.py`
+5. Plot contours following example in `macros/Examples/contourPlotterExample/contourPlotterExample.py`
+
+### GenerateJSONOutput.py
+
+Converts hypostest ROOT files to json.
+
+`GenerateJSONOutput.py -i <input_hypotest.root> -f "hypo_SU_%f_%f_0_10" -p "m0:m12"`
+
+### harvestToContours.py
+
+Extracts observed/expected contours from a harvest JSON file:
+
+`harvestToContours.py -i <harvest.json> -o <output.root>`
+
+
+
 ## Workspace file naming
 
 After running `HistFitter.py -t -w -f -F <type> config.py`, results are in:
