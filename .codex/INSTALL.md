@@ -48,8 +48,16 @@ Enable USATLAS skills in Codex via native skill discovery.
 
 ## Verify
 
+**macOS/Linux:**
+
 ```bash
 ls -la ~/.agents/skills/
+```
+
+**Windows (PowerShell):**
+
+```powershell
+Get-ChildItem $env:USERPROFILE\.agents\skills
 ```
 
 You should see four symlinks: `atlas`, `analysis-facilities`,

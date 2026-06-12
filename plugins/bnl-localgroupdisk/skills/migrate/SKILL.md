@@ -44,6 +44,10 @@ prompts** and use defaults:
 - Decision Point 2: **same-path swap**
 - `_orig` guard (Step 7): remove existing `_orig` and proceed
 - DID conflict (Step 2): still STOP — real problem, not a preference
+- `_orig` cleanup after smoke test (Step 8b): **never auto-deleted** — the
+  backup is the only rollback path and deleting it is irreversible, so even in
+  autonomous mode the run ends by asking whether the agent should delete it or
+  the user will remove it manually
 
 The user can pre-answer individual decision points in their message (e.g.,
 "using same-path swap" or "upload only"). Honor explicit choices over defaults.
@@ -122,7 +126,8 @@ voms-proxy-info --all 2>&1
 ```
 
 - Must have >2 hours remaining (>24h recommended). If <2h, tell user to run
-  `voms-proxy-init -voms atlas -valid 96:00`.
+  `voms-proxy-init -voms atlas:/atlas/usatlas -valid 96:00` (the explicit group
+  is required — plain `-voms atlas` may omit `/atlas/usatlas`).
 - VOMS attributes must include `/atlas/usatlas` — **required for LOCALGROUPDISK
   quota**. If missing, direct user to `https://atlas-auth.cern.ch/`.
 
@@ -194,7 +199,7 @@ If any non-`.root` files are found, **warn the user**:
 > **Warning:** `$source_dir` contains non-`.root` files that will NOT be
 > included in the migration:
 >
-> ```
+> ```text
 > <list of files>
 > ```
 >
@@ -211,8 +216,13 @@ the user before proceeding.
 
 **Step 2 — Check for DID conflicts:**
 
+Check **every** `.root` file, not just the first — a collision on any one of
+them must be caught before upload:
+
 ```bash
-rucio list-dids "$SCOPE:$(basename <first_file>)" 2>&1
+for f in "$source_dir"/*.root; do
+  rucio list-dids "$SCOPE:$(basename "$f")" 2>/dev/null
+done
 ```
 
 If any file already exists as a DID under the user's scope, STOP and warn.
@@ -422,8 +432,17 @@ root -b -l -q -e '
 '
 ```
 
-- **PASSED**: ask whether to delete `${source_dir}_orig` to free space (default
-  yes; autonomous mode: auto-delete). Report disk space freed.
+- **PASSED**: migration is complete. **Never auto-delete the backup** — removing
+  `${source_dir}_orig` is irreversible, so deletion always requires an explicit
+  user choice:
+  - **Interactive mode**: ask the user to choose — (a) delete
+    `${source_dir}_orig` now to reclaim space, or (b) keep it and remove it
+    manually later. Delete only on explicit confirmation; report space freed.
+  - **Autonomous mode**: do NOT delete. Put a warning in the final summary that
+    the backup is retained at `${source_dir}_orig` and can be removed to reclaim
+    local/pnfs space (the likely motivation for migrating), then end the turn by
+    asking the user to choose: (a) have the agent delete it now, or (b) inspect
+    and delete it manually.
 - **FAILED**: report the mismatch. Do NOT delete `_orig`. Offer to roll back:
   `mv "$farm_dir" "${farm_dir}_lgd"; mv "${source_dir}_orig" "$source_dir"`.
 
@@ -546,7 +565,8 @@ with a symlink farm at the original path.
 8. **Symlink farm**: renames original to `mc_sample_orig`, creates symlinks at
    the original path.
 9. **Smoke test**: TTree entry counts match — PASSED.
-10. **Cleanup**: delete `mc_sample_orig` (default yes).
+10. **Cleanup**: backup `mc_sample_orig` is retained (never auto-deleted); the
+    skill prompts whether to delete it now or leave it for manual removal.
 
 After migration: analysis code reads from the same path — no changes needed. No
 grid proxy required.
@@ -576,9 +596,14 @@ grid proxy required.
   directory contains metadata, logs, or config files, the symlink farm will be
   missing them. The skill warns about this.
 - **Source files are never deleted**: `rucio upload` copies files. The original
-  directory is only renamed (to `_orig`) during same-path swap, never removed
-  automatically unless the smoke test passes and the user (or autonomous mode)
-  confirms deletion.
+  directory is only renamed (to `_orig`) during same-path swap.
+- **`_orig` backup is never auto-deleted**: even after a passing smoke test, and
+  even in autonomous mode, the skill never removes `${source_dir}_orig` on its
+  own — deletion is irreversible and the backup is the sole rollback path, so it
+  always requires an explicit user choice (in autonomous mode, surfaced as a
+  final prompt). The smoke test only compares TTree entry counts, not full
+  content, which is another reason to keep the backup until the user is
+  satisfied.
 
 ### Rollback
 
