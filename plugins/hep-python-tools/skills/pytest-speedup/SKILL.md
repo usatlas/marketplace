@@ -12,12 +12,12 @@ description: >-
 ## Overview
 
 A slow test suite discourages running tests locally and wastes CI minutes. The
-discipline is **measure-first**: change one thing, measure locally and on CI, keep
-it only if it actually helps. HEP suites have specific bottlenecks — heavy import
-cost from libraries like uproot, awkward, and torch shows up on every collection
-even for a single test; large ROOT files inflate fixture setup; and network-backed
-fixtures accidentally call xrootd or rucio endpoints. Address the bottleneck, not
-the symptom.
+discipline is **measure-first**: change one thing, measure locally and on CI,
+keep it only if it actually helps. HEP suites have specific bottlenecks — heavy
+import cost from libraries like uproot, awkward, and torch shows up on every
+collection even for a single test; large ROOT files inflate fixture setup; and
+network-backed fixtures accidentally call xrootd or rucio endpoints. Address the
+bottleneck, not the symptom.
 
 ## When to Use
 
@@ -32,8 +32,8 @@ the symptom.
 
 ## Key Concepts
 
-| Concept                   | Notes                                                          |
-| ------------------------- | -------------------------------------------------------------- |
+| Concept                   | Notes                                                         |
+| ------------------------- | ------------------------------------------------------------- |
 | `pytest --durations N`    | Print N slowest tests/setup/teardown after a run              |
 | `pytest --collect-only`   | Measure collection time without running any tests             |
 | `pytest --noconftest`     | Skip `conftest.py` loading — isolates conftest import cost    |
@@ -68,8 +68,8 @@ python -X importtime -m pytest --collect-only 2>&1 | grep 'import time'
 ```
 
 Import cost from `uproot`, `awkward`, `hist`, or `torch` can dominate collection
-time even when running a single test. Defer heavy top-level imports to inside the
-fixture body or test function where possible.
+time even when running a single test. Defer heavy top-level imports to inside
+the fixture body or test function where possible.
 
 **Speed up collection** in `pyproject.toml`:
 
@@ -200,22 +200,23 @@ coverage xml
 
 - **Always measure before and after**: adding a plugin or config option can make
   things slower. A `hyperfine` run before and after each change is sufficient.
-- **`-n auto` is not free**: worker startup and per-worker session fixture cost add
-  overhead. On small suites (<100 fast tests), xdist can be *slower* than a
+- **`-n auto` is not free**: worker startup and per-worker session fixture cost
+  add overhead. On small suites (<100 fast tests), xdist can be _slower_ than a
   single-process run.
-- **xdist runs session-scoped fixtures per worker, not once**: work around this by
-  keying shared state on the `worker_id` fixture, or use `pytest-split` for CI
-  sharding (which avoids the problem entirely).
+- **xdist runs session-scoped fixtures per worker, not once**: work around this
+  by keying shared state on the `worker_id` fixture, or use `pytest-split` for
+  CI sharding (which avoids the problem entirely).
 - **`pytest-split` requires a stored durations file** (`.test_durations`): the
   first run splits naïvely by count; durations stabilize after a few CI runs.
-  Also fix the `pytest-randomly` seed identically across all shards so each shard
-  gets a consistent subset.
-- **Heavy HEP imports dominate collection**: even `pytest tests/unit/test_one.py`
-  triggers a full `import uproot` if it appears at the top of a `conftest.py`.
-  Move such imports to fixture bodies or test functions where possible.
+  Also fix the `pytest-randomly` seed identically across all shards so each
+  shard gets a consistent subset.
+- **Heavy HEP imports dominate collection**: even
+  `pytest tests/unit/test_one.py` triggers a full `import uproot` if it appears
+  at the top of a `conftest.py`. Move such imports to fixture bodies or test
+  functions where possible.
 - **`pyfakefs` does not intercept C-extension I/O**: uproot and ROOT open files
-  via C libraries that bypass the fake filesystem. Use `tmp_path` for those tests
-  instead of `pyfakefs`.
+  via C libraries that bypass the fake filesystem. Use `tmp_path` for those
+  tests instead of `pyfakefs`.
 - **`filterwarnings = ["error"]` plus new plugins**: some speedup plugins emit
   deprecation warnings under strict settings — audit for new failures after
   adding any plugin.
@@ -235,8 +236,7 @@ coverage xml
 ## Docs
 
 - Awesome pytest speedup: https://github.com/zupo/awesome-pytest-speedup
-- pytest caching / `--lf`:
-  https://docs.pytest.org/en/stable/how-to/cache.html
+- pytest caching / `--lf`: https://docs.pytest.org/en/stable/how-to/cache.html
 - pytest-xdist: https://pytest-xdist.readthedocs.io/
 - pytest-split: https://github.com/jerry-git/pytest-split
 - scikit-hep-testdata: https://github.com/scikit-hep/scikit-hep-testdata
