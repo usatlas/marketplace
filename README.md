@@ -119,6 +119,7 @@ pixi/uv/Hatch, and PEP-723 standalone scripts.
 | -------------------- | --------------------------------------------------------------------------- |
 | `cli-creator`        | Building a Python command-line interface with Typer                         |
 | `code-quality-tools` | Setting up code quality tooling for a HEP Python project                    |
+| `pytest-speedup`     | A pytest suite is slow and needs speeding up                                |
 | `python-packaging`   | Creating a new Python package, adding pyproject.toml to an existing project |
 | `python-testing`     | Writing or configuring tests for a HEP Python project with pytest           |
 | `standalone-script`  | Generating a self-contained Python script with PEP 723 inline dependency    |
@@ -138,7 +139,7 @@ plugins/
     VENDORED-LICENSES.md
   hep-python-tools/
     .claude-plugin/plugin.json
-    skills/  # 5 skills
+    skills/  # 6 skills
     VENDORED-LICENSES.md
 .claude-plugin/marketplace.json
 ```
