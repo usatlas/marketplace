@@ -445,8 +445,8 @@ root -b -l -q -e '
   while ((sf = (TSystemFile*)nf())) {
     TString fn = sf->GetName();
     if (sf->IsDirectory() || !fn.EndsWith(".root")) continue;
-    TFile *fo = TFile::Open(od+"/"+fn), *ff = TFile::Open(fd+"/"+fn);
-    if (!fo || fo->IsZombie() || !ff || ff->IsZombie()) {
+    TFile *fp = TFile::Open(od+"/"+fn), *ff = TFile::Open(fd+"/"+fn);
+    if (!fp || fo->IsZombie() || !ff || ff->IsZombie()) {
       cout << fn << ": FAIL open" << endl; ok = false; continue; }
     TIter nk(fo->GetListOfKeys()); TKey *k;
     while ((k = (TKey*)nk())) {

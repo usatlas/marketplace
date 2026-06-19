@@ -7,7 +7,16 @@
     "email": "yg2695@columbia.edu"
   },
   "license": "MIT",
-  "keywords": ["atlas", "rucio", "bnl", "localgroupdisk", "sdcc", "pnfs", "dcache", "migration"],
+  "keywords": [
+    "atlas",
+    "rucio",
+    "bnl",
+    "localgroupdisk",
+    "sdcc",
+    "pnfs",
+    "dcache",
+    "migration"
+  ],
   "homepage": "https://usatlas.github.io/af-docs/bnl/storage/",
   "repository": "https://github.com/usatlas/marketplace"
 }
