@@ -272,4 +272,4 @@ print(p.describe())
 
 ## Docs
 
-https://scikit-hep.org/particle/
+https://github.com/scikit-hep/particle#readme

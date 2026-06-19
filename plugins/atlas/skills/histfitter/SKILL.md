@@ -448,7 +448,7 @@ The `-j` flag writes a pyhf-compatible JSON workspace from the XML output.
 ```bash
 # From HistFactory XML to pyhf JSON
 pyhf xml2json config/MyAnalysis/TopLevelXML.xml --basedir results/ \
-  -o workspace.json
+  --output-file workspace.json
 
 # Validate
 pyhf cls workspace.json

@@ -1,0 +1,29 @@
+{
+  "name": "af-uchicago",
+  "displayName": "UChicago ATLAS Analysis Facility",
+  "description": "Skills for the UChicago ATLAS Analysis Facility (af.uchicago.edu): HTCondor batch jobs, JupyterLab, XCache, Rucio, ServiceX, Coffea Casa, and Triton ML inference.",
+  "version": "1.0.0",
+  "author": {
+    "name": "USATLAS"
+  },
+  "homepage": "https://usatlas.github.io/af-docs/uchicago/",
+  "repository": "https://github.com/usatlas/marketplace",
+  "license": "MIT",
+  "keywords": [
+    "ATLAS",
+    "HEP",
+    "particle physics",
+    "UChicago",
+    "analysis facility",
+    "HTCondor",
+    "batch jobs",
+    "JupyterLab",
+    "Rucio",
+    "XCache",
+    "ServiceX",
+    "Coffea Casa",
+    "Triton",
+    "GPU"
+  ],
+  "skills": "./skills/"
+}

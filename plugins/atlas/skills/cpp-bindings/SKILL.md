@@ -13,10 +13,11 @@ description: >-
 
 nanobind and pybind11 are C++ header-only libraries for creating Python
 extension modules from C++ code. pybind11 is the established standard; nanobind
-is a leaner, faster successor from the same author (Wenzel Jakob) designed for
-Python 3.8+ and offering smaller binary size and faster compile times. In HEP,
-bindings are used to expose ROOT-based code, custom reconstruction algorithms,
-or legacy C++ analysis code to Python without rewriting.
+is a leaner, faster successor from the same author (Wenzel Jakob), offering
+smaller binary size and faster compile times. (Current nanobind requires Python
+3.9+; older releases supported 3.8.) In HEP, bindings are used to expose
+ROOT-based code, custom reconstruction algorithms, or legacy C++ analysis code
+to Python without rewriting.
 
 ## When to Use
 
@@ -29,14 +30,14 @@ or legacy C++ analysis code to Python without rewriting.
 
 ## Key Concepts
 
-| Feature       | nanobind                             | pybind11            |
-| ------------- | ------------------------------------ | ------------------- |
-| Compile time  | Faster (30–50%)                      | Slower              |
-| Binary size   | Smaller                              | Larger              |
-| STL bindings  | Opaque by default                    | Transparent         |
-| ABI stability | Guaranteed between nanobind versions | No guarantee        |
-| Maturity      | Newer (2022+)                        | Very mature (2015+) |
-| Documentation | Growing                              | Comprehensive       |
+| Feature       | nanobind                         | pybind11             |
+| ------------- | -------------------------------- | -------------------- |
+| Compile time  | Faster (30–50%)                  | Slower               |
+| Binary size   | Smaller                          | Larger               |
+| STL casters   | Opt-in per-type header           | Bulk `stl.h` header  |
+| ABI isolation | Versioned ABI + domain isolation | No version isolation |
+| Maturity      | Newer (2022+)                    | Very mature (2015+)  |
+| Documentation | Growing                          | Comprehensive        |
 
 **Recommendation**: Use **nanobind** for new projects. Use **pybind11** when
 integrating with existing pybind11-based code or when you need the larger
@@ -50,7 +51,7 @@ ecosystem of pybind11 extensions.
 cmake_minimum_required(VERSION 3.15)
 project(myhep)
 
-find_package(Python 3.8 COMPONENTS Interpreter Development.Module REQUIRED)
+find_package(Python 3.9 COMPONENTS Interpreter Development.Module REQUIRED)
 find_package(nanobind CONFIG REQUIRED)
 
 nanobind_add_module(myhep_ext myhep.cpp)

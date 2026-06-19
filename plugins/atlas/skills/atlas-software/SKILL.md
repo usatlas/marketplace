@@ -34,16 +34,15 @@ content.
 The C++ event processing framework underlying all ATLAS reconstruction and
 analysis.
 
-- Algorithms, tools, services:
-  https://atlas-software.docs.cern.ch/docs/AthenaFramework/
-- `AthAnalysisAlgorithm` for analysis:
-  https://atlas-software.docs.cern.ch/docs/AthenaFramework/
+- Framework basics: https://atlas-software.docs.cern.ch/athena/basics/intro/
+- Writing algorithms and tools:
+  https://atlas-software.docs.cern.ch/athena/developers/tutorial/writing-algstools/
 
 ### Event Data Model (EDM)
 
 How physics objects are stored in xAOD files.
 
-- xAOD EDM overview: https://atlas-software.docs.cern.ch/docs/XAOD/
+- xAOD EDM overview: https://atlas-software.docs.cern.ch/athena/io/
 - Container types (`xAOD::JetContainer`, `xAOD::ElectronContainer`, etc.)
 - Auxiliary stores and decorations (`SG::AuxElement::Decorator<T>`)
 - Reading with `SG::ReadHandle<T>` and `SG::WriteHandle<T>`
@@ -53,7 +52,7 @@ How physics objects are stored in xAOD files.
 Recommended tools for object calibration, scale factors, and systematic
 uncertainties.
 
-- CP algorithm overview: https://atlas-software.docs.cern.ch/docs/CPAlgorithms/
+- CP algorithm overview: https://atlas-software.docs.cern.ch/analysis/cp_algs/
 - Each physics object has a group-recommended WP and tool:
 
 | Object    | CP tool interface                              | Recommended WP         |
@@ -70,7 +69,7 @@ uncertainties.
 Slimmed xAOD files produced by the ATLAS derivation framework.
 
 - Derivation framework:
-  https://atlas-software.docs.cern.ch/docs/DerivationFramework/
+  https://atlas-software.docs.cern.ch/analysis/analysis_tutorial/AnalysisSWTutorial/derivation_framework/
 - **DAOD_PHYSLITE**: primary analysis format — smaller, CP-recommended variables
   pre-applied
 - **DAOD_PHYS**: full DAOD — use when PHYSLITE lacks required variables
@@ -82,16 +81,23 @@ Slimmed xAOD files produced by the ATLAS derivation framework.
 
 Dual-use tools that work both in Athena and standalone.
 
-- ASG tool framework: https://atlas-software.docs.cern.ch/docs/ASGTools/
+- CP algorithms intro (where ASG tools are configured):
+  https://atlas-software.docs.cern.ch/analysis/cp_algs/
 - `AsgTool` base class — lighter than Gaudi tools, works in AnalysisBase
 - Property system: `declareProperty("Name", m_prop = default, "Description")`
 
 ### CMake Build System
 
-- Package structure: https://atlas-software.docs.cern.ch/docs/CMakeBuild/
-- `atlas_subdir(PackageName)` declares the package
-- `atlas_depends_on_subdirs(...)` declares dependencies
-- Build: `cmake -DATLAS_BUILD_PACKAGE=PackageName ../source && make`
+- Package structure:
+  https://atlas-software.docs.cern.ch/athena/developers/cmake/
+- `atlas_subdir(PackageName)` declares the package (single argument)
+- Dependencies are declared via `LINK_LIBRARIES` on `atlas_add_library` /
+  `atlas_add_component` etc. (`atlas_depends_on_subdirs` is obsolete — do not
+  use)
+- Build everything: `cmake ../source && make` (or use `acmSetup`/`acm`)
+- Build a subset: copy `Projects/WorkDir/package_filters.txt`, edit it (`+`/`-`
+  path regexps), and configure with
+  `cmake -DATLAS_PACKAGE_FILTER_FILE=../source/package_filters.txt ../source`
 
 ### CVMFS and Software Releases
 
@@ -99,7 +105,8 @@ Dual-use tools that work both in Athena and standalone.
 - Setup: `asetup AthAnalysis,25.2.X` or `asetup AnalysisBase,25.2.X`
 - Run 3 analysis recommendation: **AnalysisBase 25.2.X** for standalone analysis
 - Run 2 legacy: **AthAnalysis 22.2.X** for Athena-based analysis
-- Release notes: https://atlas-software.docs.cern.ch/docs/Releases/
+- Releases and nightly builds:
+  https://atlas-software.docs.cern.ch/athena/developers/releases/
 
 ### Analysis Releases (for non-Athena Python workflows)
 

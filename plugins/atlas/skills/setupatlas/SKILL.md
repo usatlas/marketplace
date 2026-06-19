@@ -182,7 +182,7 @@ cd build && acmSetup
 # Add and compile packages
 acm sparse_clone_project athena          # sparse-checkout athena
 acm add_pkg athena/Control/AthenaCommon  # include package in build
-acm clone_project will/MyAnalysis        # clone entire private fork
+acm clone_project myuser/MyAnalysis      # clone entire private fork
 acm add_pkg MyAnalysis/.*               # add all packages
 acm compile                             # build everything
 acm compile_pkg MyPackage               # build single package

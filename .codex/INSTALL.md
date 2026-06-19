@@ -22,14 +22,14 @@ Enable USATLAS skills in Codex via native skill discovery.
    ln -s ~/usatlas-marketplace/plugins/atlas/skills \
          ~/.agents/skills/atlas
 
-   ln -s ~/usatlas-marketplace/plugins/analysis-facilities/skills \
-         ~/.agents/skills/analysis-facilities
+   ln -s ~/usatlas-marketplace/plugins/af-uchicago/skills \
+         ~/.agents/skills/af-uchicago
 
    ln -s ~/usatlas-marketplace/plugins/hep-python-tools/skills \
          ~/.agents/skills/hep-python-tools
 
-   ln -s ~/usatlas-marketplace/plugins/bnl-localgroupdisk/skills \
-         ~/.agents/skills/bnl-localgroupdisk
+   ln -s ~/usatlas-marketplace/plugins/af-bnl/skills \
+         ~/.agents/skills/af-bnl
    ```
 
    **Windows (PowerShell):**
@@ -38,10 +38,10 @@ Enable USATLAS skills in Codex via native skill discovery.
    New-Item -ItemType Directory -Force -Path "$env:USERPROFILE\.agents\skills"
    $base = "$env:USERPROFILE\usatlas-marketplace\plugins"
    $target = "$env:USERPROFILE\.agents\skills"
-   cmd /c mklink /J "$target\atlas"                "$base\atlas\skills"
-   cmd /c mklink /J "$target\analysis-facilities"  "$base\analysis-facilities\skills"
-   cmd /c mklink /J "$target\hep-python-tools"     "$base\hep-python-tools\skills"
-   cmd /c mklink /J "$target\bnl-localgroupdisk"   "$base\bnl-localgroupdisk\skills"
+   cmd /c mklink /J "$target\atlas"            "$base\atlas\skills"
+   cmd /c mklink /J "$target\af-uchicago"      "$base\af-uchicago\skills"
+   cmd /c mklink /J "$target\hep-python-tools" "$base\hep-python-tools\skills"
+   cmd /c mklink /J "$target\af-bnl"           "$base\af-bnl\skills"
    ```
 
 3. **Restart Codex** (quit and relaunch the CLI) to discover the skills.
@@ -60,8 +60,8 @@ ls -la ~/.agents/skills/
 Get-ChildItem $env:USERPROFILE\.agents\skills
 ```
 
-You should see four symlinks: `atlas`, `analysis-facilities`,
-`bnl-localgroupdisk`, `hep-python-tools`.
+You should see four symlinks: `atlas`, `af-uchicago`, `af-bnl`,
+`hep-python-tools`.
 
 ## Updating
 
@@ -84,8 +84,8 @@ ln -s ~/usatlas-marketplace/plugins/atlas/skills ~/.agents/skills/atlas
 
 ```bash
 rm ~/.agents/skills/atlas
-rm ~/.agents/skills/analysis-facilities
-rm ~/.agents/skills/bnl-localgroupdisk
+rm ~/.agents/skills/af-uchicago
+rm ~/.agents/skills/af-bnl
 rm ~/.agents/skills/hep-python-tools
 ```
 

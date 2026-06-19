@@ -361,9 +361,10 @@ class TwoRegionProcessor(ProcessorABC):
 - **Schema selection matters for ATLAS**: CP algorithm NTuples (TopCPToolkit,
   EasyJet) use `NtupleSchema` from `atlas-schema`; DAOD_PHYSLITE uses
   `PHYSLITESchema`; other flat NTuples use `BaseSchema`. Always pass an explicit
-  schema to `Runner` — `schema=None` is not a valid option. Branches are flat or
-  jagged `vector<float>` under `BaseSchema`, not behavior-augmented — no `.pt`,
-  `.eta` shorthand unless you use `PHYSLITESchema` or `NtupleSchema`.
+  schema to `Runner` (its default is `NanoAODSchema`, which is CMS-specific and
+  wrong for ATLAS). Branches are flat or jagged `vector<float>` under
+  `BaseSchema`, not behavior-augmented — no `.pt`, `.eta` shorthand unless you
+  use `PHYSLITESchema` or `NtupleSchema`.
 - **NanoEvents fields are runtime-dynamic**: the available fields depend on the
   schema and the file content. Always call `events.fields` and
   `events.<collection>.fields` in a notebook before writing a processor to avoid
@@ -397,53 +398,8 @@ class TwoRegionProcessor(ProcessorABC):
   algorithm NTuples into collections and exposes `events.systematic_names` /
   `events[variation]` for systematic iteration; install with
   `pip install atlas-schema` or `pixi add atlas-schema` (conda-forge).
-- **Coffea-Casa**: ATLAS analysis facility at University of Chicago that
-  pre-configures a dask cluster for ATLAS users.
-
-## Gotchas
-
-- **Schema selection matters for ATLAS**: CP algorithm NTuples (TopCPToolkit,
-  EasyJet) use `NtupleSchema` from `atlas-schema`; DAOD_PHYSLITE uses
-  `PHYSLITESchema`; other flat NTuples use `BaseSchema`. Setting `schema=None`
-  in `Runner` disables NanoEvents entirely and passes raw uproot arrays.
-  Branches are flat or jagged `vector<float>` under `BaseSchema`, not
-  behavior-augmented — no `.pt`, `.eta` shorthand unless you use
-  `PHYSLITESchema` or `NtupleSchema`.
-- **NanoEvents fields are runtime-dynamic**: the available fields depend on the
-  schema and the file content. Always call `events.fields` and
-  `events.<collection>.fields` in a notebook before writing a processor to avoid
-  `AttributeError` on non-existent branches.
-- **All ATLAS branches are in MeV**: divide by 1000 before GeV histograms.
-- **Two execution patterns for ATLAS**: `Runner` +
-  `IterativeExecutor`/`FuturesExecutor` for local execution; `Runner` +
-  `DaskExecutor(client=client)` to scale the same processor to a Dask
-  Distributed cluster with zero processor-code changes — the processor receives
-  the same materialized `ak.Array` objects in all cases, `hist.Hist` works
-  throughout. Check your version with
-  `import coffea; print(coffea.__version__)`.
-- **`preload` / `buffer_cache`**: `preload` bulk-fetches named branches before
-  the processor loop; `buffer_cache` stores raw numpy arrays to avoid
-  re-decompressing on repeated access.
-- **`process()` must return a dict or a nested dict**: accumulators are merged
-  across chunks by the framework.
-- **`postprocess()` is called once** after all chunks are merged — use it for
-  normalization, not per-chunk computation.
-
-## Interop
-
-- **uproot**: `uproot.iterate` feeds data into coffea processors chunk by chunk.
-- **awkward**: All event data inside processors is `ak.Array`; use `ak.firsts`,
-  `ak.pad_none`, `ak.fill_none` for jagged branches.
-- **hist**: The standard accumulator type; fill inside `process()`, merge
-  automatically across chunks.
-- **vector**: `vector.register_awkward()` adds four-vector methods to awkward
-  records before passing to a processor.
-- **atlas-schema**: `NtupleSchema` from the `atlas-schema` package structures CP
-  algorithm NTuples into collections and exposes `events.systematic_names` /
-  `events[variation]` for systematic iteration; install with
-  `pip install atlas-schema` or `pixi add atlas-schema` (conda-forge).
-- **Coffea-Casa**: ATLAS analysis facility at University of Chicago that
-  pre-configures a dask cluster for ATLAS users.
+- **Coffea-Casa**: analysis facility (e.g. the UNL/Nebraska deployment and
+  ATLAS-flavoured instances) that pre-configures a dask cluster for users.
 
 ## Docs
 

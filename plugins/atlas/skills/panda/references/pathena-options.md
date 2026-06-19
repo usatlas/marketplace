@@ -44,9 +44,8 @@ pathena --trf "Transform_trf.py arg1=%IN arg2=%OUT.suffix" --inDS inputDS --outD
 | `--nFilesPerJob`  | Files per job                                              |
 | `--nFiles`        | Limit total input files (use for testing before full runs) |
 | `--nGBPerJob`     | GB per job (alternative to `--nFilesPerJob`)               |
-| `--split`         | Number of jobs when no input dataset is specified          |
-| `--maxCpuCount`   | Maximum CPU time in seconds                                |
-| `--maxWalltime`   | Maximum wall clock time in seconds                         |
+| `--split`         | Number of sub-jobs to generate                             |
+| `--maxWalltime`   | Max walltime per job, in hours                             |
 
 ## Build Options
 
@@ -63,19 +62,16 @@ pathena --trf "Transform_trf.py arg1=%IN arg2=%OUT.suffix" --inDS inputDS --outD
 | ---------------- | ------------------------------------------------ |
 | `--site`         | Target specific site                             |
 | `--excludedSite` | Comma-separated sites to avoid                   |
-| `--cloud`        | Target cloud (e.g. `US`, `CERN`)                 |
-| `--memory`       | Requested memory in MB                           |
+| `--memory`       | Required memory in MB per core                   |
 | `--nCore`        | Number of CPU cores; routes to multi-core queues |
-| `--maxDiskCount` | Maximum disk usage in KB per job                 |
 
 ## Athena-Specific Options
 
-| Option                | Description                                                |
-| --------------------- | ---------------------------------------------------------- |
-| `--trf`               | Transformation command string (alternative to job options) |
-| `--CA`                | Enable ComponentAccumulator configuration mode             |
-| `--athenaTag`         | Override the Athena version tag                            |
-| `--useAthenaPackages` | Include Athena packages from the work area                 |
+| Option        | Description                                                |
+| ------------- | ---------------------------------------------------------- |
+| `--trf`       | Transformation command string (alternative to job options) |
+| `--CA`        | Enable ComponentAccumulator configuration mode             |
+| `--athenaTag` | Use a different version of Athena                          |
 
 ## Production Options
 

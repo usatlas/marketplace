@@ -183,5 +183,5 @@ exclude_also = ["if TYPE_CHECKING:"]
 - pytest: https://docs.pytest.org/
 - pytest fixtures: https://docs.pytest.org/en/stable/fixture.html
 - Scientific Python testing guide:
-  https://learn.scientific-python.org/development/guides/pytest/
+  https://learn.scientific-python.org/development/pages/guides/pytest/
 - scikit-hep-testdata: https://github.com/scikit-hep/scikit-hep-testdata

@@ -176,13 +176,14 @@ parser.parse()
 ### Amplitude model conversion (AmpGen → GooFit)
 
 ```bash
-python -m decaylanguage.goofit models/DtoKpipipi_v2.txt > output.cu
+# CLI: the -G/--goofit converter flag on the top-level package
+python -m decaylanguage -G goofit models/DtoKpipipi_v2.txt > output.cu
 ```
 
 ```python
-from decaylanguage.modeling.amplitudechain import AmplitudeChain
+from decaylanguage.modeling import AmplitudeChain
 
-lines = AmplitudeChain.read_ampgen("models/DtoKpipipi_v2.txt")
+lines = AmplitudeChain.read_ampgen(filename="models/DtoKpipipi_v2.txt")
 ```
 
 ## Gotchas
@@ -217,4 +218,4 @@ lines = AmplitudeChain.read_ampgen("models/DtoKpipipi_v2.txt")
 
 ## Docs
 
-https://scikit-hep.org/decaylanguage/
+https://decaylanguage.readthedocs.io/

@@ -54,15 +54,15 @@ Add the JiveXML algorithm to an Athena job to write event display data:
 ```python
 from AthenaCommon.AlgSequence import AlgSequence
 topSequence = AlgSequence()
-from JiveXML.JiveXMLConf import JiveXML__AlgorithmJiveXML
-topSequence += JiveXML__AlgorithmJiveXML()
+from JiveXML.JiveXMLConf import JiveXML__AlgoJiveXML
+topSequence += JiveXML__AlgoJiveXML()
 ```
 
 This writes one `.xml` file per event in the run directory. Control output with
 algorithm properties:
 
 ```python
-jivexml = JiveXML__AlgorithmJiveXML()
+jivexml = JiveXML__AlgoJiveXML()
 jivexml.AtlasRelease = "24.0.0"
 jivexml.WriteToFile = True
 jivexml.OnlineMode = False

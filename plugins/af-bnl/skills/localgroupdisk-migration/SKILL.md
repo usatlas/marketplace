@@ -1,5 +1,5 @@
 ---
-name: migrate
+name: localgroupdisk-migration
 description: >-
   Use when migrating a directory of local ROOT files to BNL-OSG2_LOCALGROUPDISK
   via Rucio on BNL SDCC nodes, or for any sub-step of that workflow: pre-flight
@@ -445,21 +445,21 @@ root -b -l -q -e '
   while ((sf = (TSystemFile*)nf())) {
     TString fn = sf->GetName();
     if (sf->IsDirectory() || !fn.EndsWith(".root")) continue;
-    TFile *fp = TFile::Open(od+"/"+fn), *ff = TFile::Open(fd+"/"+fn);
-    if (!fp || fo->IsZombie() || !ff || ff->IsZombie()) {
+    TFile *forig = TFile::Open(od+"/"+fn), *ff = TFile::Open(fd+"/"+fn);
+    if (!forig || forig->IsZombie() || !ff || ff->IsZombie()) {
       cout << fn << ": FAIL open" << endl; ok = false; continue; }
-    TIter nk(fo->GetListOfKeys()); TKey *k;
+    TIter nk(forig->GetListOfKeys()); TKey *k;
     while ((k = (TKey*)nk())) {
       if (TString(k->GetClassName()) != "TTree") continue;
       TString tn = k->GetName();
-      TTree *to = (TTree*)fo->Get(tn), *tf = (TTree*)ff->Get(tn);
+      TTree *to = (TTree*)forig->Get(tn), *tf = (TTree*)ff->Get(tn);
       Long64_t no = to ? to->GetEntries() : -1;
       Long64_t ne = tf ? tf->GetEntries() : -2;
       if (no != ne) {
         cout << fn << ":" << tn << " orig=" << no << " farm=" << ne
              << " MISMATCH" << endl; ok = false; }
     }
-    fo->Close(); ff->Close();
+    forig->Close(); ff->Close();
   }
   cout << (ok ? "PER-FILE COUNTS MATCH" : "PER-FILE COUNTS MISMATCH") << endl;
 '
@@ -619,7 +619,7 @@ Suppose you have 25 Monte Carlo ROOT files (98 GB total) at
 with a symlink farm at the original path.
 
 ```text
-/bnl-localgroupdisk:migrate /pnfs/usatlas.bnl.gov/users/<you>/mc_sample mc_sample_truth
+/af-bnl:localgroupdisk-migration /pnfs/usatlas.bnl.gov/users/<you>/mc_sample mc_sample_truth
 ```
 
 1. **Pre-flight**: all 5 checks pass.
@@ -709,5 +709,5 @@ git branch -D lgd-migrate-${dataset_name}
 
 ## Docs
 
-- [bnl-localgroupdisk plugin](https://github.com/FlamyFlame/claude-bnl-localgroupdisk)
+- [af-bnl plugin source](https://github.com/usatlas/marketplace/tree/main/plugins/af-bnl)
 - [BNL SDCC storage documentation](https://usatlas.github.io/af-docs/bnl/storage/)

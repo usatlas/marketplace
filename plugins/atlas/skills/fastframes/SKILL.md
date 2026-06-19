@@ -13,9 +13,9 @@ FastFrames is a histogramming and ntuple reprocessing framework built on ROOT's
 RDataFrame. It processes NTuples produced by the standard CP algorithm stack in
 a columnar, lazy-evaluation model that is faster than event-loop approaches for
 many workflows. FastFrames automatically handles cross-section weighting,
-systematic variations, and profile-likelihood unfolding. It is officially
-supported by the ATLAS AMG and is the recommended method to process TopCPToolkit
-outputs into histograms.
+systematic variations, and profile-likelihood unfolding. It is maintained under
+the ATLAS Analysis Model Group (AMG, `gitlab.cern.ch/atlas-amglab/fastframes`)
+and is the recommended method to process TopCPToolkit outputs into histograms.
 
 ## When to Use
 
@@ -131,14 +131,15 @@ systematics:
 ```bash
 # option 1: conda-forge (pixi / conda)
 pixi add fastframes
-FastFrames.py --config config.yml
+# the driver is the Python script in the source tree:
+python3 fastframes/python/FastFrames.py --config config.yml
 
 # option 2: build from source inside AnalysisBase
 asetup AnalysisBase,25.2.X
-cmake -S fastframes -B build
+cmake -S fastframes/ -B build -DCMAKE_INSTALL_PREFIX=./install
 cmake --build build
-source build/setup.sh
-FastFrames.py --config config.yml
+cmake --install build
+python3 fastframes/python/FastFrames.py --config config.yml
 ```
 
 ### Reading FastFrames Output

@@ -36,30 +36,44 @@ stages, from RAW through ESD, AOD, and DAOD.
 
 ## Canonical Patterns
 
+The `eiclient` package installs three commands — `event-lookup`, `event-list`,
+and `dataset-list`. Run any with `-h` for the full option list.
+
 ### Setup
 
 ```bash
 setupATLAS
 lsetup eiclient
+voms-proxy-init -voms atlas    # a valid grid proxy is required
 ```
 
-### Event lookup
+### Event lookup — find the files/datasets containing an event
 
-Find which datasets contain a specific event:
+Events are given as `<run>:<event>` (or `<run> <event>`, quoted). The search
+spans the indexed datasets and their provenance, returning the GUIDs of the
+files that hold each event:
 
 ```bash
-ei_client GetEvent --run 123456 --event 789012
+event-lookup 280862:659846
+event-lookup 280862:659846 280862:123456      # several events
 ```
 
-### Event picking
-
-Given a file with run/event pairs, find datasets containing those events:
+Narrow the search by dataset attributes:
 
 ```bash
-ei_client EventPicking --eventList events.txt --dataType AOD
+event-lookup -d AOD -p data18_13TeV 280862:659846
 ```
 
-Event list file format (one run/event pair per line):
+### Event picking — many run/event pairs from a file
+
+With no event arguments, `event-lookup` reads pairs from `--file` (or stdin),
+one `<run> <event>` per line:
+
+```bash
+event-lookup -d AOD -F events.txt
+```
+
+`events.txt`:
 
 ```text
 154514 21179
@@ -67,23 +81,37 @@ Event list file format (one run/event pair per line):
 154558 448080
 ```
 
+Pick the output format with `-c {plain,name,short,pretty,json}` and write to a
+file with `-o`:
+
+```bash
+event-lookup -c json -o guids.json -F events.txt
+```
+
 ### List events in a dataset
 
-```bash
-ei_client GetEvents \
-  --dataset data18_13TeV.00123456.physics_Main.merge.AOD.f1234_m5678
-```
-
-### Provenance query
-
-Trace an event through all processing stages:
+`event-list` lists metadata for — or counts — the events in one or more
+datasets:
 
 ```bash
-ei_client GetProvenance --run 123456 --event 789012
+event-list data18_13TeV.00123456.physics_Main.merge.AOD.f1234_m5678
+event-list -N <dataset>                       # -N: count only
+event-list -B <lumiblock> -l 100 <dataset>    # filter by LumiBlock, limit rows
 ```
 
-This returns the chain of datasets the event passed through, from RAW to the
-final derivation.
+### List datasets for a run
+
+`dataset-list` shows the indexed datasets for one or more runs:
+
+```bash
+dataset-list -d AOD -p data18_13TeV 280862
+```
+
+### Provenance
+
+`event-lookup` already returns GUIDs from provenance (parent) datasets as well
+as the searched datasets. Narrow the result with `-D/--guid-data-type` (e.g.
+`-D RAW`) together with `-d/--data-type` to follow the RAW → AOD → DAOD chain.
 
 ## Gotchas
 

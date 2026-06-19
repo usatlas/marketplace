@@ -28,13 +28,13 @@ more than one or two parameters.
 
 ## Key Concepts
 
-| Concept                           | Notes                                                                |
-| --------------------------------- | -------------------------------------------------------------------- |
-| `typer.Argument`                  | Positional — required unless `default=...`                           |
-| `typer.Option`                    | Keyword (`--name`) — always has a default                            |
-| `Annotated[T, typer.Option(...)]` | **Modern syntax** (Typer ≥ 0.9) — preferred                          |
-| `pathlib.Path`                    | Use as type annotation for file/dir args — Typer validates existence |
-| `typer.Typer()` + `app()`         | Multi-command entry point                                            |
+| Concept                           | Notes                                                             |
+| --------------------------------- | ----------------------------------------------------------------- |
+| `typer.Argument`                  | Positional — required unless `default=...`                        |
+| `typer.Option`                    | Keyword (`--name`) — always has a default                         |
+| `Annotated[T, typer.Option(...)]` | **Modern syntax** (Typer ≥ 0.9) — preferred                       |
+| `pathlib.Path`                    | Type annotation for file/dir args; pass `exists=True` to validate |
+| `typer.Typer()` + `app()`         | Multi-command entry point                                         |
 
 ## Canonical Patterns
 
@@ -111,8 +111,10 @@ backend: Annotated[Backend, typer.Option()] = Backend.xaod
 
 ## Gotchas
 
-- **Use `Annotated[T, typer.Option(...)]` not `= typer.Option(...)`**: The old
-  signature still works but is deprecated in Typer ≥ 0.9 and will be removed.
+- **Prefer `Annotated[T, typer.Option(...)]` over `= typer.Option(...)`**: Both
+  forms work, but Typer's docs recommend `Annotated` (added in 0.9). The
+  default-value form is not formally deprecated, but it is the legacy style; use
+  `Annotated` for new code.
 - **`bool` flags auto-generate pairs**:
   `Annotated[bool, typer.Option("--flag/--no-flag")]` creates two flags. If you
   only write `bool` with no `Option(...)`, Typer makes `--flag` only (sets True

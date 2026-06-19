@@ -34,7 +34,7 @@ prun --exec "command" --outDS user.<account>.<tag> [options]
 | ---------------- | ---------------------------------------------------------------- |
 | `--inDS`         | Input dataset (Rucio name); PanDA splits across jobs             |
 | `--outDS`        | Output dataset; must match `user.<account>.<tag>`                |
-| `--output`       | Comma-separated output file names to collect from the worker     |
+| `--outputs`      | Comma-separated output file names to collect from the worker     |
 | `--secondaryDSs` | Secondary input datasets; format: `NAME:nFiles:datasetName/`     |
 | `--mergeOutput`  | Merge output files after all jobs complete                       |
 | `--mergeScript`  | Custom merge script; `%OUT` placeholder for merged file name     |
@@ -42,15 +42,14 @@ prun --exec "command" --outDS user.<account>.<tag> [options]
 
 ## Job Sizing Options
 
-| Option            | Description                                         |
-| ----------------- | --------------------------------------------------- |
-| `--nJobs`         | Number of jobs (when no `--inDS`)                   |
-| `--nFilesPerJob`  | Files per job (with `--inDS`)                       |
-| `--nGBPerJob`     | GB per job (alternative to `--nFilesPerJob`)        |
-| `--nEventsPerJob` | Events per job                                      |
-| `--nFiles`        | Limit total input files (use for testing)           |
-| `--maxCpuCount`   | Maximum CPU time in seconds; increase for long jobs |
-| `--maxWalltime`   | Maximum wall clock time in seconds                  |
+| Option            | Description                                       |
+| ----------------- | ------------------------------------------------- |
+| `--nJobs`         | Number of jobs (when no `--inDS`)                 |
+| `--nFilesPerJob`  | Files per job (with `--inDS`)                     |
+| `--nGBPerJob`     | GB per job (alternative to `--nFilesPerJob`)      |
+| `--nEventsPerJob` | Events per job                                    |
+| `--nFiles`        | Limit total input files (use for testing)         |
+| `--maxWalltime`   | Max walltime per job, in hours; use for long jobs |
 
 ## Site and Resource Options
 
@@ -58,10 +57,8 @@ prun --exec "command" --outDS user.<account>.<tag> [options]
 | ---------------- | --------------------------------------- |
 | `--site`         | Target specific site (e.g. `CERN-PROD`) |
 | `--excludedSite` | Comma-separated sites to avoid          |
-| `--cloud`        | Target cloud (e.g. `US`, `CERN`)        |
-| `--memory`       | Requested memory in MB                  |
+| `--memory`       | Required memory in MB per core          |
 | `--nCore`        | Number of CPU cores per job             |
-| `--maxDiskCount` | Maximum disk usage in KB per job        |
 
 ## ROOT and Software Options
 
@@ -101,7 +98,7 @@ worker node.
 prun --exec "echo Hello > myout.txt" \
      --outDS user.$RUCIO_ACCOUNT.hello_test \
      --nJobs 3 \
-     --output myout.txt
+     --outputs myout.txt
 ```
 
 ### Python script with input data
@@ -110,7 +107,7 @@ prun --exec "echo Hello > myout.txt" \
 prun --exec "python analysis.py %IN" \
      --inDS data18_13TeV.DAOD_PHYSLITE.dataset/ \
      --outDS user.$RUCIO_ACCOUNT.analysis_v1 \
-     --output hist.root \
+     --outputs hist.root \
      --nFilesPerJob 5
 ```
 
@@ -121,7 +118,7 @@ prun --exec "myanalysis %IN" \
      --bexec "make" \
      --inDS valid1.dataset/ \
      --outDS user.$RUCIO_ACCOUNT.cpp_analysis \
-     --output output.root \
+     --outputs output.root \
      --rootVer recommended
 ```
 
@@ -132,7 +129,7 @@ prun --containerImage docker://atlas/analysisbase:25.2.20 \
      --exec "python analysis.py %IN" \
      --inDS mc23.dataset/ \
      --outDS user.$RUCIO_ACCOUNT.container_run \
-     --output hist.root \
+     --outputs hist.root \
      --noBuild
 ```
 
@@ -154,7 +151,7 @@ prun --exec "myanalysis %IN %IN2" \
      --inDS primary.dataset/ \
      --secondaryDSs "IN2:3:secondary.dataset/" \
      --outDS user.$RUCIO_ACCOUNT.multi_input \
-     --output output.root
+     --outputs output.root
 ```
 
 ### Random seeds for MC generation
@@ -163,7 +160,7 @@ prun --exec "myanalysis %IN %IN2" \
 prun --exec "generate.py --seed %RNDM:12345" \
      --outDS user.$RUCIO_ACCOUNT.mc_gen \
      --nJobs 100 \
-     --output events.root
+     --outputs events.root
 ```
 
 ### Merge output
@@ -172,7 +169,7 @@ prun --exec "generate.py --seed %RNDM:12345" \
 prun --exec "python analysis.py %IN" \
      --inDS mc23.dataset/ \
      --outDS user.$RUCIO_ACCOUNT.merged \
-     --output hist.root \
+     --outputs hist.root \
      --nFilesPerJob 10 \
      --mergeOutput
 ```
@@ -183,7 +180,7 @@ prun --exec "python analysis.py %IN" \
 prun --exec "python analysis.py %IN" \
      --inDS mc23.dataset/ \
      --outDS user.$RUCIO_ACCOUNT.site_test \
-     --output hist.root \
+     --outputs hist.root \
      --site CERN-PROD \
      --excludedSite BNL-OSG2
 ```

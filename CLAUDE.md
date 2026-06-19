@@ -29,6 +29,19 @@ skills for authoritative guidance before writing:
 - `superpowers-developing-for-claude-code:working-with-claude-code` — official
   Claude Code documentation reference for hooks, MCP, settings, and CLI
 
+The canonical, tool-agnostic authoring guidance lives at
+[agentskills.io](https://agentskills.io/llms.txt). The most relevant pages:
+
+- [Specification](https://agentskills.io/specification) — frontmatter fields,
+  directory structure, progressive disclosure, and the `skills-ref` validator
+  (run it here via `pixi run validate-skills`).
+- [Best practices](https://agentskills.io/skill-creation/best-practices) —
+  scoping, calibrating control, gotchas/template/checklist patterns.
+- [Optimizing descriptions](https://agentskills.io/skill-creation/optimizing-descriptions)
+  — writing `description` fields that trigger reliably.
+- [Evaluating skills](https://agentskills.io/skill-creation/evaluating-skills)
+  and [Using scripts](https://agentskills.io/skill-creation/using-scripts).
+
 ## Adding a skill
 
 1. Create `plugins/<plugin>/skills/<skill-name>/SKILL.md`.
@@ -38,21 +51,31 @@ skills for authoritative guidance before writing:
 4. Run `pixi run pre-commit` to catch JSON/YAML/Markdown formatting issues.
 5. Run `pixi run check-skills` to catch updates needed from new skills.
 
-**Skill frontmatter rules (strictly enforced by Claude Code):**
+**Skill frontmatter** (per the
+[Agent Skills specification](https://agentskills.io/specification)):
 
 ```yaml
 ---
-name: skill-name # letters, numbers, hyphens only
+name: skill-name # matches the directory name
 description: >-
   Use when <triggering condition 1>, <condition 2>, ...
 ---
 ```
 
-- Only `name` and `description` are valid frontmatter fields. Any other field
-  (e.g. `attribution:`, `author:`) will cause the skill to fail to load.
-- `description` must start with "Use when" and describe triggering conditions
-  only — never summarize the skill's content or workflow.
-- Max ~1024 characters total across both fields.
+- The spec defines six valid fields: `name` and `description` (both required)
+  plus optional `license`, `compatibility`, `metadata`, and `allowed-tools`. Do
+  **not** invent top-level keys (e.g. `author:`, `attribution:`, `version:`) —
+  route any such metadata through the `metadata:` map if it is genuinely needed.
+- `name`: max 64 characters; lowercase letters, numbers, and hyphens only; no
+  leading/trailing or consecutive hyphens; **must equal the skill's directory
+  name**.
+- `description`: max 1024 characters. Must start with "Use when" and describe
+  **triggering conditions only** — never summarize the skill's content or
+  workflow. A workflow summary in the description makes the model follow the
+  summary instead of reading the skill body.
+- **Repo convention:** keep skills to `name` + `description` only. Legal
+  attribution for vendored content lives solely in
+  `plugins/atlas/VENDORED-LICENSES.md`, never as a frontmatter key.
 
 **Skill content guidelines:**
 
@@ -70,14 +93,20 @@ description: >-
 Skills that cover a broad API or deep domain knowledge should use the
 three-level loading pattern:
 
-1. **SKILL.md** (<500 lines) — decision guide: overview, when to use, key
-   concepts, canonical patterns, gotchas, and a "Reference Files" section with
-   pointers.
+1. **SKILL.md** (target <500 lines and <5000 tokens) — decision guide: overview,
+   when to use, key concepts, canonical patterns, gotchas, and a "Reference
+   Files" section with pointers.
 2. **`references/*.md`** — deep content loaded on demand. Each file covers one
    topic (e.g., `systematic-types.md`, `config-api.md`, `helper-scripts.md`).
    Each reference file should include a trigger sentence ("Read this reference
    when…") followed by a Table of Contents near the top.
 3. **`scripts/`** — executable code for deterministic/repetitive tasks (rare).
+   Design scripts for agentic use: non-interactive (all input via flags/stdin),
+   a useful `--help`, structured stdout (JSON/CSV) with diagnostics on stderr,
+   and clear exit codes. Prefer PEP 723 inline metadata (`uv run --script`) for
+   self-contained Python tools — see the `standalone-script` skill.
+4. **`assets/`** — static resources (output templates, schemas, data files)
+   loaded only when needed.
 
 The "Reference Files" section in SKILL.md should list each reference with a
 one-line description of its content and **when to read it** (e.g., "Read when
@@ -103,7 +132,15 @@ Good examples of this pattern: `awkward`, `xroofit`, `histfitter`.
 ## Adding a subagent
 
 1. Create `plugins/atlas/agents/<agent-name>.md`.
-2. Frontmatter fields: `name`, `description`, `tools` (list), `model`, `color`.
+2. Frontmatter fields: `name`, `description`, `tools` (list), `model`, `color`,
+   and the optional `readme_description`. Agents follow the Claude Code subagent
+   format, **not** the Agent Skills skill spec, so this field set differs from
+   skill frontmatter.
+   - `model` accepts an alias (`sonnet`, `opus`, `haiku`) or a pinned ID (e.g.
+     `claude-sonnet-4-6`, `claude-opus-4-8`).
+   - `readme_description` is read by `scripts/sync_skills.py` to build the
+     Subagents table in the README; if omitted, the summary is derived from
+     `description`.
 3. No registration in `marketplace.json` is required for agents.
 
 Example frontmatter:
@@ -113,11 +150,12 @@ Example frontmatter:
 name: my-agent
 description: >-
   Use when ...
+readme_description: One-line summary for the README Subagents table.
 tools:
   - Read
   - Bash
   - WebFetch
-model: claude-sonnet-4-5
+model: claude-sonnet-4-6
 color: purple
 ---
 ```
@@ -156,6 +194,21 @@ Skills are auto-discovered via `"skills": "./skills/"` in each plugin entry — 
 manual list to maintain. After adding or removing a skill directory, run
 `claude plugin validate .claude-plugin/marketplace.json` to confirm the manifest
 is still valid.
+
+To validate skills against the Agent Skills spec (frontmatter fields, naming,
+structure), run the spec validator over all skills:
+
+```bash
+pixi run validate-skills
+```
+
+This wraps the [`skills-ref`](https://pypi.org/project/skills-ref/) reference
+library (a `pypi-dependency` in `pixi.toml`, so `pixi install` provides it). The
+library's CLI is installed as `agentskills`, so a single skill can be checked
+directly with `pixi run agentskills validate plugins/<plugin>/skills/<name>`.
+
+`validate-skills` complements `pixi run lint-skills` (this repo's section
+ordering) and is included in `pixi run check-skills` alongside the README sync.
 
 ## MCP servers (atlas plugin only)
 

@@ -40,11 +40,11 @@ This adds the atlasrootstyle macro directory to the ROOT include path.
 
 ### Components
 
-| File              | Purpose                                               |
-| ----------------- | ----------------------------------------------------- |
-| `AtlasStyle.C/h`  | Main style definitions: font, tick marks, margins     |
-| `AtlasLabels.C/h` | Functions for placing official ATLAS labels on plots  |
-| `AtlasUtils.C/h`  | Utility functions: text, lines, boxes, marker legends |
+| File              | Purpose                                                            |
+| ----------------- | ------------------------------------------------------------------ |
+| `AtlasStyle.C/h`  | Main style definitions: font, tick marks, margins                  |
+| `AtlasLabels.C/h` | Functions for placing official ATLAS labels on plots               |
+| `AtlasUtils.C/h`  | Utility functions: text, boxes, marker legends, TGraph error bands |
 
 ### Style Characteristics
 
@@ -130,16 +130,12 @@ ATLASLabel(x, y, "Internal");        // "ATLAS Internal"
 ATLASLabel(x, y, "Preliminary");     // "ATLAS Preliminary"
 ATLASLabel(x, y, "");               // "ATLAS" alone (papers)
 
-// Place arbitrary text
+// Place arbitrary text (isNDC defaults to true)
 myText(x, y, color, "text");
-
-// Draw horizontal/vertical lines
-myLineH(x1, x2, y);                 // horizontal line
-myLineV(x, y1, y2);                 // vertical line
 
 // Draw legend-style boxes and markers with text
 myBoxText(x, y, boxsize, mcolor, "text");
-myMarkerText(x, y, mcolor, mstyle, "text");
+myMarkerText(x, y, mcolor, mstyle, "text", msize);
 ```
 
 ### Ratio Plot Pattern

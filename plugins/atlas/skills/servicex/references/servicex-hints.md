@@ -107,9 +107,9 @@ There are two ways to access the output of the `deliver` function.
 1. If the output is small enough you expect to be able to run in-memory. For
    quick studies, etc., this works very well and is quite easy.
 
-   a. Make sure the `servicex_analysis_utilities` package is included in the
-   project's dependencies. b. The following code will turn the output above into
-   a single awkward array:
+   a. Make sure the `servicex-analysis-utils` package is included in the
+   project's dependencies (import name `servicex_analysis_utils`). b. The
+   following code will turn the output above into a single awkward array:
 
    ```python
    from servicex_analysis_utils import to_awk

@@ -20,16 +20,31 @@ Then install whichever plugins you need from the marketplace browser.
 
 ## Plugins
 
-### `analysis-facilities`
+### `af-bnl`
 
-Skills for working with USATLAS Analysis Facilities including UChicago, BNL, and
-SLAC sites.
+Skills for the BNL SDCC ATLAS Analysis Facility. Currently: migrating local ROOT
+files to BNL-OSG2_LOCALGROUPDISK via Rucio with symlink-farm access for
+transparent, proxy-free analysis on SDCC nodes.
+
+**Skills:**
+
+| Skill                      | Description                                                                    |
+| -------------------------- | ------------------------------------------------------------------------------ |
+| `localgroupdisk-migration` | Migrating a directory of local ROOT files to BNL-OSG2_LOCALGROUPDISK via Rucio |
+
+---
+
+### `af-uchicago`
+
+Skills for the UChicago ATLAS Analysis Facility (af.uchicago.edu): HTCondor
+batch jobs, JupyterLab, XCache, Rucio, ServiceX, Coffea Casa, and Triton ML
+inference.
 
 **Skills:**
 
 | Skill         | Description                                                                  |
 | ------------- | ---------------------------------------------------------------------------- |
-| `uchicago-af` | Working with the UChicago ATLAS Analysis Facility, submitting HTCondor batch |
+| `af-uchicago` | Working with the UChicago ATLAS Analysis Facility, submitting HTCondor batch |
 
 ---
 
@@ -69,7 +84,7 @@ software orientation.
 | `decaylanguage`         | Working with particle decay chains in Python                                    |
 | `eiclient`              | Working with the ATLAS Event Index                                              |
 | `fastframes`            | You need a supported RDataFrame-based framework to process CP-algorithm NTuples |
-| `fastjet`               | Running jet clustering in Python with fastjet or pyjet                          |
+| `fastjet`               | Running jet clustering in Python with the Scikit-HEP fastjet package            |
 | `fsspec-xrootd`         | Accessing ROOT files on EOS, WLCG grid storage, or any XRootD endpoint from     |
 | `hepunits`              | Writing unit-safe HEP code in Python                                            |
 | `hist`                  | Creating, filling, slicing, or plotting histograms with the scikit-hep hist     |
@@ -108,20 +123,6 @@ software orientation.
 
 ---
 
-### `bnl-localgroupdisk`
-
-Migrate local ROOT files to BNL-OSG2_LOCALGROUPDISK via Rucio, with symlink-farm
-access and optional codebase adaptation for transparent analysis use on BNL SDCC
-nodes
-
-**Skills:**
-
-| Skill     | Description                                                                    |
-| --------- | ------------------------------------------------------------------------------ |
-| `migrate` | Migrating a directory of local ROOT files to BNL-OSG2_LOCALGROUPDISK via Rucio |
-
----
-
 ### `hep-python-tools`
 
 Generic Python tooling skills used across HEP workflows: Typer CLIs with
@@ -142,7 +143,10 @@ pixi/uv/Hatch, and PEP-723 standalone scripts.
 
 ```text
 plugins/
-  analysis-facilities/
+  af-bnl/
+    .claude-plugin/plugin.json
+    skills/  # 1 skill
+  af-uchicago/
     .claude-plugin/plugin.json
     skills/  # 1 skill
   atlas/
@@ -151,9 +155,6 @@ plugins/
     agents/  # 5 subagents
     skills/  # 43 skills
     VENDORED-LICENSES.md
-  bnl-localgroupdisk/
-    .claude-plugin/plugin.json
-    skills/  # 1 skill
   hep-python-tools/
     .claude-plugin/plugin.json
     skills/  # 6 skills

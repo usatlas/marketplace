@@ -171,4 +171,4 @@ pre-commit autoupdate
 - Ruff: https://docs.astral.sh/ruff/
 - mypy: https://mypy.readthedocs.io/
 - Scientific Python style guide:
-  https://learn.scientific-python.org/development/guides/style/
+  https://learn.scientific-python.org/development/pages/guides/style/

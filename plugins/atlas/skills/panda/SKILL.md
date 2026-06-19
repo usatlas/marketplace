@@ -57,7 +57,7 @@ voms-proxy-init --voms atlas
 prun --exec "echo Hello > myout.txt" \
      --outDS user.$RUCIO_ACCOUNT.hello_test \
      --nJobs 3 \
-     --output myout.txt
+     --outputs myout.txt
 ```
 
 ### prun: process input data
@@ -68,7 +68,7 @@ Use `%IN` as a placeholder for input file names injected by PanDA.
 prun --exec "python analysis.py %IN" \
      --inDS data18_13TeV.DAOD_PHYS.some_dataset/ \
      --outDS user.$RUCIO_ACCOUNT.analysis_output \
-     --output hist.root \
+     --outputs hist.root \
      --nFilesPerJob 5
 ```
 
@@ -81,7 +81,7 @@ prun --exec "myanalysis %IN" \
      --bexec "make" \
      --inDS valid1.dataset/ \
      --outDS user.$RUCIO_ACCOUNT.cpp_test \
-     --output output.root \
+     --outputs output.root \
      --rootVer recommended
 ```
 
@@ -92,7 +92,7 @@ prun --containerImage docker://atlas/analysisbase:25.2.20 \
      --exec "python analysis.py %IN" \
      --inDS mc23.dataset/ \
      --outDS user.$RUCIO_ACCOUNT.container_test \
-     --output hist.root \
+     --outputs hist.root \
      --noBuild
 ```
 
@@ -184,7 +184,7 @@ prun --exec "myanalysis %IN %IN2" \
      --inDS primary.dataset/ \
      --secondaryDSs "IN2:3:secondary.dataset/" \
      --outDS user.$RUCIO_ACCOUNT.multi_input \
-     --output output.root
+     --outputs output.root
 ```
 
 The format is `NAME:nFilesPerJob:datasetName`. `%IN2` resolves to the files from
@@ -196,7 +196,7 @@ the secondary dataset.
 prun --exec "python analysis.py %IN" \
      --inDS mc23.dataset/ \
      --outDS user.$RUCIO_ACCOUNT.merged_output \
-     --output hist.root \
+     --outputs hist.root \
      --nFilesPerJob 10 \
      --mergeOutput
 ```
@@ -222,7 +222,7 @@ python analysis.py input_test.root
 prun --exec "python analysis.py %IN" \
      --inDS mc23_13p6TeV.DAOD_PHYSLITE.ttbar/ \
      --outDS user.$RUCIO_ACCOUNT.ttbar_hists_v1 \
-     --output hist.root \
+     --outputs hist.root \
      --nFilesPerJob 5 \
      --nFiles 10
 
@@ -233,7 +233,7 @@ pbook show
 prun --exec "python analysis.py %IN" \
      --inDS mc23_13p6TeV.DAOD_PHYSLITE.ttbar/ \
      --outDS user.$RUCIO_ACCOUNT.ttbar_hists_v2 \
-     --output hist.root \
+     --outputs hist.root \
      --nFilesPerJob 5 \
      --mergeOutput
 
@@ -243,17 +243,17 @@ pbook retry <taskID>
 
 ## Troubleshooting
 
-| Error                         | Cause                              | Fix                                                       |
-| ----------------------------- | ---------------------------------- | --------------------------------------------------------- |
-| `sh: line 1: XYZ Killed`      | Exceeded memory limit              | Reduce `--nFilesPerJob` or `--nGBPerJob`                  |
-| `lost heartbeat`              | No heartbeat for 6 hours           | Usually recovers on `pbook retry`; transient site issue   |
-| `Looping job killed`          | No output update for 2 hours       | Use `--maxCpuCount` for legitimately long jobs            |
-| `upstream job failed`         | Build job (bexec) failed           | Check build log on BigPanDA; fix compilation errors       |
-| `over_cpu_consumption`        | Multi-threaded exceeding CPU share | Use `--nCore N` to request multi-core queue               |
-| Missing output files          | Output stream not used             | Use `--supStream` to suppress unused output streams       |
-| `proxy expired` / auth errors | VOMS proxy expired                 | Re-run `voms-proxy-init --voms atlas`                     |
-| `dataset already exists`      | Reused `--outDS` name              | Change dataset name; append version suffix                |
-| Submission hangs              | Network or PanDA server issue      | Check https://bigpanda.cern.ch; retry after a few minutes |
+| Error                         | Cause                              | Fix                                                                              |
+| ----------------------------- | ---------------------------------- | -------------------------------------------------------------------------------- |
+| `sh: line 1: XYZ Killed`      | Exceeded memory limit              | Reduce `--nFilesPerJob` or `--nGBPerJob`                                         |
+| `lost heartbeat`              | No heartbeat for 6 hours           | Usually recovers on `pbook retry`; transient site issue                          |
+| `Looping job killed`          | No output update for 2 hours       | Use `--maxWalltime <hours>` for long jobs; `--noLoopingCheck` disables the check |
+| `upstream job failed`         | Build job (bexec) failed           | Check build log on BigPanDA; fix compilation errors                              |
+| `over_cpu_consumption`        | Multi-threaded exceeding CPU share | Use `--nCore N` to request multi-core queue                                      |
+| Missing output files          | Output stream not used             | Use `--supStream` to suppress unused output streams                              |
+| `proxy expired` / auth errors | VOMS proxy expired                 | Re-run `voms-proxy-init --voms atlas`                                            |
+| `dataset already exists`      | Reused `--outDS` name              | Change dataset name; append version suffix                                       |
+| Submission hangs              | Network or PanDA server issue      | Check https://bigpanda.cern.ch; retry after a few minutes                        |
 
 ## Gotchas
 
