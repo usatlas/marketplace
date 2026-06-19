@@ -445,21 +445,21 @@ root -b -l -q -e '
   while ((sf = (TSystemFile*)nf())) {
     TString fn = sf->GetName();
     if (sf->IsDirectory() || !fn.EndsWith(".root")) continue;
-    TFile *fp = TFile::Open(od+"/"+fn), *ff = TFile::Open(fd+"/"+fn);
-    if (!fp || fo->IsZombie() || !ff || ff->IsZombie()) {
+    TFile *forig = TFile::Open(od+"/"+fn), *ff = TFile::Open(fd+"/"+fn);
+    if (!forig || forig->IsZombie() || !ff || ff->IsZombie()) {
       cout << fn << ": FAIL open" << endl; ok = false; continue; }
-    TIter nk(fo->GetListOfKeys()); TKey *k;
+    TIter nk(forig->GetListOfKeys()); TKey *k;
     while ((k = (TKey*)nk())) {
       if (TString(k->GetClassName()) != "TTree") continue;
       TString tn = k->GetName();
-      TTree *to = (TTree*)fo->Get(tn), *tf = (TTree*)ff->Get(tn);
+      TTree *to = (TTree*)forig->Get(tn), *tf = (TTree*)ff->Get(tn);
       Long64_t no = to ? to->GetEntries() : -1;
       Long64_t ne = tf ? tf->GetEntries() : -2;
       if (no != ne) {
         cout << fn << ":" << tn << " orig=" << no << " farm=" << ne
              << " MISMATCH" << endl; ok = false; }
     }
-    fo->Close(); ff->Close();
+    forig->Close(); ff->Close();
   }
   cout << (ok ? "PER-FILE COUNTS MATCH" : "PER-FILE COUNTS MISMATCH") << endl;
 '
