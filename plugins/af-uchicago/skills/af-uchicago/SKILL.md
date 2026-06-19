@@ -1,5 +1,5 @@
 ---
-name: uchicago-af
+name: af-uchicago
 description: >-
   Use when working with the UChicago ATLAS Analysis Facility, submitting
   HTCondor batch jobs at UChicago, accessing JupyterLab at af.uchicago.edu,

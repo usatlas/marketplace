@@ -1,5 +1,5 @@
 ---
-name: migrate
+name: localgroupdisk-migration
 description: >-
   Use when migrating a directory of local ROOT files to BNL-OSG2_LOCALGROUPDISK
   via Rucio on BNL SDCC nodes, or for any sub-step of that workflow: pre-flight
@@ -619,7 +619,7 @@ Suppose you have 25 Monte Carlo ROOT files (98 GB total) at
 with a symlink farm at the original path.
 
 ```text
-/bnl-localgroupdisk:migrate /pnfs/usatlas.bnl.gov/users/<you>/mc_sample mc_sample_truth
+/af-bnl:localgroupdisk-migration /pnfs/usatlas.bnl.gov/users/<you>/mc_sample mc_sample_truth
 ```
 
 1. **Pre-flight**: all 5 checks pass.
@@ -709,5 +709,5 @@ git branch -D lgd-migrate-${dataset_name}
 
 ## Docs
 
-- [bnl-localgroupdisk plugin](https://github.com/FlamyFlame/claude-bnl-localgroupdisk)
+- [af-bnl plugin source](https://github.com/usatlas/marketplace/tree/main/plugins/af-bnl)
 - [BNL SDCC storage documentation](https://usatlas.github.io/af-docs/bnl/storage/)

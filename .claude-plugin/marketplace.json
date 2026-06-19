@@ -9,15 +9,37 @@
   },
   "plugins": [
     {
-      "name": "analysis-facilities",
-      "description": "Skills for working with USATLAS Analysis Facilities (UChicago, BNL, SLAC) providing workflows for HTCondor batch jobs, JupyterLab, XCache, Rucio, ServiceX, Coffea Casa, and Triton ML inference",
-      "source": "./plugins/analysis-facilities",
+      "name": "af-bnl",
+      "description": "Skills for the BNL SDCC ATLAS Analysis Facility. Currently: migrating local ROOT files to BNL-OSG2_LOCALGROUPDISK via Rucio with symlink-farm access for transparent, proxy-free analysis on SDCC nodes.",
+      "source": "./plugins/af-bnl",
+      "version": "1.1.0",
+      "skills": "./skills/",
+      "keywords": [
+        "ATLAS",
+        "HEP",
+        "BNL",
+        "SDCC",
+        "analysis facility",
+        "Rucio",
+        "LOCALGROUPDISK",
+        "pnfs",
+        "dCache",
+        "migration",
+        "symlink"
+      ]
+    },
+    {
+      "name": "af-uchicago",
+      "description": "Skills for the UChicago ATLAS Analysis Facility (af.uchicago.edu): HTCondor batch jobs, JupyterLab, XCache, Rucio, ServiceX, Coffea Casa, and Triton ML inference.",
+      "source": "./plugins/af-uchicago",
       "version": "1.0.0",
       "skills": "./skills/",
       "keywords": [
         "ATLAS",
         "HEP",
         "particle physics",
+        "UChicago",
+        "analysis facility",
         "HTCondor",
         "batch jobs",
         "JupyterLab",
@@ -26,9 +48,7 @@
         "ServiceX",
         "Coffea Casa",
         "Triton",
-        "machine learning",
-        "UChicago",
-        "analysis facility"
+        "GPU"
       ]
     },
     {
@@ -58,24 +78,6 @@
         "coffea",
         "hist",
         "vector"
-      ]
-    },
-    {
-      "name": "bnl-localgroupdisk",
-      "description": "Migrate local ROOT files to BNL-OSG2_LOCALGROUPDISK via Rucio, with symlink-farm access for transparent analysis use on BNL SDCC nodes.",
-      "source": "./plugins/bnl-localgroupdisk",
-      "version": "1.1.0",
-      "skills": "./skills/",
-      "keywords": [
-        "ATLAS",
-        "Rucio",
-        "BNL",
-        "LOCALGROUPDISK",
-        "SDCC",
-        "pnfs",
-        "dCache",
-        "migration",
-        "symlink"
       ]
     },
     {

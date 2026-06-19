@@ -1,0 +1,27 @@
+{
+  "name": "af-bnl",
+  "displayName": "BNL ATLAS Analysis Facility",
+  "description": "Skills for the BNL SDCC ATLAS Analysis Facility. Currently: migrating local ROOT files to BNL-OSG2_LOCALGROUPDISK via Rucio with symlink-farm access for transparent, proxy-free analysis on SDCC nodes.",
+  "version": "1.1.0",
+  "author": {
+    "name": "Yuhan Guo",
+    "email": "yg2695@columbia.edu"
+  },
+  "homepage": "https://usatlas.github.io/af-docs/bnl/storage/",
+  "repository": "https://github.com/usatlas/marketplace",
+  "license": "MIT",
+  "keywords": [
+    "ATLAS",
+    "HEP",
+    "BNL",
+    "SDCC",
+    "analysis facility",
+    "Rucio",
+    "LOCALGROUPDISK",
+    "pnfs",
+    "dCache",
+    "migration",
+    "symlink"
+  ],
+  "skills": "./skills/"
+}
