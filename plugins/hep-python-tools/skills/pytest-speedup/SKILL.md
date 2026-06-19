@@ -97,15 +97,19 @@ export PYTHONDONTWRITEBYTECODE=1
 # List all active builtins:
 pytest --trace-config | grep 'active plugin'
 
-# Disable legacy ones (safe default set):
-pytest -p no:doctest -p no:pastebin -p no:nose
+# Disable ones you don't use (saves their import/registration cost):
+pytest -p no:doctest -p no:pastebin
 ```
+
+Only disable plugins that actually appear in `--trace-config`; `-p no:<name>`
+errors if no such plugin is registered. (The `nose` compatibility plugin was
+removed in modern pytest, so `-p no:nose` no longer applies.)
 
 Add permanently via `pyproject.toml`:
 
 ```toml
 [tool.pytest.ini_options]
-addopts = ["-p", "no:doctest", "-p", "no:pastebin", "-p", "no:nose"]
+addopts = ["-p", "no:doctest", "-p", "no:pastebin"]
 ```
 
 **Run only last-failed tests (fast local iteration)**:

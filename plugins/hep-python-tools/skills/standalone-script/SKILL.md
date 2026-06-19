@@ -30,11 +30,12 @@ tools, and anything you want to share as a single file.
 
 | Concept                           | Notes                                                      |
 | --------------------------------- | ---------------------------------------------------------- |
-| `# /// script` block              | Must be at the TOP of the file, before any imports         |
+| `# /// script` block              | Top-level comment block; by convention placed near the top |
 | `requires-python`                 | Minimum Python version for the script                      |
 | `dependencies`                    | PEP 508 dependency specs — same syntax as `pyproject.toml` |
 | `uv run --script <file>`          | Installs deps and runs in one step                         |
-| `uv run --script --frozen <file>` | Skip re-resolution (faster for CI)                         |
+| `uv lock --script <file>`         | Write a `<file>.lock` adjacent to the script               |
+| `uv run --script --frozen <file>` | Use the existing lock without re-resolving (needs `.lock`) |
 
 ## Canonical Patterns
 
@@ -120,20 +121,27 @@ For reproducibility in scripts that will be shared or run in CI:
 # ///
 ```
 
-Or use a lock-style spec comment and `--frozen` for CI:
+Or generate a lockfile once and run frozen in CI. `--frozen` reuses the lock and
+errors if `analysis.py.lock` is missing, so you must `uv lock --script` first:
 
 ```bash
+uv lock --script analysis.py            # writes analysis.py.lock (commit it)
 uv run --script --frozen analysis.py input.root
 ```
 
 ## Gotchas
 
-- **`# /// script` must be at the very top**: Before any imports, docstring
-  even. If it's not the first non-blank content, `uv` won't find it.
-- **Comments inside the block**: The `#` is part of the syntax — each line in
-  the block starts with `# `. Remove the `#` and uv ignores it.
-- **`uv run --script` re-resolves every time**: This is slow for packages with
-  many deps. Use `--frozen` in CI or when you know the environment is stable.
+- **Block placement is flexible, but convention is top-of-file**: PEP 723 only
+  requires the `# /// script` block to be a _top-level comment block_ (every
+  line starts at column 0); it does not have to precede imports or the module
+  docstring. `uv` scans the whole file for it. Place it near the top (after an
+  optional shebang) for readability. There must be exactly **one** `script`
+  block, or tools error.
+- **Comments inside the block**: Each content line must start with `# ` (or be a
+  bare `#`). A line that does not start with `#` ends the block.
+- **`uv run --script` re-resolves when there is no lock**: For repeatable CI
+  runs, `uv lock --script` once (commit the `.lock`) then run with `--frozen`,
+  which reuses the lock instead of re-resolving.
 - **Not the same as `uv run <file>`**: `--script` flag tells uv to treat the
   file as a PEP 723 script; without it, uv runs the file in the current
   project's virtualenv.

@@ -56,7 +56,14 @@ dependencies = [
   "hist>=2.7",
 ]
 
+# Optional extras ship with the package (installed via `pip install pkg[plot]`
+# or `uv sync --extra plot`):
 [project.optional-dependencies]
+plot = ["matplotlib", "mplhep"]
+
+# Local-only dev tools (PEP 735 dependency groups, installed via
+# `uv sync --group dev`); these are NOT published to PyPI:
+[dependency-groups]
 dev = ["pytest", "pytest-cov"]
 ```
 
@@ -110,7 +117,8 @@ describe-name: $Format:%(describe:tags=true,match=*[0-9]*)$
 
 ```toml
 # pixi.toml
-[project]
+# The manifest table is [workspace]; older pixi used [project] (now renamed).
+[workspace]
 name = "my-hep-tool"
 channels = ["conda-forge"]
 platforms = ["linux-64", "osx-arm64"]
@@ -174,7 +182,7 @@ Run with `uv run pytest` or `uv sync --group dev`.
 ## Docs
 
 - Scientific Python packaging guide:
-  https://learn.scientific-python.org/development/guides/packaging-simple/
+  https://learn.scientific-python.org/development/pages/guides/packaging-simple/
 - PyPA packaging tutorial:
   https://packaging.python.org/tutorials/packaging-projects/
 - Hatchling: https://hatch.pypa.io/latest/
