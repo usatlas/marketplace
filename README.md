@@ -1,8 +1,8 @@
 # USATLAS Marketplace
 
-Claude Code plugin marketplace for ATLAS physics analysis. Three plugins cover
-USATLAS Analysis Facilities, the full ATLAS software and analysis stack, and
-generic HEP Python tooling.
+Claude Code plugin marketplace for ATLAS physics analysis. Four plugins cover
+USATLAS Analysis Facilities, BNL LOCALGROUPDISK storage migration, the full
+ATLAS software and analysis stack, and generic HEP Python tooling.
 
 ## Installation
 
@@ -108,6 +108,20 @@ software orientation.
 
 ---
 
+### `bnl-localgroupdisk`
+
+Migrate local ROOT files to BNL-OSG2_LOCALGROUPDISK via Rucio, with symlink-farm
+access and optional codebase adaptation for transparent analysis use on BNL SDCC
+nodes
+
+**Skills:**
+
+| Skill     | Description                                                                    |
+| --------- | ------------------------------------------------------------------------------ |
+| `migrate` | Migrating a directory of local ROOT files to BNL-OSG2_LOCALGROUPDISK via Rucio |
+
+---
+
 ### `hep-python-tools`
 
 Generic Python tooling skills used across HEP workflows: Typer CLIs with
@@ -137,6 +151,9 @@ plugins/
     agents/  # 5 subagents
     skills/  # 43 skills
     VENDORED-LICENSES.md
+  bnl-localgroupdisk/
+    .claude-plugin/plugin.json
+    skills/  # 1 skill
   hep-python-tools/
     .claude-plugin/plugin.json
     skills/  # 6 skills

@@ -27,6 +27,9 @@ Enable USATLAS skills in Codex via native skill discovery.
 
    ln -s ~/usatlas-marketplace/plugins/hep-python-tools/skills \
          ~/.agents/skills/hep-python-tools
+
+   ln -s ~/usatlas-marketplace/plugins/bnl-localgroupdisk/skills \
+         ~/.agents/skills/bnl-localgroupdisk
    ```
 
    **Windows (PowerShell):**
@@ -38,18 +41,27 @@ Enable USATLAS skills in Codex via native skill discovery.
    cmd /c mklink /J "$target\atlas"                "$base\atlas\skills"
    cmd /c mklink /J "$target\analysis-facilities"  "$base\analysis-facilities\skills"
    cmd /c mklink /J "$target\hep-python-tools"     "$base\hep-python-tools\skills"
+   cmd /c mklink /J "$target\bnl-localgroupdisk"   "$base\bnl-localgroupdisk\skills"
    ```
 
 3. **Restart Codex** (quit and relaunch the CLI) to discover the skills.
 
 ## Verify
 
+**macOS/Linux:**
+
 ```bash
 ls -la ~/.agents/skills/
 ```
 
-You should see three symlinks: `atlas`, `analysis-facilities`,
-`hep-python-tools`.
+**Windows (PowerShell):**
+
+```powershell
+Get-ChildItem $env:USERPROFILE\.agents\skills
+```
+
+You should see four symlinks: `atlas`, `analysis-facilities`,
+`bnl-localgroupdisk`, `hep-python-tools`.
 
 ## Updating
 
@@ -73,6 +85,7 @@ ln -s ~/usatlas-marketplace/plugins/atlas/skills ~/.agents/skills/atlas
 ```bash
 rm ~/.agents/skills/atlas
 rm ~/.agents/skills/analysis-facilities
+rm ~/.agents/skills/bnl-localgroupdisk
 rm ~/.agents/skills/hep-python-tools
 ```
 
