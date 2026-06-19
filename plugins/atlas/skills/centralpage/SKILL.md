@@ -45,7 +45,7 @@ those levels positionally — there is **no `search` subcommand**.
 ```bash
 setupATLAS
 lsetup centralpage
-voms-proxy-init -voms atlas      # listing/querying requires a valid grid proxy
+voms-proxy-init --voms atlas     # listing/querying requires a valid grid proxy
 centralpage --help
 ```
 

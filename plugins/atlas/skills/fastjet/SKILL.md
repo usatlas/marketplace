@@ -159,12 +159,12 @@ constituents = cluster.constituents(min_pt=25.0)  # 25 GeV (use 25000.0 MeV for 
 print(ak.sum(constituents.pt, axis=-1))
 ```
 
-### Jet substructure: N-subjettiness
+### Jet substructure
 
 fjcontrib is compiled into the `fastjet` extension but is **not** exposed as a
-`fastjet.contrib` submodule with `Nsubjettiness`/`SoftDrop` classes. Instead it
-is reached through methods on the (columnar) cluster sequence, with the contrib
-axes/measure definitions passed as strings:
+`fastjet.contrib` submodule — there is no `from fastjet import contrib` and no
+`Nsubjettiness`/`SoftDrop` classes. Substructure is reached through methods on
+the (columnar) cluster sequence that return `ak.Array`:
 
 ```python
 import fastjet
@@ -172,24 +172,16 @@ import awkward as ak
 
 cluster = fastjet.ClusterSequence(events, jetdef)
 
-# tau_N for N in njets, computed per jet; returns an ak.Array
-tau = cluster.njettiness(
-    njets=[1, 2, 3],
-    measure_definition="NormalizedMeasure",   # or "UnnormalizedMeasure"
-    axes_definition="OnePass_KT_Axes",
-    beta=1.0,
-    R0=0.8,
-)
-```
-
-### Soft drop grooming
-
-```python
-# kwarg is symmetry_cut (the z_cut), not zcut
+# Soft drop grooming (kwarg is symmetry_cut, i.e. z_cut — not zcut)
 groomed = cluster.exclusive_jets_softdrop_grooming(
     njets=1, beta=0.0, symmetry_cut=0.1, R0=0.8
 )
 ```
+
+Other exposed substructure methods include `exclusive_jets_lund_declusterings`
+and `exclusive_jets_energy_correlator`. N-subjettiness (`tau_N`) is **not**
+exposed by the Scikit-HEP `fastjet` package (there is no `njettiness` method) —
+compute it from jet constituents if needed.
 
 ### Jet area (for pileup)
 
@@ -210,13 +202,13 @@ for j in cs_area.inclusive_jets(ptmin=25.0):  # 25 GeV (use 25000.0 MeV for ATLA
   all events without Python overhead.
 - **Jet area is classic-only**: `ClusterSequenceArea` and `AreaDefinition`
   operate on `PseudoJet` lists (SWIG interface); there is no awkward/columnar
-  area path. Substructure (N-subjettiness, soft drop) _is_ available on the
-  columnar cluster sequence via methods (`njettiness`,
+  area path. Soft drop, Lund declustering, and energy correlators _are_
+  available on the columnar cluster sequence via methods (e.g.
   `exclusive_jets_softdrop_grooming`) — not via classic `PseudoJet` loops.
 - **No `fastjet.contrib` submodule**: fjcontrib is compiled in but is not
   exposed as importable classes. There is no `from fastjet import contrib`, no
-  `Nsubjettiness`/`SoftDrop` class. Use the cluster-sequence methods above with
-  string axes/measure definitions.
+  `Nsubjettiness`/`SoftDrop` class, and no `njettiness` method. Use the
+  cluster-sequence substructure methods above.
 - **Units**: fastjet has no built-in unit system — ensure all four-vectors use
   the same units (usually GeV).
 - **`phi()` range**: fastjet returns phi in `[0, 2π)`; some downstream code

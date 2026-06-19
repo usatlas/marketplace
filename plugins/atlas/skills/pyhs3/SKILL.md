@@ -150,20 +150,6 @@ print(pyhs3.__version__)              # pyhs3 library version
 print(ws.metadata.hs3_version)        # HS3 schema version recorded in the workspace
 ```
 
-## HS3 vs HistFactory (HiFa) JSON
-
-| Feature                | HiFa JSON (pyhf) | HS3 JSON                    |
-| ---------------------- | ---------------- | --------------------------- |
-| Schema                 | pyhf-specific    | Standardized                |
-| Backend-agnostic       | pyhf only        | Designed for any backend    |
-| Metadata               | Minimal          | Rich (version, attribution) |
-| Custom / analytic PDFs | No               | Yes (type-tagged)           |
-| Model types            | HistFactory only | HistFactory + analytic      |
-
-HS3 represents HistFactory models with `HistFactoryDistChannel` distributions
-and dedicated modifier types, so a HistFactory model is one _kind_ of HS3 model
-rather than a foreign format that must be converted.
-
 ## Gotchas
 
 - **No `from_hifa` / `to_hifa` functions**: pyhs3 does not import pyhf and does
@@ -184,6 +170,20 @@ rather than a foreign format that must be converted.
   the file matches what your installed pyhs3 supports.
 - **JAX is optional**: `pyhs3.jaxify` / `JaxifiedGraph` require the `jax` extra
   (`pip install pyhs3[jax]`).
+
+## HS3 vs HistFactory (HiFa) JSON
+
+| Feature                | HiFa JSON (pyhf) | HS3 JSON                    |
+| ---------------------- | ---------------- | --------------------------- |
+| Schema                 | pyhf-specific    | Standardized                |
+| Backend-agnostic       | pyhf only        | Designed for any backend    |
+| Metadata               | Minimal          | Rich (version, attribution) |
+| Custom / analytic PDFs | No               | Yes (type-tagged)           |
+| Model types            | HistFactory only | HistFactory + analytic      |
+
+HS3 represents HistFactory models with `HistFactoryDistChannel` distributions
+and dedicated modifier types, so a HistFactory model is one _kind_ of HS3 model
+rather than a foreign format that must be converted.
 
 ## Interop
 
