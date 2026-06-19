@@ -61,17 +61,17 @@ TCT writes a **single TTree** (`reco` by default) for all systematics. There are
 no per-systematic TTrees. Instead, each systematically-varying branch carries a
 `%SYS%` suffix that is resolved at runtime:
 
-| Branch                              | Type            | Notes                          |
-| ----------------------------------- | --------------- | ------------------------------ |
-| `jet_pt_NOSYS`                      | `vector<float>` | Nominal jet pT (MeV)           |
-| `jet_pt_JET_JER_EffectiveNP_1__1up` | `vector<float>` | JER variation                  |
-| `jet_select_baselineJvt_%SYS%`      | `vector<char>`  | Boolean selection flag per jet |
-| `el_pt_%SYS%`                       | `vector<float>` | Electron pT (MeV)              |
-| `mu_pt_%SYS%`                       | `vector<float>` | Muon pT (MeV)                  |
-| `met_met_%SYS%`                     | `float`         | MET (MeV)                      |
-| `weight_mc`                         | `float`         | MC × filter × k-factor         |
-| `weight_pileup_%SYS%`               | `float`         | Pileup reweighting SF          |
-| `weight_bTagSF_DL1dv01_77_%SYS%`    | `float`         | Combined b-tag SF at 77% WP    |
+| Branch                                  | Type            | Notes                                                 |
+| --------------------------------------- | --------------- | ----------------------------------------------------- |
+| `jet_pt_NOSYS`                          | `vector<float>` | Nominal jet pT (MeV)                                  |
+| `jet_pt_JET_JER_EffectiveNP_1__1up`     | `vector<float>` | JER variation                                         |
+| `jet_select_baselineJvt_%SYS%`          | `vector<char>`  | Boolean selection flag per jet                        |
+| `el_pt_%SYS%`                           | `vector<float>` | Electron pT (MeV)                                     |
+| `mu_pt_%SYS%`                           | `vector<float>` | Muon pT (MeV)                                         |
+| `met_met_%SYS%`                         | `float`         | MET (MeV)                                             |
+| `weight_mc`                             | `float`         | MC × filter × k-factor                                |
+| `weight_pileup_%SYS%`                   | `float`         | Pileup reweighting SF                                 |
+| `weight_btagSF_GN2v01_Continuous_%SYS%` | `float`         | Combined b-tag SF (lowercase `btagSF`; WP per config) |
 
 **Object selection flags** (`object_select_NAME_%SYS%`) are the key to working
 with this format: objects with `select_NAME == 0` must be skipped when analysing
@@ -96,7 +96,7 @@ Key blocks and their typical YAML keys:
 | `Jets`           | Jet calibration, JVT, b-tagging                  |
 | `Photons`        | Photon calibration and identification            |
 | `Taus`           | Tau calibration and identification               |
-| `MET`            | MET reconstruction                               |
+| `MissingET`      | MET reconstruction (YAML block name `MissingET`) |
 | `OverlapRemoval` | OR between object collections                    |
 | `Trigger`        | Trigger decision + matching + scale factors      |
 | `EventSelection` | Event-level cuts and region definitions          |
@@ -152,18 +152,18 @@ must cover a **single sample** (one DSID/campaign per job).
 
 Key CLI options:
 
-| Flag                        | Default                           | Purpose                                |
-| --------------------------- | --------------------------------- | -------------------------------------- |
-| `-i`                        | required                          | Text file with input DAOD paths        |
-| `-o`                        | required                          | Output directory name                  |
-| `-t` / `--text-config`      | None                              | YAML config folder name                |
-| `-a` / `--analysis`         | `TtbarCPalgoConfigBlocksAnalysis` | Python analysis module                 |
-| `-p` / `--analysis-package` | `TopCPToolkit/configs`            | Package/path for `-t` or `-a`          |
-| `-e` / `--max-events`       | -1                                | Max events (for testing)               |
-| `--no-systematics`          | False                             | Skip systematic variations             |
-| `--no-filter`               | False                             | Save all events (keep filter decision) |
-| `--particle`                | False                             | Enable particle-level analysis         |
-| `--parton`                  | False                             | Enable parton-level analysis           |
+| Flag                        | Default                                        | Purpose                                |
+| --------------------------- | ---------------------------------------------- | -------------------------------------- |
+| `-i`                        | required                                       | Text file with input DAOD paths        |
+| `-o`                        | required                                       | Output directory name                  |
+| `-t` / `--text-config`      | None                                           | YAML config folder name                |
+| `-a` / `--analysis`         | `TopCPToolkit.TtbarCPalgoConfigBlocksAnalysis` | Python analysis module                 |
+| `-p` / `--analysis-package` | `TopCPToolkit/configs`                         | Package/path for `-t` or `-a`          |
+| `-e` / `--max-events`       | -1                                             | Max events (for testing)               |
+| `--no-systematics`          | False                                          | Skip systematic variations             |
+| `--no-filter`               | False                                          | Save all events (keep filter decision) |
+| `--particle`                | False                                          | Enable particle-level analysis         |
+| `--parton`                  | False                                          | Enable parton-level analysis           |
 
 ## Canonical YAML Config
 
@@ -206,7 +206,7 @@ Jets:
       - btagger: 'DL1dv01'
         btagWP: 'FixedCutBEff_77'
 
-MET:
+MissingET:
   - containerName: 'AnaMET'
     jets: 'AnaJets.baselineJvt'
     electrons: 'AnaElectrons.tight'
@@ -327,7 +327,8 @@ with uproot.open("output.root:reco") as tree:
     weight = (
         tree["weight_mc"].array()
         * tree[f"weight_pileup_{SYS}"].array()
-        * tree[f"weight_bTagSF_DL1dv01_FixedCutBEff_77_{SYS}"].array()
+        # b-tag SF branch: weight_btagSF_TAGGER_WP_%SYS% (lowercase btagSF)
+        * tree[f"weight_btagSF_DL1dv01_FixedCutBEff_77_{SYS}"].array()
     )
 
 # Read sum of weights from CutBookkeeper for normalisation
@@ -374,8 +375,12 @@ Key fields in `submitToGrid.py`:
   systematics. Sort offline if needed.
 - **Single sample per job**: `inputs.txt` must contain files from a single DSID
   and MC campaign. Mixing DSIDs corrupts CutBookkeeper normalisation.
-- **b-tagger naming**: Use `DL1dv01` (not the retired `MV2c10`). The full branch
-  name follows the pattern `ftag_select_TAGGER_WP_%SYS%`.
+- **b-tagger naming**: The current default tagger in the `Jets.FlavourTagging`
+  block is `GN2v01` with `btagWP: 'Continuous'` (`DL1dv01` is still selectable;
+  `MV2c10` is retired). The b-tag selection decoration follows
+  `ftag_select_TAGGER_WP_%SYS%`, and the SF weight branch is
+  `weight_btagSF_TAGGER_WP_%SYS%` (lowercase `btagSF`), e.g.
+  `weight_btagSF_GN2v01_Continuous_NOSYS`.
 - **Output tree name**: Default is `reco`. Parton-level output uses `truth`.
   Check your config's `Output.treeName` if uproot cannot find the tree.
 - **Systematic filtering**: For quick debugging runs, add to your YAML:

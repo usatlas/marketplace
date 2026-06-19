@@ -85,7 +85,7 @@ F_a(x) = (f(x, a+da) - f(x, a-da)) / 2.
 Batched computation (efficient — avoids Python loop over parameters):
 
 ```python
-npars = len(model.config.parameters)
+npars = model.config.npars  # flattened parameter count (not len(config.parameters))
 model_batch = ws.model(batch_size=npars)
 pars_batch = np.tile(pars, (npars, 1))
 

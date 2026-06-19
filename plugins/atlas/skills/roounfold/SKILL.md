@@ -17,7 +17,7 @@ description: >-
 RooUnfold provides algorithms for unfolding detector effects in measured
 distributions. Given a measured (reco-level) distribution and a response matrix
 built from MC truth-reco pairs, it returns an estimate of the true distribution
-corrected for detector resolution, acceptance, and efficiency. Seven algorithms
+corrected for detector resolution, acceptance, and efficiency. Eight algorithms
 are implemented: Bayesian iterative (D'Agostini), SVD (Tikhonov), bin-by-bin,
 TUnfold, matrix inversion, IDS, GP, and Poisson.
 

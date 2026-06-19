@@ -94,28 +94,28 @@ Required blocks: `CommonServices`, `GeneratorLevelAnalysis`, `PartonHistory`,
 
 ### Available `PartonHistory` values
 
-Pass the `histories` list under `PartonHistory:`.
+Pass the `history` value under `PartonHistory:` (key is singular).
 
-| History name      | Process                         |
-| ----------------- | ------------------------------- |
-| `Ttbar`           | ttbar production                |
-| `Ttbarbbbar`      | ttbar + bb                      |
-| `Ttbarccbar`      | ttbar + cc                      |
-| `Ttz`             | ttZ                             |
-| `Ttw`             | ttW                             |
-| `Tth`             | ttH                             |
-| `Tzq`             | tZq (single top + Z)            |
-| `The`             | the or tWH (single top + Higgs) |
-| `Wtb`             | Wtb (single top + W)            |
-| `Tqgamma`         | tqγ                             |
-| `Ttgamma`         | ttγ                             |
-| `FourTop`         | tttt                            |
-| `HWW`             | H→WW\*                          |
-| `HWW_nonresonant` | H→WW\* (Sherpa)                 |
-| `HZZ`             | H→ZZ\*                          |
-| `Zb`              | Z+b                             |
-| `Ztautau`         | Z→ττ                            |
-| `WW_nonresonant`  | WW (Sherpa)                     |
+| History name      | Process                  |
+| ----------------- | ------------------------ |
+| `Ttbar`           | ttbar production         |
+| `Ttbarbbbar`      | ttbar + bb               |
+| `Ttbarccbar`      | ttbar + cc               |
+| `Ttz`             | ttZ                      |
+| `Ttw`             | ttW                      |
+| `Tth`             | ttH                      |
+| `Tzq`             | tZq (single top + Z)     |
+| `The`             | the (single top + Higgs) |
+| `Wtb`             | Wtb (single top + W)     |
+| `Tqgamma`         | tqγ                      |
+| `Ttgamma`         | ttγ                      |
+| `FourTop`         | tttt                     |
+| `HWW`             | H→WW\*                   |
+| `HWW_nonresonant` | H→WW\* (Sherpa)          |
+| `HZZ`             | H→ZZ\*                   |
+| `Zb`              | Z+b                      |
+| `Ztautau`         | Z→ττ                     |
+| `WW_nonresonant`  | WW (Sherpa)              |
 
 Output branches follow the pattern `history_MC_resonance_variable` (no
 systematics), e.g. `Ttbar_MC_t_pt`, `Ttbar_MC_Wdecay1_from_t_pdgId`.
@@ -128,7 +128,7 @@ CommonServices: {}
 GeneratorLevelAnalysis: {}
 
 PartonHistory:
-  - histories: "Ttbar"
+  - history: "Ttbar"
 
 Output:
   treeName: "truth"

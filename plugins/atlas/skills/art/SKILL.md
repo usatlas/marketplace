@@ -33,18 +33,19 @@ release tagging until resolved.
 
 **Per-package tests**: Tests are organized by package. Each package maintains
 its own test scripts in the `test/` directory under the package source tree.
+Test scripts follow the naming convention `test_<name>_<type>.{sh,py}` where
+`<type>` is `grid` or `build`.
 
 **Test artifacts**: ART archives output files (histograms, log files, metadata)
 from each test run for comparison across nightlies. These artifacts enable
 regression detection and performance monitoring.
 
-**Test types**:
+**Test types** (the two valid `art-type` values):
 
 | Type  | Description                                      |
 | ----- | ------------------------------------------------ |
-| Grid  | Tests that run on the grid (batch-style, no TTY) |
-| Build | Tests that run during the build/CI phase         |
-| Unit  | Fast unit tests for individual components        |
+| grid  | Tests that run on the grid (batch-style, no TTY) |
+| build | Tests that run locally during the build/CI phase |
 
 ## Canonical Patterns
 
@@ -61,42 +62,50 @@ ART tools (`art.py`) are available within the ATLAS release environment after
 ### Running Tests
 
 ```bash
-# List available tests for a package
-art.py list MyPackage
+# See all art.py subcommands and their arguments
+art.py --help
 
-# Run a specific test
-art.py run MyPackage test_myworkflow.sh
+# List tests found under a package's test/ directory
+art.py list <script_directory>
 
-# Run all tests for a package
+# Run tests locally (build-type), writing artifacts to an output directory
+art.py run <script_directory> <output_directory>
+
+# Run all CTest-registered tests for a package (includes build-type ART tests)
 acm test MyPackage
-
-# Compare outputs across nightlies
-art.py compare MyPackage test_myworkflow.sh
 ```
+
+The exact positional arguments to each `art.py` subcommand are best confirmed
+with `art.py --help` / `art.py <subcommand> --help` inside the release, as they
+have varied across ART versions.
 
 ### Writing a Shell-Based Test
 
 Place test scripts in the package's `test/` directory. Name them
-`test_<testname>.sh`:
+`test_<name>_<type>.sh` where `<type>` is `grid` or `build`:
 
 ```bash
 #!/bin/bash
-# art-description: Validate reconstruction on ttbar sample
+# art-description: Build PHYS and PHYSLITE derivations from ttbar AOD
 # art-type: grid
+# art-include: main/Athena
 # art-input: mc21_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep
-# art-output: myOutput.pool.root
+# art-input-nfiles: 1
+# art-output: *.pool.root
 
 set -e
 
-Reco_tf.py \
+Derivation_tf.py --CA \
     --inputAODFile ${ArtInFile} \
-    --outputDAODFile myOutput.pool.root \
-    --reductionConf PHYS
-
-# Validate output
-art.py compare ref myOutput.pool.root
-echo "art-result: $?"
+    --outputDAODFile art.pool.root \
+    --formats PHYS PHYSLITE \
+    --maxEvents -1
+echo "art-result: $? derivation"
 ```
+
+`art-result: <code> <label>` lines are parsed to determine pass/fail for each
+step. Note `--reductionConf` (the old derivation transform option) has been
+replaced by `Derivation_tf.py --CA ... --formats <FMT> [<FMT> ...]`.
 
 ### Writing a Python-Based Test
 
@@ -120,16 +129,17 @@ sys.exit(test_config())
 
 Test scripts use special comment headers to declare metadata:
 
-| Directive          | Purpose                                   |
-| ------------------ | ----------------------------------------- |
-| `art-description`  | Human-readable test description           |
-| `art-type`         | Test category: `grid`, `build`, or `unit` |
-| `art-input`        | Input dataset name (for grid tests)       |
-| `art-output`       | Output files to archive as artifacts      |
-| `art-input-nfiles` | Number of input files to process          |
-| `art-cores`        | Number of CPU cores to request            |
-| `art-memory`       | Memory limit in MB                        |
-| `art-athena-mt`    | Number of AthenaMT threads                |
+| Directive          | Purpose                                                              |
+| ------------------ | -------------------------------------------------------------------- |
+| `art-description`  | Human-readable test description                                      |
+| `art-type`         | Test category: `grid` or `build`                                     |
+| `art-include`      | Branch/project the test runs in (e.g. `main/Athena`, or `*` for all) |
+| `art-input`        | Input dataset name (for grid tests)                                  |
+| `art-output`       | Output files to archive as artifacts (globs allowed)                 |
+| `art-input-nfiles` | Number of input files to process                                     |
+| `art-cores`        | Number of CPU cores to request                                       |
+| `art-memory`       | Memory limit in MB                                                   |
+| `art-athena-mt`    | Number of AthenaMT threads                                           |
 
 ### Checking Results on the Dashboard
 
@@ -145,11 +155,11 @@ and download test artifacts. Filter by project, branch, package, or test name.
 - **Grid constraints**: Grid-type tests cannot use interactive input, local file
   paths outside the sandbox, or network resources not available on worker nodes.
 - **Timeouts**: Long-running tests are killed after the configured timeout.
-  Break large workflows into smaller tests or request additional time via
-  `art-memory` and `art-cores`.
-- **Artifact comparison**: Use `art.py compare` to diff outputs against a
-  reference nightly. Small numerical differences are expected — set tolerances
-  appropriately.
+  Break large workflows into smaller tests. `art-memory` and `art-cores` request
+  resources but do not extend the timeout.
+- **Artifact comparison**: ART diffs archived outputs against a reference
+  nightly. Small numerical differences are expected — set tolerances
+  appropriately in the comparison step.
 - **All ATLAS energy/momentum values are in MeV**.
 
 ## Interop

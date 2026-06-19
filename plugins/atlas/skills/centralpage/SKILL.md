@@ -36,45 +36,62 @@ dataset metadata.
 
 ## Canonical Patterns
 
-### Setup and launch
+The Central Page organises samples under PMG **hashtags** arranged in levels
+(`PMGL1`–`PMGL4`; level 3 = "Baseline"). The `centralpage` command navigates
+those levels positionally — there is **no `search` subcommand**.
+
+### Setup
 
 ```bash
 setupATLAS
 lsetup centralpage
-
-centralpage                      # interactive mode
-centralpage --help              # show options
+voms-proxy-init -voms atlas      # listing/querying requires a valid grid proxy
+centralpage --help
 ```
 
-### Search for samples
+### List available hashtags
+
+A scope is required (`centralpage -l` alone errors with "Scope required"):
 
 ```bash
-# Search by process name
-centralpage search "Ztautau"
-
-# Search by generator
-centralpage search "Sherpa ttbar"
-
-# Filter by MC campaign
-centralpage search "mc23 Powheg Zjets"
+centralpage -s <scope> -l           # list hashtags for the scope
+centralpage -s <scope> -P 3 -l      # only the level-3 (Baseline) hashtags
 ```
 
-### Common queries
+### Browse samples by hashtag level
 
-- Find all MC samples for a specific process (e.g. ttbar, diboson, Zjets)
-- Find samples matching a specific generator (Powheg, Sherpa, MadGraph)
-- Find samples by MC campaign (mc20, mc21, mc23)
-- Look up cross-sections and filter efficiencies for a DSID
+Pass hashtags positionally as `L1 L2 L3 L4` to drill down to the samples:
+
+```bash
+centralpage -s <scope> <L1> <L2> <L3> <L4>
+```
+
+Add detail to the output:
+
+- `-m` / `--metadata` — also print dataset metadata (cross-section, filter eff.)
+- `-a` / `--aod` — also print AODs (standard tags) for each sample
+- `-p` / `--phys` — also print DAOD_PHYS containers
+- `-L` / `--physlite` — also print DAOD_PHYSLITE containers
+- `-f <fmt>` / `--outformat` — restrict to a single output format
+- `-t` / `--table` — emit a LaTeX table
+
+### Reverse lookup — find the hashtags for a known dataset
+
+```bash
+centralpage -d <dataset_name>
+```
 
 ### Verify cross-sections
 
-Always cross-check sample cross-sections against the PMG cross-section database
-before using them in an analysis. The centralpage tool provides direct access to
-these values, but verify against the latest PMG recommendations for your
-analysis.
+The metadata shown with `-m` comes from the PMG database, but always re-check
+cross-sections, k-factors, and filter efficiencies against the latest PMG
+recommendations before using them in an analysis.
 
 ## Gotchas
 
+- **Hashtag levels, not free text**: the CLI navigates PMG hashtags positionally
+  (`L1 L2 L3 L4`) or by `-d <dataset>`; there is no free-text `search` command.
+  Use `-s <scope> -l` to discover the valid hashtags first.
 - **Grid credentials required**: Full sample listing requires valid ATLAS grid
   credentials (`voms-proxy-init --voms atlas`).
 - **Campaign coverage varies**: Not all MC campaigns have the same processes

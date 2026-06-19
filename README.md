@@ -69,7 +69,7 @@ software orientation.
 | `decaylanguage`         | Working with particle decay chains in Python                                    |
 | `eiclient`              | Working with the ATLAS Event Index                                              |
 | `fastframes`            | You need a supported RDataFrame-based framework to process CP-algorithm NTuples |
-| `fastjet`               | Running jet clustering in Python with fastjet or pyjet                          |
+| `fastjet`               | Running jet clustering in Python with the Scikit-HEP fastjet package            |
 | `fsspec-xrootd`         | Accessing ROOT files on EOS, WLCG grid storage, or any XRootD endpoint from     |
 | `hepunits`              | Writing unit-safe HEP code in Python                                            |
 | `hist`                  | Creating, filling, slicing, or plotting histograms with the scikit-hep hist     |

@@ -1,23 +1,29 @@
 ---
 name: fastjet
 description: >-
-  Use when running jet clustering in Python with fastjet or pyjet: calling
-  anti-kt or Cambridge/Aachen algorithms on particle four-vectors, accessing jet
-  constituents, computing jet substructure variables (tau_N, softdrop),
-  clustering jets from generator-level events read with pyhepmc or pylhe, or
-  processing many events over awkward arrays with the array-oriented (columnar)
-  interface to avoid slow Python loops.
+  Use when running jet clustering in Python with the Scikit-HEP fastjet package
+  (or migrating from the deprecated pyjet): calling anti-kt or Cambridge/Aachen
+  algorithms on particle four-vectors, accessing jet constituents, computing jet
+  substructure variables (N-subjettiness, soft drop), clustering jets from
+  generator-level events read with pyhepmc or pylhe, or processing many events
+  over awkward arrays with the array-oriented (columnar) interface to avoid slow
+  Python loops.
 ---
 
 # fastjet
 
 ## Overview
 
-fastjet is the standard jet-finding library in HEP. The Python bindings
-(`fastjet` PyPI package, also known as `pyjet` in older versions) expose the
-anti-kt, Cambridge/Aachen, and kt clustering algorithms. In ATLAS physics
-analyses the main use is truth-level jet clustering for generator studies or jet
-substructure calculations on particle-level events.
+fastjet is the standard jet-finding library in HEP. The Scikit-HEP `fastjet`
+PyPI package provides official Python bindings to the complete FastJet C++
+library and Awkward Array. It exposes the anti-kt, Cambridge/Aachen, and kt
+clustering algorithms. In ATLAS physics analyses the main use is truth-level jet
+clustering for generator studies or jet substructure calculations on
+particle-level events.
+
+The older `pyjet` package is a **separate, archived, deprecated** project (it
+wrapped only `fjcore` over NumPy structured arrays) — it is _not_ an older name
+for `fastjet`. Use `fastjet` for all new work.
 
 The library provides two interfaces: the **array-oriented (columnar)
 interface**, which accepts `awkward` arrays directly and handles many events at
@@ -155,26 +161,34 @@ print(ak.sum(constituents.pt, axis=-1))
 
 ### Jet substructure: N-subjettiness
 
+fjcontrib is compiled into the `fastjet` extension but is **not** exposed as a
+`fastjet.contrib` submodule with `Nsubjettiness`/`SoftDrop` classes. Instead it
+is reached through methods on the (columnar) cluster sequence, with the contrib
+axes/measure definitions passed as strings:
+
 ```python
-import fastjet as fj
+import fastjet
+import awkward as ak
 
-# requires fastjet contrib (fjcontrib)
-from fastjet import contrib
+cluster = fastjet.ClusterSequence(events, jetdef)
 
-tau_calc = contrib.Nsubjettiness(1, contrib.OnePass_KT_Axes(),
-                                  contrib.UnnormalizedMeasure(beta=1.0))
-
-for jet in jets:
-    tau1 = tau_calc(jet)
+# tau_N for N in njets, computed per jet; returns an ak.Array
+tau = cluster.njettiness(
+    njets=[1, 2, 3],
+    measure_definition="NormalizedMeasure",   # or "UnnormalizedMeasure"
+    axes_definition="OnePass_KT_Axes",
+    beta=1.0,
+    R0=0.8,
+)
 ```
 
 ### Soft drop grooming
 
 ```python
-from fastjet import contrib
-
-sd = contrib.SoftDrop(beta=0.0, zcut=0.1, R=1.0)
-groomed_jets = [sd(j) for j in jets]
+# kwarg is symmetry_cut (the z_cut), not zcut
+groomed = cluster.exclusive_jets_softdrop_grooming(
+    njets=1, beta=0.0, symmetry_cut=0.1, R0=0.8
+)
 ```
 
 ### Jet area (for pileup)
@@ -194,20 +208,25 @@ for j in cs_area.inclusive_jets(ptmin=25.0):  # 25 GeV (use 25000.0 MeV for ATLA
   interpreter on every particle and every event. Pass an `ak.Array` to
   `ClusterSequence` directly — this pushes the conversion into C++ and processes
   all events without Python overhead.
-- **Classic interface is required for `ClusterSequenceArea` and fjcontrib**: The
-  columnar interface supports only `ClusterSequence`. Jet area computation and
-  substructure tools (`Nsubjettiness`, `SoftDrop`) require the classic
-  `PseudoJet`-based path.
+- **Jet area is classic-only**: `ClusterSequenceArea` and `AreaDefinition`
+  operate on `PseudoJet` lists (SWIG interface); there is no awkward/columnar
+  area path. Substructure (N-subjettiness, soft drop) _is_ available on the
+  columnar cluster sequence via methods (`njettiness`,
+  `exclusive_jets_softdrop_grooming`) — not via classic `PseudoJet` loops.
+- **No `fastjet.contrib` submodule**: fjcontrib is compiled in but is not
+  exposed as importable classes. There is no `from fastjet import contrib`, no
+  `Nsubjettiness`/`SoftDrop` class. Use the cluster-sequence methods above with
+  string axes/measure definitions.
 - **Units**: fastjet has no built-in unit system — ensure all four-vectors use
   the same units (usually GeV).
 - **`phi()` range**: fastjet returns phi in `[0, 2π)`; some downstream code
-  expects `(-π, π]`. Use `fj.PseudoJet.phi_std()` or subtract `2π` if needed.
-- **pyjet vs fastjet**: the older `pyjet` package uses `numpy` structured
-  arrays; the newer `fastjet` package (from Scikit-HEP) uses `PseudoJet` objects
-  and is the recommended path.
-- **fjcontrib availability**: substructure tools (`Nsubjettiness`, `SoftDrop`)
-  require the `fastjet` package built with contrib support, or a separate
-  `fjcontrib` install.
+  expects `(-π, π]`. Use `PseudoJet.phi_std()` (range `(-π, π]`) or subtract
+  `2π` if needed.
+- **pyjet is deprecated**: the older `pyjet` package (archived, NumPy structured
+  arrays, `fjcore` only) is _not_ an older name for `fastjet`. Migrate to the
+  Scikit-HEP `fastjet` package.
+- **`inclusive_jets` kwarg differs by interface**: columnar uses `min_pt=`;
+  classic (`PseudoJet`-based) uses `ptmin=`.
 - **`with_name="Momentum4D"` required for pt/eta/phi/M input**: Without
   `vector.register_awkward()` and `with_name="Momentum4D"`, the columnar
   interface only auto-detects `(px, py, pz, E)` field names.
@@ -225,4 +244,5 @@ for j in cs_area.inclusive_jets(ptmin=25.0):  # 25 GeV (use 25000.0 MeV for ATLA
 
 ## Docs
 
-https://fastjet.fr/ Python bindings: https://scikit-hep.org/fastjet/
+Python bindings: https://fastjet.readthedocs.io/ — FastJet C++:
+https://fastjet.fr/

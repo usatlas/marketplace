@@ -122,7 +122,11 @@ mjj = (pairs.j1 + pairs.j2).mass / 1000  # MeV → GeV if NTuple stores MeV
 **b-jet selection (DL1dv01 at 77% WP)**:
 
 ```python
-bjets = jets[jets["DL1dv01_pb"] / (jets["DL1dv01_pu"] * 0.018 + jets["DL1dv01_pc"] * 0.982) > 2.456]
+# DL1d discriminant is a log-likelihood ratio: D_b = log(p_b / (f_c*p_c + (1-f_c)*p_u)), f_c = 0.018.
+# Compare D_b to the WP cut (the 77% WP value comes from the CDI/calibration file).
+import numpy as np
+db = np.log(jets["DL1dv01_pb"] / (0.018 * jets["DL1dv01_pc"] + 0.982 * jets["DL1dv01_pu"]))
+bjets = jets[db > 2.456]
 ```
 
 **Weighted histogram fill**:

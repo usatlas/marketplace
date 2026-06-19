@@ -301,14 +301,19 @@ note that PHYSLITE has no uncalibrated objects.
 
 ## xAOD Object Names (PHYSLITE)
 
-| Object    | FuncADL accessor         |
-| --------- | ------------------------ |
-| Jets      | `e.Jets()`               |
-| Electrons | `e.Electrons()`          |
-| Muons     | `e.Muons()`              |
-| Taus      | `e.TauJets()`            |
-| Photons   | `e.Photons()`            |
-| MET       | `e.MissingETContainer()` |
+| Object    | FuncADL accessor        |
+| --------- | ----------------------- |
+| Jets      | `e.Jets()`              |
+| Electrons | `e.Electrons()`         |
+| Muons     | `e.Muons()`             |
+| Taus      | `e.TauJets()`           |
+| Photons   | `e.Photons()`           |
+| MET       | `e.MissingET().First()` |
+
+`MissingET` is stored as a container holding a single object, so the accessor
+`e.MissingET()` returns a sequence — call `.First()` to get the term, then a
+method such as `.met()` (MeV): `e.MissingET().First().met() / 1000.0`. There is
+no `e.MissingETContainer()` accessor.
 
 ## Worked Example — UprootRaw Histogram
 
@@ -377,6 +382,9 @@ plt.show()
   `deliver` calls waste round trips.
 - **No awkward in FuncADL queries**: Use `Select` / `Where` instead — awkward
   functions are not available inside the lambda DSL.
+- **Use `Dataset=` on `Sample`, not `RucioDID=`**: the `Sample.RucioDID` field
+  is deprecated in ServiceX 3.x. Pass a dataset object via
+  `Dataset=dataset.Rucio(...)`.
 - **PHYSLITE vs PHYS collection names differ**: Using the wrong collection name
   (e.g. `AntiKt4EMPFlowJets` on PHYSLITE) returns empty results silently.
 - **FuncADL requires `func_adl_servicex_xaodr25`**: Install separately; not
@@ -409,7 +417,7 @@ plt.show()
 
 ## Docs
 
-- ServiceX client: https://servicex.readthedocs.io/en/latest/
-- FuncADL xAOD R25: https://github.com/iris-hep/func_adl_servicex_xaodr25
-- tryservicex.org tutorial: https://tryservicex.org
-- servicex-analysis-utils: https://github.com/iris-hep/servicex_analysis_utils
+- ServiceX docs / tutorial: https://tryservicex.org
+- ServiceX frontend source: https://github.com/ssl-hep/ServiceX_frontend
+- FuncADL xAOD R25 package: https://pypi.org/project/func-adl-servicex-xaodr25/
+- servicex-analysis-utils: https://github.com/ssl-hep/servicex_analysis_utils

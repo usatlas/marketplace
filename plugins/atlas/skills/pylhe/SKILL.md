@@ -19,9 +19,10 @@ pylhe reads and writes Les Houches Event (LHE) files — the standard XML-like
 ASCII format for parton-level events produced by matrix-element generators such
 as MadGraph5_aMC@NLO, Powheg-BOX, Sherpa, Pythia, and Whizard. Since v1.0.0 the
 primary interface is the `LHEFile` dataclass, which exposes the init block and
-an iterable of events as typed dataclass attributes. All older module-level
-functions (`read_lhe`, `read_lhe_init`, `to_awkward`, …) are deprecated — they
-still work but emit `DeprecationWarning`.
+an iterable of events as typed dataclass attributes. The older module-level read
+functions (`read_lhe`, `read_lhe_init`, `read_num_events`,
+`read_lhe_with_attributes`, `read_lhe_file`) were **removed** in v1.0.0 — they
+no longer exist. `to_awkward` is still a module-level function and is current.
 
 ## When to Use
 
@@ -36,27 +37,28 @@ still work but emit `DeprecationWarning`.
 
 ## Key Concepts
 
-| Concept                              | Notes                                                    |
-| ------------------------------------ | -------------------------------------------------------- |
-| `LHEFile.fromfile(path)`             | Load file; returns `LHEFile` (lazy generator)            |
-| `LHEFile.frombuffer(fileobj)`        | Same, from an already-open file object                   |
-| `LHEFile.fromstring(text)`           | Parse an LHE string directly                             |
-| `LHEFile.count_events(path)`         | Counts events without loading them                       |
-| `lhef.init`                          | `LHEInit` dataclass (beam info, xsec, groups)            |
-| `lhef.events`                        | Iterator of `LHEEvent` objects                           |
-| `lhef.tofile(path)` / `lhef.tolhe()` | Write back to file or to a string                        |
-| `LHEEvent.eventinfo`                 | `LHEEventInfo` (nparticles, pid, weight, …)              |
-| `LHEEvent.particles`                 | List of `LHEParticle` objects                            |
-| `LHEEvent.weights`                   | Dict `{weight_id: float}` (needs `with_attributes=True`) |
-| `LHEEvent.graph`                     | `graphviz.Digraph` of the event topology                 |
-| `LHEParticle.status`                 | -1 = incoming, +1 = outgoing, +2 = intermediate          |
-| `LHEParticle.id`                     | PDG ID                                                   |
-| `LHEParticle.px/py/pz/e/m`           | Four-momentum + mass (GeV)                               |
-| `LHEParticle.event`                  | Back-reference to the parent `LHEEvent`                  |
-| `LHEInit.initInfo`                   | `LHEInitInfo` (beam PDG IDs, energies, PDFs)             |
-| `LHEInit.procInfo`                   | List of `LHEProcInfo` (xSection, error, …)               |
-| `LHEInit.weightgroup`                | Dict of `LHEWeightGroup` (reweighting groups)            |
-| `pylhe.to_awkward(events)`           | Converts event iterator to an awkward array              |
+| Concept                              | Notes                                                      |
+| ------------------------------------ | ---------------------------------------------------------- |
+| `LHEFile.fromfile(path)`             | Load file; returns `LHEFile` (lazy generator)              |
+| `LHEFile.frombuffer(fileobj)`        | Same, from an already-open file object                     |
+| `LHEFile.fromstring(text)`           | Parse an LHE string directly                               |
+| `LHEFile.count_events(path)`         | Counts events without loading them                         |
+| `lhef.init`                          | `LHEInit` dataclass (beam info, xsec, groups)              |
+| `lhef.events`                        | Iterator of `LHEEvent` objects                             |
+| `lhef.tofile(path)` / `lhef.tolhe()` | Write back to file or to a string                          |
+| `LHEEvent.eventinfo`                 | `LHEEventInfo` (nparticles, pid, weight, …)                |
+| `LHEEvent.particles`                 | List of `LHEParticle` objects                              |
+| `LHEEvent.weights`                   | Dict `{weight_id: float}` (needs `with_attributes=True`)   |
+| `LHEEvent.graph`                     | `graphviz.Digraph` of the event topology                   |
+| `LHEParticle.status`                 | -1 = incoming, +1 = outgoing, +2 = intermediate            |
+| `LHEParticle.id`                     | PDG ID                                                     |
+| `LHEParticle.px/py/pz/e/m`           | Four-momentum + mass (GeV)                                 |
+| `LHEParticle.event`                  | Deprecated back-ref; use `LHEEvent.mothers(particle)`      |
+| `LHEInit.initInfo`                   | `LHEInitInfo` (beam PDG IDs, energies, PDFs)               |
+| `LHEInit.procInfo`                   | List of `LHEProcInfo` (xSection, error, …)                 |
+| `LHEInit.generators`                 | List of `LHEGenerator` (generator metadata)                |
+| `LHEFile.header.initrwgt`            | `LHEInitRWGT`: reweighting-group definitions (file header) |
+| `pylhe.to_awkward(events)`           | Converts event iterator to an awkward array                |
 
 ## Canonical Patterns
 
@@ -172,13 +174,16 @@ event.graph.render("event_topology", format="pdf", view=True, cleanup=True)
   `LHEFile.fromfile`.
 - **LHE does not contain shower/hadronization**: particles are parton-level — no
   hadrons, no pile-up.
-- **Deprecated API**: `pylhe.read_lhe()`, `pylhe.read_lhe_init()`,
+- **Removed API**: `pylhe.read_lhe()`, `pylhe.read_lhe_init()`,
   `pylhe.read_lhe_with_attributes()`, `pylhe.read_num_events()`, and
-  `pylhe.read_lhe_file()` all emit `DeprecationWarning`. Use `LHEFile.fromfile`
-  instead.
+  `pylhe.read_lhe_file()` were removed in v1.0.0 and now raise `AttributeError`.
+  Use `LHEFile.fromfile(path).events`, `LHEFile.fromfile(path).init`, and
+  `LHEFile.count_events(path)` respectively.
+- **`LHEParticle.event` is deprecated**: the per-particle back-reference emits a
+  `DeprecationWarning`; use `LHEEvent.mothers(particle)` instead.
 - **`with_attributes=True`** (the default) is required to populate
-  `event.weights`; if you used the old `read_lhe()` (which set
-  `with_attributes=False`) event weights will be empty dicts.
+  `event.weights`; pass `with_attributes=False` and event weights will be empty
+  dicts.
 - **Awkward structure**: momentum fields are nested under
   `arr.particles.vector`, not directly on `arr.particles`. Use
   `arr.particles.vector.px`, etc., or the vector shorthand (`.pt`, `.eta`,

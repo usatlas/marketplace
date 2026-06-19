@@ -124,8 +124,9 @@ no_overflow = h[1:-1].sum()  # sum without overflow bins
 ## Interop
 
 - **awkward**: `ak.to_numpy(ak.flatten(arr))` → feed directly to `.fill()`
-- **pyhf / cabinetry**: `cabinetry.contrib.histogram_manipulation` converts
-  `Hist` objects to workspace format
+- **pyhf / cabinetry**: build templates and a workspace with
+  `cabinetry.templates.build()` / `cabinetry.workspace.build()`; cabinetry reads
+  ROOT histograms via its `contrib.histogram_reader`
 - **mplhep**: `mplhep.style.use("ATLAS")` sets ATLAS plot style; all `histplot`
   calls accept `Hist` natively
 - **numpy**: `h.values()` returns a numpy array; `h.axes[i].centers` gives bin

@@ -144,8 +144,9 @@ with pyhepmc.open("output.hepmc3", "w", precision=6) as out:
             out.write(event)
 ```
 
-`precision` controls the number of significant digits (default is full double).
-Reducing it (e.g. `precision=4`) can significantly reduce file size.
+`precision` controls the number of significant digits (valid range 2–24; default
+`None` = full double precision). Reducing it (e.g. `precision=4`) can
+significantly reduce file size.
 
 ### Access named weights (scale / PDF variations)
 
