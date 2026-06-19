@@ -9,8 +9,12 @@ version = "0.1.0"
 pre-commit = { cmd = "pre-commit run --all-files", description = "Run pre-commit hooks on all files" }
 sync-skills = { cmd = "python scripts/sync_skills.py && (pre-commit run prettier --files README.md &> /dev/null || true)", description = "Sync README with current plugins/skills and reformat" }
 lint-skills = { cmd = "python scripts/lint_skills.py", description = "Check SKILL.md section ordering" }
-check-skills = { cmd = "(pre-commit run -a || true) && git diff --exit-code", depends-on = [ "lint-skills", "sync-skills" ], description = "CI: lint skills and verify README is up to date" }
+validate-skills = { cmd = "python scripts/validate_skills.py", description = "Validate every SKILL.md against the Agent Skills spec (skills-ref)" }
+check-skills = { cmd = "(pre-commit run -a || true) && git diff --exit-code", depends-on = [ "lint-skills", "validate-skills", "sync-skills" ], description = "CI: validate/lint skills and verify README is up to date" }
 
 [dependencies]
 pre-commit = ">=4.5.1,<5"
 python = ">=3.9"
+
+[pypi-dependencies]
+skills-ref = ">=0.1.1"
