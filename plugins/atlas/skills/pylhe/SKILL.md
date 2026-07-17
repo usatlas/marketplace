@@ -55,6 +55,7 @@ to identify a file.
 | `LHEEvent.particles`                       | List of `LHEParticle` objects                              |
 | `LHEEvent.mothers(particle)`               | Get mothers of a particle in this event                    |
 | `LHEEvent.weights`                         | Dict `{weight_id: float}` (needs `with_attributes=True`)   |
+| `LHEEvent.scales`                          | Dict `{scale_id: float}` (needs `with_attributes=True`)    |
 | `LHEEvent.graph`                           | `graphviz.Digraph` of the event topology                   |
 | `LHEParticle.status`                       | -1 = incoming, +1 = outgoing, +2 = intermediate            |
 | `LHEParticle.id`                           | PDG ID                                                     |
