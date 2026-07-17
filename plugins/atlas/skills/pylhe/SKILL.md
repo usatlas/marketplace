@@ -65,6 +65,17 @@ to identify a file.
 | `LHEInit.generators`                       | List of `LHEGenerator` (generator metadata)                |
 | `LHEFile.header.initrwgt`                  | `LHEInitRWGT`: reweighting-group definitions (file header) |
 | `pylhe.to_awkward(events)`                 | Converts event iterator to an awkward array                |
+| `pylhe.DEFAULT_FORMAT`                     | XML, RWGT weights, plain                                   |
+| `pylhe.GZ_FORMAT`                          | XML, RWGT weights, gzip compression                        |
+| `pylhe.RWGT_FORMAT`                        | XML, RWGT weights block, plain                             |
+| `pylhe.WEIGHTS_FORMAT`                     | XML, WEIGHTS weights block, plain                          |
+| `pylhe.RWGT_GZ_FORMAT`                     | XML, RWGT weights block, gzip compression                  |
+| `pylhe.WEIGHTS_GZ_FORMAT`                  | XML, WEIGHTS weights block,  gzip compression              |
+| `pylhe.NO_WEIGHTS_FORMAT`                  | XML, no weights block, plain                               |
+| `pylhe.HDF5_FORMAT`                        | Output format for HDF5-based LHEH5 files                   |
+| `pylhe.HDF5_GZ_FORMAT`                     | LHEH5, gzip-compressed, shuffled HDF5 datasets             |
+
+
 
 ## Canonical Patterns
 
@@ -198,6 +209,10 @@ event.graph.render("event_topology", format="pdf", view=True, cleanup=True)
   materialise into a list, or wrap with `list()`.
 - **Status codes vary by generator**: v1-era generators sometimes use status=0
   for all particles; v3 files follow the standard (-1/+1/+2).
+- `write()`, `tolhe()`, and `tofile()` now use format objects (`LHEXMLFormat` /
+  `LHEHDF5Format`) and `LHEWeightFormat` instead of the old `rwgt`, `weights`,
+  and `gz` booleans.
+
 
 ## Interop
 
