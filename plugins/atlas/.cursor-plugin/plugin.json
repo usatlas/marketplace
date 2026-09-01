@@ -2,7 +2,7 @@
   "name": "atlas",
   "displayName": "ATLAS",
   "description": "ATLAS analysis plugin: grid/catalog tools (Rucio, AMI, ATLAS Open Data), statistics (pyhf, cabinetry, HistFitter, TRExFitter, RooUnfold, pyhs3), analysis frameworks (TopCPToolkit, FastFrames, ServiceX), Scikit-HEP tools, and ATLAS software orientation.",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "author": {
     "name": "USATLAS"
   },

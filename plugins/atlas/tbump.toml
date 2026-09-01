@@ -1,7 +1,7 @@
 github_url = "https://github.com/usatlas/marketplace"
 
 [version]
-current = "1.0.0"
+current = "2.0.0"
 
 regex = '''
   (?P<major>\d+)
@@ -15,7 +15,7 @@ regex = '''
   '''
 
 [git]
-message_template = "chore(atlas): bump version 1.0.0 → {new_version}"
+message_template = "chore(atlas): bump version 2.0.0 → {new_version}"
 tag_template = "atlas-v{new_version}"
 
 [[file]]
