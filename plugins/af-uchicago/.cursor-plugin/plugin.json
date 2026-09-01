@@ -1,7 +1,7 @@
 {
   "name": "af-uchicago",
   "displayName": "UChicago ATLAS Analysis Facility",
-  "description": "Skills for the UChicago ATLAS Analysis Facility (af.uchicago.edu): HTCondor batch jobs, JupyterLab, XCache, Rucio, ServiceX, Coffea Casa, and Triton ML inference.",
+  "description": "Skills for the UChicago ATLAS Analysis Facility (af.uchicago.edu): HTCondor batch jobs, JupyterLab, XCache, Rucio, ServiceX, Coffea Casa, Triton ML inference, and the AF MCP Platform.",
   "version": "1.0.0",
   "author": {
     "name": "USATLAS"
@@ -23,7 +23,8 @@
     "ServiceX",
     "Coffea Casa",
     "Triton",
-    "GPU"
+    "GPU",
+    "MCP"
   ],
   "skills": "./skills/"
 }

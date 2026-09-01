@@ -1,0 +1,35 @@
+github_url = "https://github.com/usatlas/marketplace"
+
+[version]
+current = "0.1.0"
+
+regex = '''
+  (?P<major>\d+)
+  \.
+  (?P<minor>\d+)
+  \.
+  (?P<patch>\d+)
+  (rc
+    (?P<candidate>\d+)
+  )?
+  '''
+
+[git]
+message_template = "chore: bump version 0.1.0 → {new_version}"
+tag_template = "v{new_version}"
+
+[[file]]
+src = "tbump.toml"
+search = "bump version {current_version} → "
+
+[[file]]
+src = "pixi.toml"
+search = 'version = "{current_version}"'
+
+[[file]]
+src = ".claude-plugin/marketplace.json"
+search = '"version": "{current_version}"'
+
+[[field]]
+name = "candidate"
+default = ""

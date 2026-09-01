@@ -39,6 +39,8 @@ Triton). It is part of the MWT2 Tier-2 center supporting US ATLAS computing.
 | Coffea Casa       | `https://coffea.af.uchicago.edu`                         |
 | Triton gRPC       | `triton-traefik.triton.svc.cluster.local:8001`           |
 | Triton S3         | `s3://triton-models/<username>/` at `s3.af.uchicago.edu` |
+| MCP Endpoint      | `https://mcp.af.uchicago.edu/mcp`                        |
+| MCP Portal        | `https://mcp-portal.af.uchicago.edu/`                    |
 | Support Email     | `atlas-us-chicago-tier3-admins@cern.ch`                  |
 | Discourse         | `atlas-talk.sdcc.bnl.gov`                                |
 | Home Directory    | `/home/<username>` (100GB quota, backed up weekly)       |
@@ -343,6 +345,40 @@ Connect local VSCode to JupyterLab kernels:
 3. Select "Existing Jupyter Server" and enter the JupyterLab URL
 4. Authenticate with ATLAS credentials
 5. Select remote kernel from UChicago AF JupyterLab
+
+## MCP Platform
+
+UChicago AF runs the AF MCP Platform, a credential-brokered
+[Model Context Protocol](https://modelcontextprotocol.io/) gateway that exposes
+Rucio, AMI, HTCondor, JupyterLab, and AF filesystem tools to LLM clients such as
+Claude Code and Claude Desktop.
+
+- **MCP endpoint**: `https://mcp.af.uchicago.edu/mcp` — point an MCP-over-HTTP
+  client at this URL. Most clients auto-discover the broker's OAuth endpoints
+  and open a browser to log in; no manual token setup is needed.
+- **Portal**: `https://mcp-portal.af.uchicago.edu/` — web UI for the platform.
+- **Personal Access Tokens**: for clients that cannot do the browser-based OAuth
+  flow, generate a static bearer token at
+  `https://mcp-portal.af.uchicago.edu/tokens/`.
+- **Identities**: link your ATLAS/CERN identity to your AF account at
+  `https://mcp-portal.af.uchicago.edu/identities/` — required before the broker
+  can mint per-user Rucio/AMI/x509 credentials on your behalf.
+
+The `atlas-af` server's tools are namespaced by backend: `af_*` (identity —
+`af_whoami`, `af_list_identities`, `af_link_identity`, `af_usage`),
+`rucio-atlas_*` (e.g. `rucio-atlas_rucio_list_dids`,
+`rucio-atlas_rucio_get_did`, `rucio-atlas_rucio_list_files`), `ami_*` (e.g.
+`ami_search_by_hashtags`, `ami_get_dataset_hashtags`, `ami_get_physics_params`,
+`ami_get_ami_tag`), `jlab_*` (e.g. `jlab_nb_list_files`, `jlab_nb_list_kernels`,
+`jlab_nb_use_notebook`), and `fs_*` (e.g. `fs_list`, `fs_stat`, `fs_read`).
+Check `/mcp` for the current full list — it changes as backends are added.
+
+This overlaps with domains the `atlas` plugin also covers via CLI (Rucio in the
+setupatlas, eiclient, panda, servicex, and centralpage skills; AMI/pyAMI in
+setupatlas and centralpage). When both plugins are installed, prefer the
+`rucio-atlas_*`/`ami_*` MCP tools above over those skills' CLI commands when
+available — the MCP path needs no `lsetup`/VOMS-proxy setup, but only works once
+the user has linked their identity (check with `af_whoami`).
 
 ## Hardware Summary
 

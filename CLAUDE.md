@@ -7,7 +7,7 @@ plugins/
   <plugin-name>/
     .claude-plugin/plugin.json   # Claude Code plugin manifest
     .cursor-plugin/plugin.json   # Cursor plugin manifest
-    .mcp.json                    # MCP server config (atlas only)
+    .mcp.json                    # MCP server config (af-uchicago only)
     agents/<name>.md             # subagent definitions
     skills/<name>/SKILL.md       # skill definitions
 .claude-plugin/marketplace.json  # Claude Code registry of all plugins
@@ -210,31 +210,51 @@ directly with `pixi run agentskills validate plugins/<plugin>/skills/<name>`.
 `validate-skills` complements `pixi run lint-skills` (this repo's section
 ordering) and is included in `pixi run check-skills` alongside the README sync.
 
-## MCP servers (atlas plugin only)
+## Version bumping
 
-Configured in `plugins/atlas/.mcp.json`. First-time setup:
+Versions are independent per component, each with its own
+[`tbump`](https://github.com/dmerejkowsky/tbump) config:
 
-```bash
-rucio-mcp init atlas                # one-time: writes ~/.config/rucio-mcp/rucio.cfg
-export RUCIO_ACCOUNT=yourusername   # required, no default
-pixi exec --spec rucio-mcp sh -c 'voms-proxy-init -voms atlas'  # valid proxy required
-```
+- **Top level** (`tbump.toml`): bumps `pixi.toml`'s workspace version and
+  `.claude-plugin/marketplace.json`'s `metadata.version`.
 
-Health check: `RUCIO_ACCOUNT=yourusername rucio-mcp ping`
+  ```bash
+  pixi run tbump <new_version>
+  ```
 
-If ping fails with a CRL expiry error, refresh the CRLs:
+- **Per plugin** (`plugins/<plugin>/tbump.toml`): bumps that plugin's own
+  `.claude-plugin/plugin.json` and `.cursor-plugin/plugin.json` `version` fields
+  only — it does not touch the top-level files above, or the per-plugin
+  `"version"` entries inside `marketplace.json`'s `plugins` array (update those
+  by hand if they need to track the bump).
 
-```bash
-pixi exec --spec rucio-mcp sh -c '$X509_CERT_DIR/refresh_crls.sh'
-```
+  ```bash
+  pixi run tbump-af-bnl <new_version>
+  pixi run tbump-af-uchicago <new_version>
+  pixi run tbump-atlas <new_version>
+  pixi run tbump-hep-python-tools <new_version>
+  ```
 
-The three servers:
+Each `tbump` invocation prints a diff and prompts for confirmation before
+committing, tagging (`v<version>` at the top level, `<plugin>-v<version>` per
+plugin), and pushing — pass `--dry-run` to preview only.
 
-| Key              | Launch                                                           | Notes                     |
-| ---------------- | ---------------------------------------------------------------- | ------------------------- |
-| `rucio`          | `pixi exec --spec rucio-mcp sh -c 'rucio-mcp serve --read-only'` | RUCIO_ACCOUNT must be set |
-| `ami`            | `pixi exec --spec ami-mcp sh -c 'ami-mcp serve'`                 | no extra env vars         |
-| `atlasopenmagic` | `uvx atlasopenmagic-mcp serve`                                   | no extra env vars         |
+## MCP servers (af-uchicago plugin only)
+
+Configured in `plugins/af-uchicago/.mcp.json` as a single HTTP server pointing
+at the AF MCP Platform, a credential-brokered gateway that exposes Rucio, AMI,
+HTCondor, JupyterLab, and AF filesystem tools:
+
+| Key        | URL                               | Notes                                            |
+| ---------- | --------------------------------- | ------------------------------------------------ |
+| `atlas-af` | `https://mcp.af.uchicago.edu/mcp` | OAuth-discovered per-user auth, no local process |
+
+Most MCP clients (Claude Code, Claude Desktop) auto-discover the broker's OAuth
+endpoints on first use and open a browser to log in — no local process or env
+vars to configure. Clients that cannot do the browser-based flow mint a static
+Personal Access Token at `https://mcp-portal.af.uchicago.edu/tokens/`. Linking
+an ATLAS/CERN identity at `https://mcp-portal.af.uchicago.edu/identities/` is
+required before the broker can mint per-user Rucio/AMI/x509 credentials.
 
 ## ATLAS software docs
 

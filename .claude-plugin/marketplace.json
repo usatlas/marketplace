@@ -5,7 +5,8 @@
     "url": "https://github.com/usatlas"
   },
   "metadata": {
-    "description": "Claude Code plugins for ATLAS physics analysis at US ATLAS analysis facilities."
+    "description": "Claude Code plugins for ATLAS physics analysis at US ATLAS analysis facilities.",
+    "version": "0.1.0"
   },
   "plugins": [
     {
@@ -30,7 +31,7 @@
     },
     {
       "name": "af-uchicago",
-      "description": "Skills for the UChicago ATLAS Analysis Facility (af.uchicago.edu): HTCondor batch jobs, JupyterLab, XCache, Rucio, ServiceX, Coffea Casa, and Triton ML inference.",
+      "description": "Skills for the UChicago ATLAS Analysis Facility (af.uchicago.edu): HTCondor batch jobs, JupyterLab, XCache, Rucio, ServiceX, Coffea Casa, Triton ML inference, and the AF MCP Platform.",
       "source": "./plugins/af-uchicago",
       "version": "1.0.0",
       "skills": "./skills/",
@@ -48,12 +49,13 @@
         "ServiceX",
         "Coffea Casa",
         "Triton",
-        "GPU"
+        "GPU",
+        "MCP"
       ]
     },
     {
       "name": "atlas",
-      "description": "ATLAS analysis plugin: grid/catalog MCPs (Rucio, AMI, ATLAS Open Data), statistics (pyhf, cabinetry, HistFitter, TRExFitter, RooUnfold, pyhs3), analysis frameworks (TopCPToolkit, FastFrames, ServiceX), and Scikit-HEP tools.",
+      "description": "ATLAS analysis plugin: grid/catalog tools (Rucio, AMI, ATLAS Open Data), statistics (pyhf, cabinetry, HistFitter, TRExFitter, RooUnfold, pyhs3), analysis frameworks (TopCPToolkit, FastFrames, ServiceX), and Scikit-HEP tools.",
       "source": "./plugins/atlas",
       "version": "1.0.0",
       "skills": "./skills/",

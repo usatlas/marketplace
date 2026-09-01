@@ -36,7 +36,7 @@ ServiceX supports two query backends:
 - Iterating quickly on object selection before committing to a full NTuple
   production
 - Analysis facility workflows where ATLAS grid access is not available locally
-- ATLAS Open Data workflows (atlasopenmagic-mcp provides dataset containers)
+- ATLAS Open Data workflows (`atlasopenmagic` provides dataset containers)
 
 ## Key Concepts
 
@@ -410,10 +410,10 @@ plt.show()
   value for remote or large datasets
 - **awkward**: Results from `to_awk` are `ak.Array` — use awkward operations for
   filtering, flattening, and array math
-- **Rucio/AMI**: Use `ami-mcp` or `rucio-mcp` to find dataset DIDs before
+- **Rucio/AMI**: Use `rucio` or `ami` (pyAMI) to find dataset DIDs before
   querying ServiceX
-- **atlasopenmagic-mcp**: Provides ATLAS Open Data dataset identifiers ready for
-  use with `dataset.Rucio(...)` or `dataset.FileList([...])`
+- **atlasopenmagic**: Provides ATLAS Open Data dataset identifiers ready for use
+  with `dataset.Rucio(...)` or `dataset.FileList([...])`
 
 ## Docs
 

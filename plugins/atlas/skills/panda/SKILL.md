@@ -280,8 +280,8 @@ pbook retry <taskID>
 
 ## Interop
 
-- **Rucio**: input and output datasets are managed by Rucio. Use `rucio ls` or
-  the Rucio MCP server to discover dataset names before submission.
+- **Rucio**: input and output datasets are managed by Rucio. Use `rucio ls` to
+  discover dataset names before submission.
 - **setupATLAS / lsetup**: `lsetup panda` provides prun, pathena, and pbook.
   Combine with `asetup` for Athena-based pathena workflows.
 - **BigPanDA**: https://bigpanda.cern.ch — web monitoring for all PanDA tasks.
