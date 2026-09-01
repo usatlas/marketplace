@@ -252,9 +252,13 @@ HTCondor, JupyterLab, and AF filesystem tools:
 Most MCP clients (Claude Code, Claude Desktop) auto-discover the broker's OAuth
 endpoints on first use and open a browser to log in — no local process or env
 vars to configure. Clients that cannot do the browser-based flow mint a static
-Personal Access Token at `https://mcp-portal.af.uchicago.edu/tokens/`. Linking
-an ATLAS/CERN identity at `https://mcp-portal.af.uchicago.edu/identities/` is
-required before the broker can mint per-user Rucio/AMI/x509 credentials.
+Personal Access Token at `https://mcp-portal.af.uchicago.edu/tokens/` and wire
+it in as an `Authorization: Bearer <token>` header — in Claude Code via
+`claude mcp add --transport http atlas-af https://mcp.af.uchicago.edu/mcp/ --header "Authorization: Bearer $MCP_BEARER_TOKEN"`,
+in Claude Desktop via Settings > Connectors > Add custom connector > Request
+headers. Linking an ATLAS/CERN identity at
+`https://mcp-portal.af.uchicago.edu/identities/` is required before the broker
+can mint per-user Rucio/AMI/x509 credentials.
 
 ## ATLAS software docs
 

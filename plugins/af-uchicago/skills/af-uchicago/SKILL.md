@@ -359,7 +359,14 @@ Claude Code and Claude Desktop.
 - **Portal**: `https://mcp-portal.af.uchicago.edu/` — web UI for the platform.
 - **Personal Access Tokens**: for clients that cannot do the browser-based OAuth
   flow, generate a static bearer token at
-  `https://mcp-portal.af.uchicago.edu/tokens/`.
+  `https://mcp-portal.af.uchicago.edu/tokens/`, then wire it in as an
+  `Authorization: Bearer <token>` header:
+  - **Claude Code**:
+    `claude mcp add --transport http atlas-af https://mcp.af.uchicago.edu/mcp/ --header "Authorization: Bearer $MCP_BEARER_TOKEN"`
+    (export the token to that env var first).
+  - **Claude Desktop / Claude.ai**: Settings > Connectors > Add custom
+    connector > Request headers — Name `Authorization`, Value `Bearer <token>`,
+    marked Required.
 - **Identities**: link your ATLAS/CERN identity to your AF account at
   `https://mcp-portal.af.uchicago.edu/identities/` — required before the broker
   can mint per-user Rucio/AMI/x509 credentials on your behalf.

@@ -36,8 +36,9 @@ tools below.
 
 ## Available CLI Tools
 
-You have access to three command-line tools for ATLAS data discovery (all
-require `setupATLAS`; see the setupatlas skill):
+You have access to two command-line tools for ATLAS data discovery, both
+requiring `setupATLAS` (see the setupatlas skill), plus the `atlasopenmagic`
+Python package for ATLAS Open Data (no `setupATLAS` needed — see below).
 
 ### Rucio (`lsetup rucio`)
 
@@ -55,6 +56,8 @@ require `setupATLAS`; see the setupatlas skill):
 
 ### atlasopenmagic (Python package)
 
+- Install with `pip install atlasopenmagic` (or `uv pip install atlasopenmagic`)
+  — no `setupATLAS` or ATLAS environment needed
 - `atlasopenmagic.get_urls(...)` — get download URLs for ATLAS Open Data ROOT
   files by process and year
 - `atlasopenmagic.available_datasets()` — browse available Open Data samples

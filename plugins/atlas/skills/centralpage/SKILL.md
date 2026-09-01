@@ -107,8 +107,9 @@ recommendations before using them in an analysis.
 
 - **pyAMI**: `ami list datasets` queries the same PMG cross-section database and
   dataset metadata that centralpage covers — see the setupatlas skill. Requires
-  `~/.pyami/pyami.cfg` credentials and a valid VOMS proxy
-  (`voms-proxy-init --voms atlas`).
+  `~/.pyami/pyami.cfg` credentials; a valid VOMS proxy
+  (`voms-proxy-init --voms atlas`) is needed unless authenticating with
+  `--ignore-proxy` (username/password) instead.
 - **Rucio**: Datasets found via centralpage can be located and downloaded with
   Rucio.
 - **atlasopenmagic**: The `atlasopenmagic` Python package can also search for

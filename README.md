@@ -167,8 +167,12 @@ plugins/
 The `atlas-af` server auto-discovers OAuth on first use — most MCP clients
 (Claude Code, Claude Desktop) open a browser to log in with no local setup
 needed. Clients that can't do the browser-based flow mint a static Personal
-Access Token at `https://mcp-portal.af.uchicago.edu/tokens/`, after linking an
-ATLAS/CERN identity at `https://mcp-portal.af.uchicago.edu/identities/`.
+Access Token at `https://mcp-portal.af.uchicago.edu/tokens/` and wire it in as
+an `Authorization: Bearer <token>` header — in Claude Code via
+`claude mcp add --transport http atlas-af https://mcp.af.uchicago.edu/mcp/ --header "Authorization: Bearer $MCP_BEARER_TOKEN"`,
+in Claude Desktop via Settings > Connectors > Add custom connector > Request
+headers — after linking an ATLAS/CERN identity at
+`https://mcp-portal.af.uchicago.edu/identities/`.
 
 ## Contributing
 
