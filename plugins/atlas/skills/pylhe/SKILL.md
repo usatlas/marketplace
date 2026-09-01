@@ -1,14 +1,15 @@
 ---
 name: pylhe
 description: >-
-  Use when reading or writing Les Houches Event XML (LHE) or HDF5 (LHEH5) files in Python: reading
-  parton-level events from MadGraph, Powheg, Sherpa, Pythia, or Whizard
-  generators, iterating over initial- and final-state parton four-vectors,
-  accessing event weights and scale/PDF reweighting blocks, counting events
-  efficiently, writing modified LHE files back to disk, visualising event
-  topologies with graphviz, or converting events to awkward arrays for
-  vectorized analysis. Also use when the user mentions `LHEFile`, `LHEEvent`,
-  `LHEParticle`, or parsing `.lhe` / `.lhe.gz` / `lhe.hdf5` / `.lheh5` files.
+  Use when reading or writing Les Houches Event XML (LHE) or HDF5 (LHEH5) files
+  in Python: reading parton-level events from MadGraph, Powheg, Sherpa, Pythia,
+  or Whizard generators, iterating over initial- and final-state parton
+  four-vectors, accessing event weights and scale/PDF reweighting blocks,
+  counting events efficiently, writing modified LHE files back to disk,
+  visualising event topologies with graphviz, or converting events to awkward
+  arrays for vectorized analysis. Also use when the user mentions `LHEFile`,
+  `LHEEvent`, `LHEParticle`, or parsing `.lhe` / `.lhe.gz` / `lhe.hdf5` /
+  `.lheh5` files.
 ---
 
 # pylhe
@@ -23,8 +24,8 @@ an iterable of events as typed dataclass attributes. The older module-level read
 functions (`read_lhe`, `read_lhe_init`, `read_num_events`,
 `read_lhe_with_attributes`, `read_lhe_file`) were **removed** in v1.0.0 — they
 no longer exist. `to_awkward` is still a module-level function and is current.
-Since v2.0.0 also HDF5 files in the LHEH5 format are supported for reading and 
-writing through `LHEFile`. Similar to gzip magic bytes hdf5 magic bytes are used 
+Since v2.0.0 also HDF5 files in the LHEH5 format are supported for reading and
+writing through `LHEFile`. Similar to gzip magic bytes hdf5 magic bytes are used
 to identify a file.
 
 ## When to Use
@@ -41,41 +42,39 @@ to identify a file.
 
 ## Key Concepts
 
-| Concept                                    | Notes                                                      |
-| ------------------------------------------ | ---------------------------------------------------------- |
-| `LHEFile.fromfile(path)`                   | Load file; returns `LHEFile` (lazy generator)              |
-| `LHEFile.frombuffer(fileobj)`              | Same, from an already-open file object                     |
-| `LHEFile.fromstring(text)`                 | Parse an LHE string directly                               |
-| `LHEFile.count_events(path)`               | Counts events without loading them                         |
-| `LHEFile.init`                             | `LHEInit` dataclass (beam info, xsec, groups)              |
-| `LHEFile.events`                           | Iterator of `LHEEvent` objects                             |
-| `LHEFile.tofile(path)`                     | Write to a file                                            |
-| `LHEFile.tolhe()`                          | Return a string                                            |
-| `LHEEvent.eventinfo`                       | `LHEEventInfo` (nparticles, pid, weight, …)                |
-| `LHEEvent.particles`                       | List of `LHEParticle` objects                              |
-| `LHEEvent.mothers(particle)`               | Get mothers of a particle in this event                    |
-| `LHEEvent.weights`                         | Dict `{weight_id: float}` (needs `with_attributes=True`)   |
-| `LHEEvent.scales`                          | Dict `{scale_id: float}` (needs `with_attributes=True`)    |
-| `LHEEvent.graph`                           | `graphviz.Digraph` of the event topology                   |
-| `LHEParticle.status`                       | -1 = incoming, +1 = outgoing, +2 = intermediate            |
-| `LHEParticle.id`                           | PDG ID                                                     |
-| `LHEParticle.px/py/pz/e/m`                 | Four-momentum + mass (GeV)                                 |
-| `LHEInit.initInfo`                         | `LHEInitInfo` (beam PDG IDs, energies, PDFs)               |
-| `LHEInit.procInfo`                         | List of `LHEProcInfo` (xSection, error, …)                 |
-| `LHEInit.generators`                       | List of `LHEGenerator` (generator metadata)                |
-| `LHEFile.header.initrwgt`                  | `LHEInitRWGT`: reweighting-group definitions (file header) |
-| `pylhe.to_awkward(events)`                 | Converts event iterator to an awkward array                |
-| `pylhe.DEFAULT_FORMAT`                     | XML, RWGT weights, plain                                   |
-| `pylhe.GZ_FORMAT`                          | XML, RWGT weights, gzip compression                        |
-| `pylhe.RWGT_FORMAT`                        | XML, RWGT weights block, plain                             |
-| `pylhe.WEIGHTS_FORMAT`                     | XML, WEIGHTS weights block, plain                          |
-| `pylhe.RWGT_GZ_FORMAT`                     | XML, RWGT weights block, gzip compression                  |
-| `pylhe.WEIGHTS_GZ_FORMAT`                  | XML, WEIGHTS weights block,  gzip compression              |
-| `pylhe.NO_WEIGHTS_FORMAT`                  | XML, no weights block, plain                               |
-| `pylhe.HDF5_FORMAT`                        | Output format for HDF5-based LHEH5 files                   |
-| `pylhe.HDF5_GZ_FORMAT`                     | LHEH5, gzip-compressed, shuffled HDF5 datasets             |
-
-
+| Concept                       | Notes                                                      |
+| ----------------------------- | ---------------------------------------------------------- |
+| `LHEFile.fromfile(path)`      | Load file; returns `LHEFile` (lazy generator)              |
+| `LHEFile.frombuffer(fileobj)` | Same, from an already-open file object                     |
+| `LHEFile.fromstring(text)`    | Parse an LHE string directly                               |
+| `LHEFile.count_events(path)`  | Counts events without loading them                         |
+| `LHEFile.init`                | `LHEInit` dataclass (beam info, xsec, groups)              |
+| `LHEFile.events`              | Iterator of `LHEEvent` objects                             |
+| `LHEFile.tofile(path)`        | Write to a file                                            |
+| `LHEFile.tolhe()`             | Return a string                                            |
+| `LHEEvent.eventinfo`          | `LHEEventInfo` (nparticles, pid, weight, …)                |
+| `LHEEvent.particles`          | List of `LHEParticle` objects                              |
+| `LHEEvent.mothers(particle)`  | Get mothers of a particle in this event                    |
+| `LHEEvent.weights`            | Dict `{weight_id: float}` (needs `with_attributes=True`)   |
+| `LHEEvent.scales`             | Dict `{scale_id: float}` (needs `with_attributes=True`)    |
+| `LHEEvent.graph`              | `graphviz.Digraph` of the event topology                   |
+| `LHEParticle.status`          | -1 = incoming, +1 = outgoing, +2 = intermediate            |
+| `LHEParticle.id`              | PDG ID                                                     |
+| `LHEParticle.px/py/pz/e/m`    | Four-momentum + mass (GeV)                                 |
+| `LHEInit.initInfo`            | `LHEInitInfo` (beam PDG IDs, energies, PDFs)               |
+| `LHEInit.procInfo`            | List of `LHEProcInfo` (xSection, error, …)                 |
+| `LHEInit.generators`          | List of `LHEGenerator` (generator metadata)                |
+| `LHEFile.header.initrwgt`     | `LHEInitRWGT`: reweighting-group definitions (file header) |
+| `pylhe.to_awkward(events)`    | Converts event iterator to an awkward array                |
+| `pylhe.DEFAULT_FORMAT`        | XML, RWGT weights, plain                                   |
+| `pylhe.GZ_FORMAT`             | XML, RWGT weights, gzip compression                        |
+| `pylhe.RWGT_FORMAT`           | XML, RWGT weights block, plain                             |
+| `pylhe.WEIGHTS_FORMAT`        | XML, WEIGHTS weights block, plain                          |
+| `pylhe.RWGT_GZ_FORMAT`        | XML, RWGT weights block, gzip compression                  |
+| `pylhe.WEIGHTS_GZ_FORMAT`     | XML, WEIGHTS weights block, gzip compression               |
+| `pylhe.NO_WEIGHTS_FORMAT`     | XML, no weights block, plain                               |
+| `pylhe.HDF5_FORMAT`           | Output format for HDF5-based LHEH5 files                   |
+| `pylhe.HDF5_GZ_FORMAT`        | LHEH5, gzip-compressed, shuffled HDF5 datasets             |
 
 ## Canonical Patterns
 
@@ -212,7 +211,6 @@ event.graph.render("event_topology", format="pdf", view=True, cleanup=True)
 - `write()`, `tolhe()`, and `tofile()` now use format objects (`LHEXMLFormat` /
   `LHEHDF5Format`) and `LHEWeightFormat` instead of the old `rwgt`, `weights`,
   and `gz` booleans.
-
 
 ## Interop
 
