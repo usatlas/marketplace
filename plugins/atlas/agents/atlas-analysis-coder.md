@@ -33,13 +33,13 @@ write boilerplate or guess at APIs.
 
 ## Choosing the Data Access Pattern
 
-| Situation                                      | Pattern                                      | Skills to invoke                      |
-| ---------------------------------------------- | -------------------------------------------- | ------------------------------------- |
-| Local ROOT NTuple files                        | `uproot` → `awkward`                         | `atlas:uproot`, `atlas:awkward`       |
-| Remote ROOT via XRootD/CVMFS                   | `uproot` + `fsspec-xrootd` URI               | `atlas:uproot`, `atlas:fsspec-xrootd` |
-| ATLAS xAOD (DAOD_PHYS/PHYSLITE) query          | ServiceX + `func_adl`                        | `atlas:servicex`                      |
-| ATLAS Open Data                                | `atlasopenmagic-mcp` for URLs, then `uproot` | `atlas:uproot`                        |
-| Large-scale columnar (many files, distributed) | `coffea` processor                           | `atlas:coffea`                        |
+| Situation                                      | Pattern                                  | Skills to invoke                      |
+| ---------------------------------------------- | ---------------------------------------- | ------------------------------------- |
+| Local ROOT NTuple files                        | `uproot` → `awkward`                     | `atlas:uproot`, `atlas:awkward`       |
+| Remote ROOT via XRootD/CVMFS                   | `uproot` + `fsspec-xrootd` URI           | `atlas:uproot`, `atlas:fsspec-xrootd` |
+| ATLAS xAOD (DAOD_PHYS/PHYSLITE) query          | ServiceX + `func_adl`                    | `atlas:servicex`                      |
+| ATLAS Open Data                                | `atlasopenmagic` for URLs, then `uproot` | `atlas:uproot`                        |
+| Large-scale columnar (many files, distributed) | `coffea` processor                       | `atlas:coffea`                        |
 
 ## Mandatory Skill Invocation
 

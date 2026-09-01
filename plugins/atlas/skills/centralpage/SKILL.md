@@ -105,15 +105,14 @@ recommendations before using them in an analysis.
 
 ## Interop
 
-- **ami-mcp**: The AMI MCP server (`ami-mcp`) provides LLM-friendly access to
-  the same PMG cross-section database and dataset metadata that centralpage
-  queries. Prefer `ami-mcp` for programmatic lookups of cross-sections,
-  k-factors, filter efficiencies, and dataset tags within a Claude session — it
-  returns structured results without requiring `lsetup`. Requires `~/.globus`
-  credentials and a valid VOMS proxy (`voms-proxy-init --voms atlas`).
+- **pyAMI**: `ami list datasets` queries the same PMG cross-section database and
+  dataset metadata that centralpage covers — see the setupatlas skill. Requires
+  `~/.pyami/pyami.cfg` credentials; a valid VOMS proxy
+  (`voms-proxy-init --voms atlas`) is needed unless authenticating with
+  `--ignore-proxy` (username/password) instead.
 - **Rucio**: Datasets found via centralpage can be located and downloaded with
-  Rucio — Rucio has a dedicated MCP server (`rucio-mcp`).
-- **atlasopenmagic**: The ATLAS Open Magic MCP server can also search for
+  Rucio.
+- **atlasopenmagic**: The `atlasopenmagic` Python package can also search for
   datasets and provides complementary search capabilities.
 - **setupATLAS**: `lsetup centralpage` requires a working ALRB environment — see
   the setupatlas skill.

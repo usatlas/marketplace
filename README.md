@@ -37,8 +37,8 @@ transparent, proxy-free analysis on SDCC nodes.
 ### `af-uchicago`
 
 Skills for the UChicago ATLAS Analysis Facility (af.uchicago.edu): HTCondor
-batch jobs, JupyterLab, XCache, Rucio, ServiceX, Coffea Casa, and Triton ML
-inference.
+batch jobs, JupyterLab, XCache, Rucio, ServiceX, Coffea Casa, Triton ML
+inference, and the AF MCP Platform.
 
 **Skills:**
 
@@ -46,11 +46,17 @@ inference.
 | ------------- | ---------------------------------------------------------------------------- |
 | `af-uchicago` | Working with the UChicago ATLAS Analysis Facility, submitting HTCondor batch |
 
+**MCP servers** (configured in `plugins/af-uchicago/.mcp.json`):
+
+| Server     | Launch command / URL              | Purpose                                                                                                  |
+| ---------- | --------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| `atlas-af` | `https://mcp.af.uchicago.edu/mcp` | AF MCP Platform: credential-brokered access to Rucio, AMI, HTCondor, JupyterLab, and AF filesystem tools |
+
 ---
 
 ### `atlas`
 
-ATLAS analysis plugin: grid/catalog MCPs (Rucio, AMI, ATLAS Open Data),
+ATLAS analysis plugin: grid/catalog tools (Rucio, AMI, ATLAS Open Data),
 statistics (pyhf, cabinetry, HistFitter, TRExFitter, RooUnfold, pyhs3), analysis
 frameworks (TopCPToolkit, FastFrames, ServiceX), Scikit-HEP tools, and ATLAS
 software orientation.
@@ -61,7 +67,7 @@ software orientation.
 | -------------------------- | ------------------------------------------------------------------------------- |
 | `atlas-analysis-architect` | Designs end-to-end analysis pipelines; produces a structured specification      |
 | `atlas-analysis-coder`     | Writes Python analysis code (uproot, ServiceX, coffea, hist)                    |
-| `atlas-data-explorer`      | Dataset and file discovery via Rucio, AMI, and ATLAS Open Data MCPs             |
+| `atlas-data-explorer`      | Dataset and file discovery via Rucio, AMI, and ATLAS Open Data CLI tools        |
 | `atlas-docs-expert`        | Answers ATLAS software questions; cites atlas-software.docs.cern.ch             |
 | `atlas-stats-expert`       | Statistical model design: pyhf/cabinetry workspaces, TRExFitter configs, limits |
 
@@ -98,7 +104,7 @@ software orientation.
 | `pyhepmc`               | Reading or writing HepMC3 event records in Python                               |
 | `pyhf`                  | You need HistFactory statistical modeling, profile-likelihood fits, CLs limits  |
 | `pyhs3`                 | Reading, writing, or validating binned and/or unbinned statistical models in    |
-| `pylhe`                 | Reading or writing Les Houches Event (LHE) files in Python                      |
+| `pylhe`                 | Reading or writing Les Houches Event XML (LHE) or HDF5 (LHEH5) files in Python: |
 | `quickfit`              | Fitting a RooWorkspace dataset with quickFit, generating an Asimov dataset with |
 | `roounfold`             | Performing statistical unfolding for an ATLAS cross-section measurement:        |
 | `servicex`              | Querying ATLAS data remotely via ServiceX                                       |
@@ -112,14 +118,6 @@ software orientation.
 | `xcache`                | Setting up a local XCache disk caching proxy for XRootD root:// protocol        |
 | `xmlanawsbuilder`       | Building a RooFit workspace from XML cards with xmlAnaWSBuilder or XMLReader    |
 | `xroofit`               | Building RooFit statistical models with xRooFit, constructing workspaces with   |
-
-**MCP servers** (configured in `plugins/atlas/.mcp.json`):
-
-| Server           | Launch command                                                   | Purpose                             |
-| ---------------- | ---------------------------------------------------------------- | ----------------------------------- |
-| `rucio`          | `pixi exec --spec rucio-mcp sh -c 'rucio-mcp serve --read-only'` | Dataset and replica discovery       |
-| `ami`            | `pixi exec --spec ami-mcp sh -c 'ami-mcp serve'`                 | AMI metadata (cross-sections, tags) |
-| `atlasopenmagic` | `uvx atlasopenmagic-mcp serve`                                   | ATLAS Open Data catalog             |
 
 ---
 
@@ -148,10 +146,10 @@ plugins/
     skills/  # 1 skill
   af-uchicago/
     .claude-plugin/plugin.json
+    .mcp.json
     skills/  # 1 skill
   atlas/
     .claude-plugin/plugin.json
-    .mcp.json
     agents/  # 5 subagents
     skills/  # 43 skills
     VENDORED-LICENSES.md
@@ -164,21 +162,17 @@ plugins/
 
 <!-- UPDATE:END -->
 
-## Rucio MCP setup
+## AF MCP Platform setup (af-uchicago)
 
-```bash
-rucio-mcp init atlas                          # one-time: writes ~/.config/rucio-mcp/rucio.cfg
-export RUCIO_ACCOUNT=yourusername             # required — no default
-pixi exec --spec rucio-mcp sh -c 'voms-proxy-init -voms atlas'  # obtain a valid proxy first
-```
-
-Health check: `RUCIO_ACCOUNT=yourusername rucio-mcp ping`
-
-If ping fails with a CRL expiry error, refresh the CRLs:
-
-```bash
-pixi exec --spec rucio-mcp sh -c '$X509_CERT_DIR/refresh_crls.sh'
-```
+The `atlas-af` server auto-discovers OAuth on first use — most MCP clients
+(Claude Code, Claude Desktop) open a browser to log in with no local setup
+needed. Clients that can't do the browser-based flow mint a static Personal
+Access Token at `https://mcp-portal.af.uchicago.edu/tokens/` and wire it in as
+an `Authorization: Bearer <token>` header — in Claude Code via
+`claude mcp add --transport http atlas-af https://mcp.af.uchicago.edu/mcp/ --header "Authorization: Bearer $MCP_BEARER_TOKEN"`,
+in Claude Desktop via Settings > Connectors > Add custom connector > Request
+headers — after linking an ATLAS/CERN identity at
+`https://mcp-portal.af.uchicago.edu/identities/`.
 
 ## Contributing
 

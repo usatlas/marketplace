@@ -172,9 +172,12 @@ def _plugins_section(marketplace: dict) -> list[str]:
                 )
                 rows = []
                 for sname, cfg in servers.items():
-                    cmd = shlex.join([cfg.get("command", "")] + cfg.get("args", []))
+                    if "url" in cfg:
+                        cmd = cfg["url"]
+                    else:
+                        cmd = shlex.join([cfg.get("command", "")] + cfg.get("args", []))
                     rows.append([f"`{sname}`", f"`{cmd}`", cfg.get("description", "")])
-                parts.append(_md_table(["Server", "Launch command", "Purpose"], rows))
+                parts.append(_md_table(["Server", "Launch command / URL", "Purpose"], rows))
                 parts.append("")
 
 

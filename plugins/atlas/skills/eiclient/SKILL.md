@@ -130,8 +130,7 @@ as the searched datasets. Narrow the result with `-D/--guid-data-type` (e.g.
 
 - **panda/pathena**: Event lists from EI can be fed to pathena's
   `--eventPickEvtList` option for grid-based event picking.
-- **Rucio**: Use Rucio (or the `rucio-mcp` server) to locate and download
-  datasets identified by EI queries.
+- **Rucio**: Use Rucio to locate and download datasets identified by EI queries.
 - **pyAMI**: Complements EI — pyAMI provides dataset-level metadata (tags,
   cross-sections), while EI provides event-level information.
 - **setupATLAS**: `lsetup eiclient` requires a working ALRB environment — see

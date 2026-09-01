@@ -1,6 +1,7 @@
 {
   "name": "hep-python-tools",
   "description": "Generic Python tooling skills used across HEP workflows: Typer CLIs with pixi/uv/Hatch, and PEP-723 standalone scripts.",
+  "version": "1.0.0",
   "homepage": "https://github.com/usatlas/marketplace",
   "repository": "https://github.com/usatlas/marketplace",
   "license": "MIT",

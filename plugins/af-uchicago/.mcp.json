@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "atlas-af": {
+      "description": "AF MCP Platform: credential-brokered access to Rucio, AMI, HTCondor, JupyterLab, and AF filesystem tools",
+      "type": "http",
+      "url": "https://mcp.af.uchicago.edu/mcp"
+    }
+  }
+}
