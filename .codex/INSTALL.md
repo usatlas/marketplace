@@ -2,6 +2,14 @@
 
 Enable USATLAS skills in Codex via native skill discovery.
 
+The `atlas` and `hep-python-tools` plugins depend on skills
+(`analysis-spec-builder`, `awkward-array`, `cli-creator`, `hist`, `servicex`,
+`standalone-script`, `vector-awkward`) provided by the `iris-hep` plugin,
+referenced from [iris-hep/marketplace](https://github.com/iris-hep/marketplace)
+rather than vendored here. Codex has no equivalent of Claude Code's plugin
+`dependencies` resolution, so clone that repository too and symlink its
+`iris-hep/skills` directory the same way as below if you need those skills.
+
 ## Prerequisites
 
 - Git

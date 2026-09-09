@@ -278,7 +278,7 @@ pyhf digest workspace.json                 # SHA256 digest for reproducibility
 - **atlas:cabinetry**: high-level wrapper that builds pyhf workspaces from
   config + histograms
 - **atlas:pyhs3**: schema-compliant serialisation of pyhf workspaces
-- **atlas:hist**: convert `Hist` objects to numpy arrays for workspace
+- **iris-hep:hist**: convert `Hist` objects to numpy arrays for workspace
   construction
 - **atlas:trexfitter**: can export HistFactory XML → convert with
   `pyhf xml2json`

@@ -122,6 +122,15 @@ def _plugins_section(marketplace: dict) -> list[str]:
 
     for entry in marketplace["plugins"]:
         name = entry["name"]
+
+        # A plugin whose source is an object (github/git-subdir/npm/etc.) is
+        # fetched from elsewhere at install time and has no local directory to
+        # introspect — render it from the marketplace entry alone.
+        if not isinstance(entry.get("source"), str):
+            parts.append(f"### `{name}` (external)\n\n{entry.get('description', '')}\n")
+            parts.append("---\n")
+            continue
+
         plugin_dir = ROOT / "plugins" / name
 
         plugin_info = json.loads(
@@ -196,6 +205,10 @@ def _layout_section(marketplace: dict) -> list[str]:
 
     for entry in marketplace["plugins"]:
         name = entry["name"]
+        # External plugins (non-string source) have no local directory to
+        # walk — this section documents this repo's own plugins/ tree.
+        if not isinstance(entry.get("source"), str):
+            continue
         plugin_dir = ROOT / "plugins" / name
         lines.append(f"  {name}/")
         lines.append("    .claude-plugin/plugin.json")
@@ -212,7 +225,13 @@ def _layout_section(marketplace: dict) -> list[str]:
         if (plugin_dir / "VENDORED-LICENSES.md").exists():
             lines.append("    VENDORED-LICENSES.md")
 
-    lines.extend([".claude-plugin/marketplace.json", "```"])
+    lines.extend(
+        [
+            ".claude-plugin/marketplace.json",
+            ".agents/plugins/marketplace.json  # symlink to the file above",
+            "```",
+        ]
+    )
     parts.append("\n".join(lines))
     return parts
 
