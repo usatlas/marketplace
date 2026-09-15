@@ -33,7 +33,7 @@
       "name": "af-uchicago",
       "description": "Skills for the UChicago ATLAS Analysis Facility (af.uchicago.edu): HTCondor batch jobs, JupyterLab, XCache, Rucio, ServiceX, Coffea Casa, Triton ML inference, and the AF MCP Platform.",
       "source": "./plugins/af-uchicago",
-      "version": "1.0.0",
+      "version": "1.1.2",
       "skills": "./skills/",
       "keywords": [
         "ATLAS",
@@ -57,7 +57,7 @@
       "name": "atlas",
       "description": "ATLAS analysis plugin: grid/catalog tools (Rucio, AMI, ATLAS Open Data), statistics (pyhf, cabinetry, HistFitter, TRExFitter, RooUnfold, pyhs3), analysis frameworks (TopCPToolkit, FastFrames, ServiceX), and Scikit-HEP tools.",
       "source": "./plugins/atlas",
-      "version": "1.0.0",
+      "version": "2.0.0",
       "skills": "./skills/",
       "keywords": [
         "ATLAS",
