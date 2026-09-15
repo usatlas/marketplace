@@ -26,10 +26,10 @@ search = "bump version {current_version} → "
 src = "pixi.toml"
 search = 'version = "{current_version}"'
 
-[[file]]
-src = ".claude-plugin/marketplace.json"
-search = '"version": "{current_version}"'
-
 [[field]]
 name = "candidate"
 default = ""
+
+[[before_commit]]
+name = "sync metadata.version into marketplace.json"
+cmd = "python3 scripts/sync_marketplace_version.py --metadata {new_version}"
