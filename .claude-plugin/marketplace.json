@@ -103,6 +103,17 @@
         "pre-commit",
         "mypy"
       ]
+    },
+    {
+      "name": "iris-hep",
+      "description": "Upstream IRIS-HEP marketplace plugin, referenced directly rather than vendored: analysis-spec-builder, awkward-array, cli-creator, hist, servicex, standalone-script, and vector-awkward skills for HEP analysis. Depended on by the atlas and hep-python-tools plugins.",
+      "source": {
+        "source": "git-subdir",
+        "url": "https://github.com/iris-hep/marketplace.git",
+        "path": "./iris-hep",
+        "ref": "main"
+      },
+      "keywords": ["IRIS-HEP", "ServiceX", "awkward", "hist", "vector", "HEP"]
     }
   ]
 }

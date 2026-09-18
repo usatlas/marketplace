@@ -5,6 +5,7 @@
   "homepage": "https://atlas-software.docs.cern.ch/",
   "repository": "https://github.com/usatlas/marketplace",
   "license": "MIT",
+  "dependencies": ["iris-hep"],
   "keywords": [
     "ATLAS",
     "HEP",
