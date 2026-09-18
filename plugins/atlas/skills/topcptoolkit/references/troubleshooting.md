@@ -143,7 +143,9 @@ with uproot.open("output.root:reco") as tree:
     }, with_name="Momentum4D")
 
     # Apply the object selection flag — required to filter valid objects per systematic
-    sel = tree[f"jet_select_passesOR_{SYS}"].array().astype(bool)
+    # (already a boolean branch; no cast needed — awkward arrays have no .astype,
+    # use ak.values_astype if a conversion is ever genuinely required)
+    sel = tree[f"jet_select_passesOR_{SYS}"].array()
     selected_jets = jets[sel]
 
     # Event-level weights
@@ -159,6 +161,9 @@ with uproot.open("output.root") as f:
     # Bins: 1=nEvents, 2=sumW, 3=sumW2
     cbk = f["CutBookkeeper_DSID_RUN_NOSYS"]
     sum_of_weights = cbk.values()[1]
+    if sum_of_weights == 0:
+        raise ValueError("sum_of_weights is 0 — check the CutBookkeeper name/DSID")
+    weight = weight / sum_of_weights
 ```
 
 ## Migrating from AnalysisTop

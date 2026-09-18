@@ -50,7 +50,10 @@ setupATLAS -c <container>
 ```
 
 Warning: exiting a joined session kills only that session, not the original
-container. Processes started in the joined session terminate on exit.
+container. Processes started in the joined session terminate on exit. The
+dependency runs the other way too: a joined session is a `docker exec` into the
+original container, so stopping or exiting the _original_ container ends every
+session joined to it.
 
 ## Force a specific container runtime
 

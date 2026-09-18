@@ -10,10 +10,12 @@ from Python, or diagnosing a common uproot error.
 
 ## Write ROOT files
 
-Uproot now writes RNTuples by default when using the dict-like syntax. Use
-`mkrntuple` to write an RNTuple (supports any structure representable as an
-Awkward Array, including jagged and nested fields). Use `mktree` to explicitly
-write a TTree (flat and one-level-jagged branches only).
+Since uproot 5.7.0, uproot writes RNTuples by default when using the dict-like
+syntax (earlier versions default to TTree — check `uproot.__version__` if output
+differs from what's shown here). Use `mkrntuple` to write an RNTuple (supports
+any structure representable as an Awkward Array, including jagged and nested
+fields). Use `mktree` to explicitly write a TTree (flat and one-level-jagged
+branches only).
 
 ```python
 import uproot, numpy as np, awkward as ak, hist

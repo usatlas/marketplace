@@ -40,7 +40,8 @@ systematics, which are already in the file:
 import numpy as np
 
 def jet_pt_scale(pt):
-    # returns shape (n_events, 2) — axis-1 is [up, down]
+    # pt is jagged (events x jets); broadcasts to events x jets x 2, the last
+    # axis holding [up, down]
     return (1.0 + np.array([0.05, -0.05], dtype="f4")) * pt[:, None]
 
 events.Jet.add_systematic("PtScale", "UpDownSystematic", "pt", jet_pt_scale)

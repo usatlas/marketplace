@@ -120,11 +120,13 @@ OverlapRemoval:
     jets: "AnaJets.baselineJvt"
     electrons: "AnaElectrons.loose"
     jetsSelectionName: "baselineJvtLoose"
+    electronsSelectionName: "loose"
   - inputLabel: "preselectORtight"
     outputLabel: "passesORtight"
     jets: "AnaJets.baselineJvt"
     electrons: "AnaElectrons.tight"
     jetsSelectionName: "baselineJvtTight"
+    electronsSelectionName: "tight"
 
 Thinning:
   - containerName: "AnaElectrons"

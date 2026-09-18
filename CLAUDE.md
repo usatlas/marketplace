@@ -33,8 +33,8 @@ The canonical, tool-agnostic authoring guidance lives at
 [agentskills.io](https://agentskills.io/llms.txt). The most relevant pages:
 
 - [Specification](https://agentskills.io/specification) — frontmatter fields,
-  directory structure, progressive disclosure, and the `skills-ref` validator
-  (run it here via `pixi run validate-skills`).
+  directory structure, progressive disclosure, and spec validation (this repo
+  runs `skill-validator` for that, via `pixi run validate-skills`).
 - [Best practices](https://agentskills.io/skill-creation/best-practices) —
   scoping, calibrating control, gotchas/template/checklist patterns.
 - [Optimizing descriptions](https://agentskills.io/skill-creation/optimizing-descriptions)
@@ -213,10 +213,16 @@ structure), run the spec validator over all skills:
 pixi run validate-skills
 ```
 
-This wraps the [`skills-ref`](https://pypi.org/project/skills-ref/) reference
-library (a `pypi-dependency` in `pixi.toml`, so `pixi install` provides it). The
-library's CLI is installed as `agentskills`, so a single skill can be checked
-directly with `pixi run agentskills validate plugins/<plugin>/skills/<name>`.
+This wraps
+[`skill-validator`](https://github.com/agent-ecosystem/skill-validator) (a Go
+binary, not a pixi/conda dependency — `scripts/validate_skills.py` falls back to
+running it via the `.pre-commit-config.yaml` hook, which pre-commit builds in
+its own isolated environment, if it isn't already on `PATH`). It also does
+orphan-file reachability analysis: a `references/*.md` file not linked from its
+skill's SKILL.md is a hard error, not just a lint nit. To check a single
+plugin's skills directly: `skill-validator check plugins/<plugin>/skills` (it
+only looks one level deep for `SKILL.md` files, so point it at a `skills/`
+directory, not an individual skill or the repo root).
 
 `validate-skills` complements `pixi run lint-skills` (this repo's section
 ordering) and is included in `pixi run check-skills` alongside the README sync.

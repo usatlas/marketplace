@@ -118,8 +118,9 @@ print(p.name, p.pdgid)          # "J/psi(1S)", 443
   `try/except ParticleNotFound` when processing MC output, where
   generator-specific codes (e.g. `9999999`) appear. `PDGID.is_valid` and
   `PDGID.is_generator_specific` let you pre-filter without exceptions.
-- **Decay mode coverage is incomplete**: not all particles have decay modes in
-  the PDG table; `b0.decay_modes` may be an empty list.
+- **No decay-mode data on `Particle`**: identity/mass/width only — there is no
+  `decay_modes` attribute. Use the `decaylanguage` skill (`.dec` file parsing)
+  for branching fractions and decay chains.
 - **`findall` vs `finditer`**: `findall` returns a sorted list; `finditer`
   returns a lazy iterator — prefer `finditer` for large scans to avoid
   materialising the full result.

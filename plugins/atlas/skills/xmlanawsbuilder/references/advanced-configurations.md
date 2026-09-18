@@ -27,7 +27,7 @@ PDFs — renaming it breaks the binned model.
 
 ```xml
 <Channel Name="sr" Type="counting" Lumi="20.3">
-  <Data NumData="9" Observable="obs_sr[0,1]"/>
+  <Data NumData="9" Observable="obs_sr:[0,1]"/>
   <Sample Name="signal" Norm="0.5" ImportSyst=":common:" SharePdf="counting">
   </Sample>
 </Channel>

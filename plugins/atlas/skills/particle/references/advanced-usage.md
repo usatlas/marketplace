@@ -13,7 +13,7 @@ summary for a particle.
 - [PDGID standalone (fast, no full table load)](#pdgid-standalone-fast-no-full-table-load)
 - [Particle and PDGID literals](#particle-and-pdgid-literals)
 - [MC generator ID converters](#mc-generator-id-converters)
-- [Decay modes (if available)](#decay-modes-if-available)
+- [Decay modes](#decay-modes)
 - [Use with generator truth (e.g. from pyhepmc)](#use-with-generator-truth-eg-from-pyhepmc)
 - [Describe a particle](#describe-a-particle)
 
@@ -29,8 +29,10 @@ Particle.findall(pdg_name="pi")           # pi0, pi+, pi-
 # By quantum numbers
 Particle.findall(J=1, P=-1)              # spin-1 negative-parity particles (vectors)
 
-# K+ and K- by glob pattern
-Particle.findall("K*")
+# K+ and K- by glob pattern (findall takes a callable or pdg_name=/J=/etc.
+# keyword filters, not a bare glob string — use fnmatch explicitly)
+import fnmatch
+Particle.findall(lambda p: fnmatch.fnmatch(p.name, "K[+-]"))
 
 # Strange mesons with c*tau > 1 m — use hepunits for unit safety
 from hepunits import meter
@@ -111,12 +113,18 @@ pyid = Pythia2PDGIDBiMap[PDGID(9010221)]
 pdgid = Pythia2PDGIDBiMap[PythiaID(10221)]
 ```
 
-## Decay modes (if available)
+## Decay modes
+
+`Particle` objects carry PDG identity/mass/width data, not branching-fraction
+decay tables — there is no `decay_modes` attribute. For decay-chain data (modes,
+branching fractions, `.dec` files), use the `decaylanguage` skill instead:
 
 ```python
-b0 = Particle.from_name("B0")
-for mode in b0.decay_modes:
-    print(mode)
+from decaylanguage import DecFileParser
+
+parser = DecFileParser.from_file("DECAY.DEC")
+parser.parse()
+print(parser.list_decay_modes("B0"))
 ```
 
 ## Use with generator truth (e.g. from pyhepmc)

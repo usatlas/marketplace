@@ -131,8 +131,10 @@ cr_mask = sel.all("baseline", "btag") & ~sel.all("met")
 
 NanoEvents fields are determined at runtime by the schema and the file content —
 there is no static list. Before writing a processor against an unfamiliar file,
-open it interactively with `NanoEventsFactory.from_root(..., mode="eager")` and
-inspect `events.fields` / `events.<collection>.fields`.
+open it interactively with `NanoEventsFactory.from_root(..., mode="virtual")`
+(the safe default — branches load lazily; `mode="eager"` on a full-size file can
+expand to several GB in memory) and inspect `events.fields` /
+`events.<collection>.fields`.
 
 | File type                          | `schemaclass`    | Branch access style                       |
 | ---------------------------------- | ---------------- | ----------------------------------------- |

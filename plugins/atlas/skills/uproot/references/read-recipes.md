@@ -29,7 +29,9 @@ with uproot.open("output.root:reco") as tree:
     # entry-level cut (Python expression; ATLAS values in MeV)
     arrays = tree.arrays(
         ["jet_pt", "met_met"],
-        cut="n_jets >= 4 & met_met > 200000",
+        # parenthesize each comparison: & binds tighter than >=/> in the cut
+        # expression, so unparenthesized terms parse as a chained comparison
+        cut="(n_jets >= 4) & (met_met > 200000)",
     )
 
     # compute derived quantities at read time

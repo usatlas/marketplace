@@ -201,10 +201,10 @@ For deeper detail beyond what this skill covers, read the reference files in
   `TFormula`-based `NormFactor`, or diagnosing a fit convergence, pull, or limit
   failure.
 - **`references/worked-example.md`** — Complete multi-region, multi-sample
-  config for a ttH→bb search (2 regions, 3 backgrounds, NormFactors, and
-  systematics wired together) plus the full run pipeline and output directory
-  layout. Read when adapting a full worked config rather than the minimal
-  skeleton above.
+  config for a ttH→bb search (2 regions, one signal, two backgrounds — ttbar and
+  Wjets — one data sample, NormFactors, and systematics wired together) plus the
+  full run pipeline and output directory layout. Read when adapting a full
+  worked config rather than the minimal skeleton above.
 
 ## Gotchas
 

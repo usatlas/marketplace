@@ -73,7 +73,9 @@ from configManager import configMgr
 | `histBackupCacheFile`    | ""      | Path to backup histogram cache            |
 
 This reuses previously built histograms and only rebuilds missing ones (e.g.,
-new signal points). Run with `-w` (not `-t`) to activate the fallback.
+new signal points). `useCacheToTreeFallback` defaults to `False` — set
+`configMgr.useCacheToTreeFallback = True` in the config, then run with `-w` (not
+`-t`); `-w` alone does not activate the fallback.
 
 ### Key methods
 
