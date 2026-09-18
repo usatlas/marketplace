@@ -2,9 +2,9 @@
 
 Read this reference when filtering the PDG table by quantum numbers or glob
 patterns, working with antiparticles, using standalone `PDGID` queries,
-converting generator-specific IDs (Geant3, Pythia, Corsika7) to PDG IDs,
-looking up decay modes, classifying MC truth particles, or printing a full
-property summary for a particle.
+converting generator-specific IDs (Geant3, Pythia, Corsika7) to PDG IDs, looking
+up decay modes, classifying MC truth particles, or printing a full property
+summary for a particle.
 
 ## Table of Contents
 

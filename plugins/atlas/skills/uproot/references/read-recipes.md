@@ -2,8 +2,8 @@
 
 Read this reference when the basic inspect/filter/read-into-awkward workflow in
 SKILL.md doesn't cover the case: expression-based cuts, RNTuple-specific reads,
-histogram extraction, numpy/pandas export, multi-file concatenation,
-remote/glob file access, or a full end-to-end pipeline example.
+histogram extraction, numpy/pandas export, multi-file concatenation, remote/glob
+file access, or a full end-to-end pipeline example.
 
 ## Table of Contents
 

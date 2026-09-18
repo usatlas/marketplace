@@ -9,7 +9,7 @@ Complements `asetup.md`. Covers the full `lsetup` tool catalog, the complete
 See all available versions with `lsetup <tool> -h` or `showVersions`.
 
 | Tool       | Description                            | Docs / Contact                                                     |
-| ---------- | --------------------------------------- | ------------------------------------------------------------------ |
+| ---------- | -------------------------------------- | ------------------------------------------------------------------ |
 | `asetup`   | Athena/StatAnalysis release setup      | https://twiki.cern.ch/twiki/bin/viewauth/AtlasComputing/AtlasSetup |
 | `root`     | ROOT data analysis framework           | https://root.cern                                                  |
 | `rucio`    | Distributed data management client     | https://rucio-ui.cern.ch                                           |

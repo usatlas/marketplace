@@ -18,17 +18,17 @@ Used in the top-level card's `<Asimov Action="...">` attribute (colon-separated
 list, e.g. `Action="fixsyst:fit:genasimov:float:savesnapshot"`):
 
 | Keyword           | Meaning                                                         |
-| ----------------- | ---------------------------------------------------------------- |
+| ----------------- | --------------------------------------------------------------- |
 | `fit`             | Maximum likelihood fit                                          |
 | `genasimov`       | Generate Asimov dataset (once per line)                         |
 | `savesnapshot`    | Save parameter snapshot (once per line)                         |
 | `matchglob`       | Match global observables to NP values; always pair with `reset` |
 | `reset`           | Reset to state before current action list                       |
-| `raw`             | Reset to state before any actions                                |
-| `fixsyst`         | Fix all constrained NPs                                          |
-| `fixall`          | Fix all NPs                                                      |
-| `float`           | Float NPs fixed by `fixsyst` or `Setup`                          |
-| `<snapshot name>` | Load a saved snapshot                                            |
+| `raw`             | Reset to state before any actions                               |
+| `fixsyst`         | Fix all constrained NPs                                         |
+| `fixall`          | Fix all NPs                                                     |
+| `float`           | Float NPs fixed by `fixsyst` or `Setup`                         |
+| `<snapshot name>` | Load a saved snapshot                                           |
 
 ## Data node attributes
 
@@ -36,7 +36,7 @@ list, e.g. `Action="fixsyst:fit:genasimov:float:savesnapshot"`):
 observed dataset:
 
 | Attribute     | Description                                           |
-| ------------- | ------------------------------------------------------ |
+| ------------- | ----------------------------------------------------- |
 | `InputFile`   | Data file path (text, ROOT ntuple, or histogram)      |
 | `FileType`    | `ascii` (default), `root`, or `histogram`             |
 | `TreeName`    | TTree name (ROOT ntuple only)                         |
@@ -68,11 +68,11 @@ common systematic that samples opt into via `ImportSyst`:
 **Constraint types and response functions:**
 
 | Type   | Response function                                              |
-| ------ | ---------------------------------------------------------------- |
-| `gaus` | `CentralValue + NP × Mag`                                       |
-| `logn` | `(1 + Mag/CentralValue)^NP`                                     |
+| ------ | -------------------------------------------------------------- |
+| `gaus` | `CentralValue + NP × Mag`                                      |
+| `logn` | `(1 + Mag/CentralValue)^NP`                                    |
 | `asym` | Polynomial interp within ±1σ, log-normal extrapolation outside |
-| `dfd`  | Double-Fermi-Dirac box (for ill-defined uncertainties)          |
+| `dfd`  | Double-Fermi-Dirac box (for ill-defined uncertainties)         |
 
 Signs in `Mag` matter — always follow the sign convention of the upstream tool.
 For `asym`, only the sign of the upper uncertainty is used.
@@ -83,13 +83,13 @@ For `asym`, only the sign of the upper uncertainty is used.
 physics process:
 
 | Attribute                      | Description                                                                           |
-| ------------------------------- | --------------------------------------------------------------------------------------- |
-| `Name`                         | Process name (unique within category)                                                |
+| ------------------------------ | ------------------------------------------------------------------------------------- |
+| `Name`                         | Process name (unique within category)                                                 |
 | `InputFile`                    | Path to pdf-level XML card                                                            |
 | `ImportSyst`                   | Comma-separated common systematic groups; `:common:` = all ungrouped; `:self:` = none |
 | `MultiplyLumi`                 | Whether to multiply `Lumi` to yield                                                   |
 | `SharePdf`                     | All processes with the same value share a single PDF                                  |
-| `Norm`, `XSection`, `BR`, etc. | Pre-defined constant scale factors on yield                                          |
+| `Norm`, `XSection`, `BR`, etc. | Pre-defined constant scale factors on yield                                           |
 
 ## NormFactor and ShapeFactor
 

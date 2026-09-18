@@ -1,9 +1,9 @@
 # coffea NanoEvents Schemas and Data Access — Deep Reference
 
 Read this reference when discovering the structure of an unfamiliar ROOT file,
-choosing between `mode="eager"` and `mode="virtual"`, tuning
-`NanoEventsFactory` performance with `preload`/`buffer_cache`, or iterating
-over `atlas-schema` systematic variations.
+choosing between `mode="eager"` and `mode="virtual"`, tuning `NanoEventsFactory`
+performance with `preload`/`buffer_cache`, or iterating over `atlas-schema`
+systematic variations.
 
 ## Table of Contents
 
@@ -91,7 +91,7 @@ print(events.systematic_names)     # ['NOSYS', 'JET_JER__1up', 'JET_JER__1down',
 Schema summary for ATLAS work:
 
 | File type                          | `schemaclass`    | Branch access style                       |
-| ----------------------------------- | ---------------- | ----------------------------------------- |
+| ---------------------------------- | ---------------- | ----------------------------------------- |
 | CP algorithm NTuple (TopCPToolkit) | `NtupleSchema`   | `events.recojet.pt`; systematics via loop |
 | Flat NTuple (SimpleAnalysis)       | `BaseSchema`     | `events["jet_pt"]` verbatim               |
 | DAOD_PHYSLITE                      | `PHYSLITESchema` | `events.Jets.pt` with behaviors           |

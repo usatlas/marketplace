@@ -2,8 +2,8 @@
 
 Read this reference when asymptotic CLs results look unreliable and you need
 toy-based hypothesis tests, when producing a Brazil-band or pull plot for a
-note/paper, or when building a full multi-channel (signal + control region)
-fit end-to-end.
+note/paper, or when building a full multi-channel (signal + control region) fit
+end-to-end.
 
 ## Table of Contents
 

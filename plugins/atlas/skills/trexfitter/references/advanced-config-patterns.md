@@ -1,9 +1,9 @@
 # TRExFitter: Advanced Config Patterns & Troubleshooting
 
-Read this reference when running Asimov/blind fits, parallelising the
-histogram or ranking steps, correlating or decorrelating nuisance parameters,
-writing a `NormFactor` `Expression`, tuning MC statistical uncertainties,
-exporting a workspace to pyhf, or diagnosing a fit/limit failure.
+Read this reference when running Asimov/blind fits, parallelising the histogram
+or ranking steps, correlating or decorrelating nuisance parameters, writing a
+`NormFactor` `Expression`, tuning MC statistical uncertainties, exporting a
+workspace to pyhf, or diagnosing a fit/limit failure.
 
 ## Asimov (Blind) Fit
 

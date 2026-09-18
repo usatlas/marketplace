@@ -1,8 +1,8 @@
 # coffea Scale-Out Execution and Advanced Systematics — Deep Reference
 
 Read this reference when scaling a processor to a Dask cluster, applying
-object-level systematic variations that are not already baked into the
-NTuple, or building a multi-region histogram accumulation processor.
+object-level systematic variations that are not already baked into the NTuple,
+or building a multi-region histogram accumulation processor.
 
 ## Table of Contents
 
