@@ -14,6 +14,7 @@ methods.
 - [Object hierarchy](#object-hierarchy)
 - [Weight and systematic propagation](#weight-and-systematic-propagation)
 - [Input file management](#input-file-management)
+- [CLI flag reference](#cli-flag-reference)
 
 ## configMgr (singleton)
 
@@ -70,6 +71,9 @@ from configManager import configMgr
 | `useCacheToTreeFallback` | False   | Fall back to trees for missing histograms |
 | `useHistBackupCacheFile` | False   | Use a backup cache file                   |
 | `histBackupCacheFile`    | ""      | Path to backup histogram cache            |
+
+This reuses previously built histograms and only rebuilds missing ones (e.g.,
+new signal points). Run with `-w` (not `-t`) to activate the fallback.
 
 ### Key methods
 
@@ -413,3 +417,43 @@ sam.addInputs(["file1.root", "file2.root"], "mytree")
 Each level stores `InputTree(filename, treename)` objects in a set, ensuring
 uniqueness. The tree name defaults to the sample's `prefixTreeName` (which
 defaults to the sample name) if not specified.
+
+## CLI flag reference
+
+```bash
+HistFitter.py [options] configFile.py
+```
+
+| Flag             | Action                                          |
+| ---------------- | ----------------------------------------------- |
+| `-t`             | Build histograms from TTrees                    |
+| `-w`             | Create RooWorkspace from histograms             |
+| `-f`             | Fit the workspace                               |
+| `-p`             | Run exclusion hypothesis test (CLs)             |
+| `-z`             | Run discovery hypothesis test (p₀)              |
+| `-l`             | Upper limit scan                                |
+| `-d`             | Draw before/after plots                         |
+| `-D <plots>`     | Specific plots: before, after, corrMatrix,      |
+|                  | separateComponents, likelihood, systematics,    |
+|                  | plotInterpolation                               |
+| `-F <type>`      | Fit type: bkg, excl, disc                       |
+| `-x`             | Write XML then call hist2workspace              |
+| `-j`             | Write JSON workspace from XML output            |
+| `-i`             | Stay in interactive Python after running        |
+| `-a`             | Use Asimov dataset                              |
+| `-m <params>`    | Run MINOS (asymmetric errors); use ALL for all  |
+| `-C <p1:v1,...>` | Fix parameters to constant values               |
+| `-g <points>`    | Signal grid points (comma-separated)            |
+| `-r <regions>`   | Signal regions to process (comma-separated)     |
+| `-R`             | Rebin non-equidistant histograms to proxy bins  |
+| `-V`             | Include validation regions                      |
+| `-u <arg>`       | Arbitrary user argument (accessible in config)  |
+| `--pyhf`         | Use pyhf backend where possible                 |
+| `--pyhf-backend` | Backend: numpy, tensorflow, pytorch, jax        |
+| `-L <level>`     | Log level: VERBOSE, DEBUG, INFO, WARNING, ERROR |
+
+Typical workflow: `-t -w -f` (histos → workspace → fit). After first run, skip
+`-t` if cuts/weights are unchanged: `-w -f` or just `-f`.
+
+Several `configMgr` properties above are set indirectly by these flags:
+`readFromTree` by `-t`, `myFitType` by `-F`, and `userArg` by `-u`.

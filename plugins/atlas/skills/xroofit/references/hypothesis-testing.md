@@ -117,6 +117,15 @@ w.Browse()  # hypoSpace appears under "scans" folder
   `"2"` (expected) and `"obs"` (observed); each value has `.value()` and
   `.error()`
 
+### Minimal Version
+
+If the POI is already declared in the workspace, the whole scan collapses to one
+line:
+
+```python
+print(w.nll("obsData").hypoSpace().limits())
+```
+
 ## Toy-Based Limits
 
 Replace `scanType` to use toys instead of asymptotic formulae:

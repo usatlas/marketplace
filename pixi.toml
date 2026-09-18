@@ -10,7 +10,7 @@ version = "0.2.2"
 pre-commit = { cmd = "pre-commit run --all-files", description = "Run pre-commit hooks on all files" }
 sync-skills = { cmd = "python scripts/sync_skills.py && (pre-commit run prettier --files README.md &> /dev/null || true)", description = "Sync README with current plugins/skills and reformat" }
 lint-skills = { cmd = "python scripts/lint_skills.py", description = "Check SKILL.md section ordering" }
-validate-skills = { cmd = "python scripts/validate_skills.py", description = "Validate every SKILL.md against the Agent Skills spec (skills-ref)" }
+validate-skills = { cmd = "python scripts/validate_skills.py", description = "Validate every SKILL.md against the Agent Skills spec (skill-validator, must be on PATH)" }
 check-skills = { cmd = "(pre-commit run -a || true) && git diff --exit-code", depends-on = [ "lint-skills", "validate-skills", "sync-skills" ], description = "CI: validate/lint skills and verify README is up to date" }
 tbump = { cmd = "tbump", description = "Bump the top-level workspace/marketplace version: pixi run tbump <new_version>" }
 tbump-af-bnl = { cmd = "tbump -c plugins/af-bnl/tbump.toml", description = "Bump the af-bnl plugin version: pixi run tbump-af-bnl <new_version>" }
@@ -22,6 +22,3 @@ tbump-hep-python-tools = { cmd = "tbump -c plugins/hep-python-tools/tbump.toml",
 pre-commit = ">=4.5.1,<5"
 python = ">=3.9"
 tbump = ">=6.9.0,<7"
-
-[pypi-dependencies]
-skills-ref = ">=0.1.1"

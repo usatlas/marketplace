@@ -56,7 +56,8 @@ shell. Use `asetup --printLast` to inspect saved state.
 `--opt`/`--dbg` flags to `asetup`.
 
 See `references/asetup.md` for the full asetup option reference, configuration
-file format, and environment variables.
+file format, and environment variables. See `references/tools.md` for the full
+`lsetup` tool catalog, `acm` command reference, and grid tool details.
 
 ## Canonical Patterns
 
@@ -95,22 +96,9 @@ lsetup xcache            # XRootD local proxy cache
 lsetup lcgenv            # LCG environment tool
 ```
 
-See all available versions with `lsetup <tool> -h` or `showVersions`.
-
-| Tool       | Description                            | Docs / Contact                                                     |
-| ---------- | -------------------------------------- | ------------------------------------------------------------------ |
-| `asetup`   | Athena/StatAnalysis release setup      | https://twiki.cern.ch/twiki/bin/viewauth/AtlasComputing/AtlasSetup |
-| `root`     | ROOT data analysis framework           | https://root.cern                                                  |
-| `rucio`    | Distributed data management client     | https://rucio-ui.cern.ch                                           |
-| `panda`    | PanDA distributed analysis client      | https://panda-wms.readthedocs.io                                   |
-| `pyami`    | ATLAS Metadata Interface Python client | https://atlas-ami.cern.ch                                          |
-| `scikit`   | scikit-hep Python ecosystem            | https://scikit-hep.org                                             |
-| `views`    | Full LCG software release              | `lsetup "views"` for list                                          |
-| `xrootd`   | XRootD data access                     |                                                                    |
-| `xcache`   | XRootD local proxy cache               | https://twiki.atlas-canada.ca/bin/view/AtlasCanada/Xcache          |
-| `lcgenv`   | LCG environment tool                   | https://twiki.atlas-canada.ca/bin/view/AtlasCanada/Lcgenv          |
-| `astyle`   | ATLAS ROOT style macros                | https://gitlab.cern.ch/atlas-publications-committee/atlasrootstyle |
-| `eiclient` | Event Index client                     | https://twiki.cern.ch/twiki/bin/view/AtlasComputing/EventIndex     |
+See all available versions with `lsetup <tool> -h` or `showVersions`. See
+`references/tools.md` for the full tool catalog with docs/contacts (root, rucio,
+panda, pyami, scikit, views, xrootd, xcache, lcgenv, astyle, eiclient).
 
 ### Configuring an ATLAS Release with asetup
 
@@ -119,50 +107,17 @@ StatAnalysis, etc.) in the current shell. Arguments can be separated by spaces
 or commas.
 
 ```bash
-# Stable releases
-asetup StatAnalysis,0.7.3             # specific release
-asetup AnalysisBase,24.2.2            # specific AnalysisBase release
-asetup Athena,22.0.0                  # specific Athena stable release
-
-# Latest releases
-asetup StatAnalysis,0.7,latest        # latest nightly of branch
-asetup --stable StatAnalysis,0.7,latest  # latest stable of branch
-asetup Athena,main,latest             # latest Athena main nightly
-
-# Nightly by date (rDD, rMM-DD, rYYYY-MM-DD)
-asetup Athena,main,r07-07             # nightly from July 7
-
-# Re-setup the last release saved in this directory
-asetup                                # no args = restore last session
-
-# Add a user script to be re-sourced on every restore
-asetup source myPackage/setup.sh
-
-# Undo an asetup (reset to original shell env)
-asetup --reset
-
-# Compiler/cmake only (no release)
-asetup none,gcc14,cmakesetup          # e.g. for building StatAnalysis
+asetup StatAnalysis,0.7.3             # specific stable release
+asetup AnalysisBase,24.2,latest       # latest nightly of a branch
+asetup Athena,main,r07-07             # nightly from July 7 (rDD/rMM-DD/rYYYY-MM-DD)
+asetup                                # no args = restore last saved session
+asetup --reset                        # undo, restore original shell env
 ```
-
-Key environment variables set by `asetup`:
-
-| Variable                   | Example value                            |
-| -------------------------- | ---------------------------------------- |
-| `AtlasProject`             | `Athena`, `AnalysisBase`, `StatAnalysis` |
-| `AtlasVersion`             | `24.0.0`                                 |
-| `AtlasBuildBranch`         | `main`, `24.0`, `0.7`                    |
-| `AtlasReleaseType`         | `stable` or `nightly`                    |
-| `BINARY_TAG` / `CMTCONFIG` | `x86_64-el9-gcc13-opt`                   |
-| `TestArea`                 | current build directory path             |
 
 User configuration can be stored in `~/.asetup` or `$PWD/.asetup` (INI format
 with `[defaults]`, `[aliases]`, `[environment]`, `[epilog.sh]` sections). See
-`references/asetup.md` for details.
-
-Quick start: https://twiki.cern.ch/twiki/bin/viewauth/AtlasComputing/AtlasSetup
-Full reference:
-https://twiki.cern.ch/twiki/bin/view/AtlasComputing/AtlasSetupReference
+`references/asetup.md` for the full option reference, environment variables set
+by `asetup`, and the configuration file format.
 
 ### Package Management with acm
 
@@ -189,25 +144,8 @@ acm compile_pkg MyPackage               # build single package
 acm new_skeleton MyPackage              # create skeleton analysis package
 ```
 
-| Command                           | Description                                       |
-| --------------------------------- | ------------------------------------------------- |
-| `acmSetup [opts] <release>`       | Set up release + source area                      |
-| `acm compile`                     | Build project (cmake --build)                     |
-| `acm compile_pkg <pkg>`           | Build a single package                            |
-| `acm find_packages`               | Reconfigure cmake (wipes CMakeCache)              |
-| `acm test <pkg>`                  | Run ctests for a package                          |
-| `acm clean [-f]`                  | cmake clean; `-f` also reruns find_packages       |
-| `acm clone_project <repo>`        | Clone a GitLab project into source area           |
-| `acm sparse_clone_project athena` | Sparse-clone the athena project                   |
-| `acm add_pkg <path>`              | Include package(s) in compilation                 |
-| `acm exclude_pkg <path>`          | Exclude package(s) from compilation               |
-| `acm add_pkg_clients <path>`      | Add all packages that depend on the given one     |
-| `acm switch <branch/tag> <path>`  | Check out specific version of a package           |
-| `acm new_pkg <name>`              | Create a new cmake package                        |
-| `acm new_skeleton <name>`         | Create a skeleton analysis package with algorithm |
-| `acmSetup --unset`                | Undo the current setup                            |
-
-Contact: atlas-sw-acm-users@cern.ch
+See `references/tools.md` for the full `acm` command reference (package
+add/exclude/switch, cmake clean/find_packages, testing).
 
 ### Grid Data Access (rucio, panda)
 
@@ -221,7 +159,7 @@ rucio upload --rse SITE_SCRATCHDISK scope:dataset file.root
 rucio add-rule scope:dataset 1 SITE_SCRATCHDISK  # create replication rule
 ```
 
-Contact: hn-atlas-dist-analysis-help@cern.ch WebUI: https://rucio-ui.cern.ch
+WebUI: https://rucio-ui.cern.ch
 
 ```bash
 lsetup panda
@@ -230,8 +168,7 @@ prun --exec "my_command %IN" --inDS scope:input --outDS user.me.output
 # bigpanda monitoring at https://bigpanda.cern.ch
 ```
 
-Contact: hn-atlas-dist-analysis-help@cern.ch Monitor: https://bigpanda.cern.ch |
-Docs: https://panda-wms.readthedocs.io
+Monitor: https://bigpanda.cern.ch | Docs: https://panda-wms.readthedocs.io
 
 ### Dataset Metadata with pyami
 
@@ -242,20 +179,9 @@ ami list datasets --project mc20_13TeV --type EVNT "*Ztautau*"
 # Use --ignore-proxy to authenticate with username/password
 ```
 
-Contact: atlas-bookkeeping@cern.ch
-
-### Utility Commands
-
-```bash
-showVersions            # show installed software versions
-queryC <name>           # find/query containers on CVMFS
-installPip <pkg>        # install pip package into local area
-installRpm <pkg>        # install RPM into local area
-diagnostics             # diagnostic tools menu
-advancedTools           # advanced tools menu
-printMenu               # reprint the setupATLAS menu
-helpMe                  # extended help with all tool documentation
-```
+See `references/tools.md` for the full utility command list (`showVersions`,
+`queryC`, `installPip`, `installRpm`, `diagnostics`, `advancedTools`,
+`printMenu`, `helpMe`).
 
 ## Gotchas
 
@@ -304,12 +230,19 @@ helpMe                  # extended help with all tool documentation
 | Atlantis event display                        | hn-atlas-AtlantisDisplay@cern.ch    |
 | AMI bookkeeping                               | atlas-bookkeeping@cern.ch           |
 
-## Docs
+## Reference Files
 
-https://twiki.atlas-canada.ca/bin/view/AtlasCanada/ATLASLocalRootBase2
-
-### Reference Files
+For deeper detail beyond what this skill covers, read the reference files in
+`references/`:
 
 - **`references/asetup.md`** — Complete asetup option reference, configuration
   file format, environment variables, saved session workflow, and platform
-  string syntax.
+  string syntax. Read when configuring a release with non-default options or
+  writing a `.asetup` config file.
+- **`references/tools.md`** — Full `lsetup` tool catalog with docs/contacts,
+  complete `acm` command reference, and the full utility command list. Read when
+  the user needs a tool or command beyond the canonical examples above.
+
+## Docs
+
+https://twiki.atlas-canada.ca/bin/view/AtlasCanada/ATLASLocalRootBase2

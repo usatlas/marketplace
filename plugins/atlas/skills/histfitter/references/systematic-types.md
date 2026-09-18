@@ -246,7 +246,7 @@ Pruned systematics are tracked in `sample.systListOverallPruned` and
 
 After enabling pruning, verify that the total systematic uncertainty on yields
 is not significantly changed. Compare `SysTable.py` output with and without
-pruning.
+pruning. Pruning plots are saved to `plots/`.
 
 ## Constraint terms
 

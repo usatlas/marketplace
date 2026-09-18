@@ -81,8 +81,12 @@ description: >-
 
 - Section order: Overview → When to Use → Key Concepts → Canonical Patterns →
   Gotchas → Interop → Docs.
-- Deep skills (uproot, coffea, pyhf, histfitter) add a Worked Example and
-  Troubleshooting table (~300–500 lines). Medium skills target ~150–250 lines.
+- Target ~150–250 lines for SKILL.md, even for skills covering a large or deep
+  API surface (uproot, coffea, pyhf, histfitter, and similar). A Worked Example
+  or Troubleshooting table belongs in `references/`, not inline — see
+  "Progressive disclosure" below. A skill this size that still exceeds ~300
+  lines is a sign that detail belongs in a reference file, not evidence that the
+  skill needs more room.
 - All ATLAS energy/momentum values are in MeV — note this in Gotchas.
 - End with a `## Docs` section linking the canonical upstream documentation URL.
 - No `attribution:` or vendoring comments inside skill files. Legal attribution
@@ -113,7 +117,14 @@ one-line description of its content and **when to read it** (e.g., "Read when
 the user asks which systematic type to use"). This lets the model decide at
 runtime whether loading the reference is worthwhile.
 
-Good examples of this pattern: `awkward`, `xroofit`, `histfitter`.
+**This section is mandatory, not optional, whenever a skill has a `references/`
+directory.** A `references/*.md` file with no pointer anywhere in its skill's
+SKILL.md is a bug — the content is unreachable to the model no matter how good
+it is. Run `pixi run check-skills` after adding or editing a `references/` file
+to catch this.
+
+Good examples of this pattern: `xroofit`, `histfitter`, `topcptoolkit`, `panda`,
+`uproot`.
 
 **Writing style for skills:**
 

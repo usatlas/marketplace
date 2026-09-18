@@ -104,18 +104,6 @@ setupATLAS -c docker://atlas/analysisbase:21.2.85-centos7
 setupATLAS -c docker://gitlab-registry.cern.ch/atlas/athena/analysisbase:24.2.0
 ```
 
-### Standalone container (atlas-standalone type)
-
-For images that ship a pre-built release (detected by `/release_setup.sh`),
-setupATLAS does not run automatically inside. Source the release manually:
-
-```bash
-setupATLAS -c docker://gitlab-registry.cern.ch/atlas/athena/analysisbase:24.2.0
-# Inside the container:
-source /release_setup.sh
-source /alrb/postATLASReleaseSetup.sh
-```
-
 ### Run without CVMFS (standalone setupATLAS)
 
 Download the standalone bootstrap when CVMFS is unavailable:
@@ -129,53 +117,6 @@ chmod +x ./setupATLAS
 This downloads the container image and enters it. CVMFS is accessed from inside
 the container via the automounter.
 
-### GPU passthrough
-
-```bash
-# Apptainer/Singularity (Linux)
-setupATLAS -c centos7 -e "--nv"
-
-# Docker (Linux or macOS)
-setupATLAS -c centos7 -e "--gpus all"
-```
-
-The `-e` flag passes runtime exec options directly to the container backend.
-
-### Batch submission from containers
-
-Enter the container with the `-b` flag to enable batch mode, then generate
-submission scripts:
-
-```bash
-setupATLAS -c centos7 -b
-batchScript "source /path/myJob.sh" -o submitMyJob.sh
-
-# Submit to SLURM
-sbatch --export=NONE submitMyJob.sh
-
-# Submit to LSF
-bsub -L /bin/bash submitMyJob.sh
-```
-
-The `-b` flag configures the container for non-interactive batch execution.
-
-### Force a specific container runtime
-
-```bash
-# Force Docker on a Linux system that has both Apptainer and Docker
-setupATLAS -c el9 --swtype docker
-
-# Force Podman
-setupATLAS -c el9 --swtype podman
-```
-
-Or set the environment variable before entering:
-
-```bash
-export ALRB_CONT_SWTYPE=docker
-setupATLAS -c el9
-```
-
 ### Join an existing Docker container
 
 ```bash
@@ -183,9 +124,9 @@ export ALRB_CONT_CONDUCT="dockerJoin"
 setupATLAS -c <container>
 ```
 
-This attaches to an already-running Docker container instead of starting a new
-one. Warning: exiting the joined session kills that session only, but the
-original container keeps running.
+Attaches to an already-running Docker container instead of starting a new one.
+See `references/container-options.md` for the exit-session caveat, forcing a
+specific runtime (`--swtype`), pre/post setup hooks, and GPU/batch options.
 
 ### Run a command and exit
 
@@ -194,48 +135,32 @@ original container keeps running.
 setupATLAS -c el9 -r "asetup StatAnalysis,0.7,latest && myScript.sh"
 ```
 
-### Pre/post setup hooks
-
-```bash
-# Run commands before setupATLAS runs inside the container
-setupATLAS -c el9 --presetup "export MY_VAR=foo"
-
-# Run commands after setupATLAS completes inside the container
-setupATLAS -c el9 --postsetup "source ~/mysetup.sh"
-```
-
 ## Worked Example
 
 **Scenario:** Run a StatAnalysis job on macOS where Apptainer is unavailable.
 
 1. Install Docker Desktop for macOS and start it.
 
-2. Download standalone setupATLAS (if CVMFS is not available):
-
-   ```bash
-   curl -O https://atlas-tier3-sw.web.cern.ch/containers/setupATLAS
-   chmod +x ./setupATLAS
-   ```
-
-3. Enter an EL9 container:
+2. Download standalone setupATLAS (if CVMFS is not available) and enter an EL9
+   container — see "Run without CVMFS" above:
 
    ```bash
    ./setupATLAS -c el9
    ```
 
-4. Inside the container, set up the analysis release:
+3. Inside the container, set up the analysis release:
 
    ```bash
    setupATLAS
    asetup StatAnalysis,0.7,latest
    ```
 
-5. Create a container-specific login script so future shells auto-configure. Add
+4. Create a container-specific login script so future shells auto-configure. Add
    the standard setupATLAS initialization (see the setupatlas skill) to
    `$HOME/.bashrc.container` — container shells source this file instead of
    `~/.bashrc`.
 
-6. Run the analysis:
+5. Run the analysis:
 
    ```bash
    cd /srv    # maps to $PWD on the host
@@ -275,16 +200,9 @@ setupATLAS -c el9 --postsetup "source ~/mysetup.sh"
 - **Relative symlinks only.** Absolute symlinks break inside containers because
   host paths differ from container paths. Always use relative symlinks in the
   working directory.
-- **Timezone issue with voms-proxy.** In unpacked Apptainer containers,
-  `voms-proxy-init` can fail with timezone errors. Fix with
-  `export TZ=<timezone>` (e.g. `export TZ=America/Chicago`) or use `arcproxy` as
-  an alternative.
 - **ATLAS units are MeV.** All ATLAS energy, momentum, and mass values are in
   MeV, not GeV. This applies to ROOT files, xAOD containers, and framework
   outputs accessed from within containers.
-- **Exiting a joined Docker session.** When using `dockerJoin`, exiting kills
-  only the joined session, not the original container. But be aware that
-  processes started in the joined session terminate on exit.
 
 ## Interop
 
@@ -297,11 +215,11 @@ setupATLAS -c el9 --postsetup "source ~/mysetup.sh"
 - **Rucio/PanDA**: Grid tools work inside containers after
   `voms-proxy-init --voms atlas` — see the setupatlas skill for grid patterns.
 
-## Docs
-
-https://twiki.atlas-canada.ca/bin/view/AtlasCanada/Containers
-
-### Reference Files
+## Reference Files
 
 - **`references/container-options.md`** — Full container option table,
   environment variables, advanced runtime configuration, and conduct keywords.
+
+## Docs
+
+https://twiki.atlas-canada.ca/bin/view/AtlasCanada/Containers

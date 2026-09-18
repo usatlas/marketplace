@@ -187,229 +187,24 @@ trex-fitter l config.config          # CLs limit
 trex-fitter s config.config          # significance
 ```
 
-### Asimov (Blind) Fit
+## Reference Files
 
-```bash
-# In Fit block: FitBlind: TRUE
-trex-fitter f config.config "FitBlind=TRUE"
-```
+For deeper detail beyond what this skill covers, read the reference files in
+`references/`:
 
-Or at the command line without editing the config:
-
-```bash
-trex-fitter f config.config "StatOnly=TRUE"   # stat-only cross-check
-```
-
-### Parallelising Steps
-
-`h`/`n` (histogram step) and `r` (ranking) are embarrassingly parallel:
-
-```bash
-# Histogram step: split by region
-trex-fitter h config.config "Regions=SR"
-trex-fitter h config.config "Regions=CR_top"
-
-# Ranking: split by NP index (0-based, nSteps total)
-trex-fitter r config.config "LHscanStep=0:10"   # step 0 of 10
-trex-fitter r config.config "LHscanStep=1:10"
-```
-
-### Correlate / Decorrelate NPs
-
-```
-% 100% correlation: share NuisanceParameter name
-Systematic: "JES_1"
-  NuisanceParameter: "JES"
-  ...
-
-Systematic: "JES_2"
-  NuisanceParameter: "JES"
-  ...
-
-% Full decorrelation: unique NuisanceParameter per region
-Systematic: "JES"
-  NuisanceParameter: "JES_SR"
-  Regions: SR
-
-Systematic: "JES"
-  NuisanceParameter: "JES_CR"
-  Regions: CR_top
-```
-
-Or use the command-line option `DecorrSysts=JES` to split automatically.
-
-### NormFactor Expression (W helicity example)
-
-```
-NormFactor: "norm_left"
-  Expression: (1.-norm_long-norm_right):norm_long[0.687,0,1],norm_right[0.002,0,1]
-
-NormFactor: "norm_long"
-  Nominal: 0.687
-
-NormFactor: "norm_right"
-  Nominal: 0.002
-```
-
-`Expression` uses ROOT `TFormula` syntax: `<formula>:<param>[init,min,max],...`.
-
-### MC Statistical Uncertainties
-
-```
-Job: "MyAnalysis"
-  MCstatThreshold: 0.01       % add gamma only if rel. unc. > 1%
-  MCstatConstraint: POISSON   % POISSON (default) or GAUSSIAN
-
-Sample: "rare_bkg"
-  SeparateGammas: TRUE        % per-sample gammas (ShapeSys, not OverallSys)
-  UseMCstat: FALSE            % exclude this sample from shared gammas
-```
-
-Cap per-bin MC stat uncertainty at ~20%; larger values bias signal extraction.
-
-### Exporting to pyhf
-
-```bash
-trex-fitter w config.config
-pyhf xml2json --basedir output/MyAnalysis/RooStats \
-    output/MyAnalysis/RooStats/MyAnalysis.xml > workspace.json
-```
-
-## Worked Example: ttH→bb Search (2 regions, 3 samples)
-
-```
-Job: "ttH_bb"
-  CmeLabel: "13 TeV"
-  POI: "mu_ttH"
-  ReadFrom: HIST
-  HistoPath: "hists"
-  OutputDir: "output/ttH_bb"
-  LumiLabel: "139 fb^{-1}"
-  Lumi: 139.0
-  MCstatThreshold: 0.05
-  SystPruningShape: 0.02
-  SystPruningNorm: 0.01
-
-Fit: "Fit_ttH"
-  FitType: SPLUSB
-  FitRegion: CRSR
-  FitBlind: FALSE
-  POIAsimov: 1
-  UseMinos: mu_ttH
-
-Limit: "Limit_ttH"
-  LimitType: ASYMPTOTIC
-
-Significance: "Sig_ttH"
-  SignificanceType: ASYMPTOTIC
-  POIAsimov: 1
-
-Region: "SR_lj"
-  Type: SIGNAL
-  HistoName: "h_mbb"
-  Label: "SR (l+jets)"
-  ShortLabel: "SR"
-  VariableTitle: "m_{bb} [GeV]"
-
-Region: "CR_ttbar"
-  Type: CONTROL
-  HistoName: "h_mbb"
-  Label: "t#bar{t} CR"
-  ShortLabel: "CR"
-
-Sample: "ttH"
-  Type: SIGNAL
-  HistoFile: "ttH125"
-  FillColor: 632
-  NormalizedByTheory: TRUE
-
-Sample: "ttbar"
-  Type: BACKGROUND
-  HistoFile: "ttbar"
-  FillColor: 4
-
-Sample: "Wjets"
-  Type: BACKGROUND
-  HistoFile: "Wjets"
-  FillColor: 5
-
-Sample: "Data"
-  Type: DATA
-  HistoFile: "data"
-
-NormFactor: "mu_ttH"
-  Title: "#mu_{ttH}"
-  Nominal: 1
-  Min: -10
-  Max: 20
-  Samples: ttH
-
-NormFactor: "mu_ttbar"
-  Title: "#mu_{t#bar{t}}"
-  Nominal: 1
-  Min: 0
-  Max: 5
-  Samples: ttbar
-
-Systematic: "Lumi"
-  Title: "Luminosity uncertainty"
-  Type: OVERALL
-  OverallUp: 0.017
-  OverallDown: -0.017
-  Samples: ttH, ttbar, Wjets
-
-Systematic: "JES"
-  Title: "Jet energy scale"
-  Type: HISTO
-  HistoNameUp: "h_mbb_JES_up"
-  HistoNameDown: "h_mbb_JES_dn"
-  Samples: ttH, ttbar, Wjets
-  Symmetrisation: TWOSIDED
-  Smoothing: 40
-
-Systematic: "bTagB"
-  Title: "b-tagging (b-jet eff.)"
-  Type: HISTO
-  HistoNameUp: "h_mbb_bTag_up"
-  HistoNameDown: "h_mbb_bTag_dn"
-  Samples: ttH, ttbar, Wjets
-  Symmetrisation: TWOSIDED
-
-Systematic: "ttbar_XS"
-  Title: "t#bar{t} cross section"
-  Type: OVERALL
-  OverallUp: 0.06
-  OverallDown: -0.06
-  Samples: ttbar
-```
-
-Run the full pipeline:
-
-```bash
-trex-fitter h  config/ttH_bb.config
-trex-fitter wd config/ttH_bb.config
-trex-fitter f  config/ttH_bb.config
-trex-fitter prl config/ttH_bb.config
-trex-fitter s  config/ttH_bb.config
-```
-
-Post-fit outputs land in `output/ttH_bb/`: `Fits/`, `Plots/`, `Tables/`,
-`Pulls/`, `Limits/`, `Significance/`.
-
-## Troubleshooting
-
-| Symptom                                          | Likely cause                                     | Fix                                                                   |
-| ------------------------------------------------ | ------------------------------------------------ | --------------------------------------------------------------------- |
-| MIGRAD does not converge                         | NaN/Inf in likelihood                            | `DebugLevel: 3`; inspect `Systematics/` plots for bad templates       |
-| Hessian matrix not positive-definite             | Near-degenerate NPs or singular workspace        | Merge similar backgrounds; increase `SystPruningShape`                |
-| Many NPs constrained (σ_post ≪ 1)                | Fit absorbing fluctuations via shape NPs         | Reduce bins; apply `Smoothing: 40`; check `Systematics/` folder       |
-| Large NP pulls (\|pull\| > 2)                    | Template disagreement with data                  | Inspect `Systematics/` plots; introduce CR for that NP                |
-| Limit result is `nan`                            | Fit failure in signal hypothesis                 | Run `f` step first; check `w` step warnings in log                    |
-| Same results each run vary slightly              | `SetRandomInitialNPval` > 0 set in config        | Difference ≤ 0.01 on POI is acceptable; increase it only for testing  |
-| `h` step very slow                               | No parallelisation                               | Split by `Regions=<list>` in parallel jobs                            |
-| Empty-bin crash                                  | Zero-yield background bin                        | Merge backgrounds, rebin, or adjust selection; TRExFitter fills 1e-6  |
-| Systematic one-sided (both up/dn same direction) | Generator stat fluctuations or genuine asymmetry | Use `Symmetrisation: ABSMEAN` or `MAXIMUM`; or `ONESIDEDPLUS/MINUS`   |
-| `pyhf xml2json` fails                            | Expressions or multiple POIs not supported       | Manually edit JSON; expressions not in pyhf (tracked upstream issues) |
+- **`references/advanced-config-patterns.md`** — Asimov/blind fits,
+  parallelising the histogram and ranking steps, correlating/decorrelating
+  nuisance parameters, `NormFactor` `Expression` syntax, MC statistical
+  uncertainty tuning, exporting to pyhf, and a fit/limit troubleshooting table.
+  Read when running a blind or stat-only fit, splitting a slow `h`/`r` step
+  across jobs, sharing or splitting a `NuisanceParameter`, writing a
+  `TFormula`-based `NormFactor`, or diagnosing a fit convergence, pull, or limit
+  failure.
+- **`references/worked-example.md`** — Complete multi-region, multi-sample
+  config for a ttH→bb search (2 regions, 3 backgrounds, NormFactors, and
+  systematics wired together) plus the full run pipeline and output directory
+  layout. Read when adapting a full worked config rather than the minimal
+  skeleton above.
 
 ## Gotchas
 
