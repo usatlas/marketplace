@@ -92,93 +92,6 @@ with uproot.open("output.root:reco") as tree:
     leading_jet_pt = ak.firsts(arrays["jet_pt"])  # safe: None for events with 0 jets
 ```
 
-### Expressions, cuts, and aliases
-
-The first argument to `arrays()` accepts branch names, expression strings, or a
-mix. `cut=` filters events. `aliases=` assigns friendlier names. Expression
-evaluation is not yet supported for RNTuples.
-
-```python
-import uproot
-
-with uproot.open("output.root:reco") as tree:
-    # entry-level cut (Python expression; ATLAS values in MeV)
-    arrays = tree.arrays(
-        ["jet_pt", "met_met"],
-        cut="n_jets >= 4 & met_met > 200000",
-    )
-
-    # compute derived quantities at read time
-    arrays = tree.arrays("sqrt(jet_px**2 + jet_py**2)")
-
-    # give expressions friendlier names; can cut on aliases
-    arrays = tree.arrays(
-        ["jet_pt_calc", "met_met"],
-        aliases={"jet_pt_calc": "sqrt(jet_px**2 + jet_py**2)"},
-        cut="jet_pt_calc > 25000",
-    )
-```
-
-### Read an RNTuple
-
-RNTuple uses "fields" instead of "branches" and `filter_field=` instead of
-`filter_branch=`; everything else mirrors the TTree interface.
-
-```python
-import uproot
-
-with uproot.open("output.root:reco") as rnt:
-    print(rnt.keys())           # field names
-    print(rnt.typenames())      # field name → C++ type
-    rnt.show()                  # name/typename table
-
-    # read specific fields
-    arrays = rnt.arrays(["jet_pt", "weight_mc"])
-
-    # filter fields with a lambda
-    arrays = rnt.arrays(filter_field=lambda f: "jet" in f.name)
-```
-
-### Read histograms from a ROOT file
-
-```python
-import uproot
-
-with uproot.open("histograms.root") as f:
-    h = f["h_jet_pt"]              # TH1F, TH1D, etc.
-
-    # export to numpy  →  (bin contents, edges)
-    values, edges = h.to_numpy()
-
-    # export to boost-histogram (manipulation, rebinning)
-    bh_obj = h.to_boost()
-
-    # export to hist (plotting with mplhep)
-    hist_obj = h.to_hist()
-
-# TH2 follows the same interface
-with uproot.open("histograms.root") as f:
-    h2 = f["h_jet_pt_vs_eta"]
-    values, xedges, yedges = h2.to_numpy()
-    bh2 = h2.to_hist()
-```
-
-### Read as numpy (flat branches only)
-
-```python
-with uproot.open("output.root:reco") as tree:
-    weights = tree["weight_mc"].array(library="np")   # 1-D numpy array
-    pileup  = tree["weight_pileup"].array(library="np")
-    total_weight = weights * pileup
-```
-
-### Read as pandas (flat branches only — no jagged)
-
-```python
-with uproot.open("output.root:reco") as tree:
-    df = tree.arrays(["weight_mc", "weight_pileup", "met_met"], library="pd")
-```
-
 ### Batch iteration over large files
 
 `step_size` accepts an entry count or a memory string; the memory form is more
@@ -207,108 +120,6 @@ for batch, report in uproot.iterate(
     pass
 ```
 
-### Concatenate multiple files
-
-```python
-arrays = uproot.concatenate(
-    ["sample_A.root:reco", "sample_B.root:reco"],
-    ["jet_pt", "weight_mc"],
-)
-```
-
-### Glob patterns and remote files
-
-```python
-# local glob
-arrays = uproot.concatenate("ntuples/*.root:reco", ["jet_pt"])
-
-# remote via XRootD (requires fsspec-xrootd)
-arrays = uproot.concatenate(
-    "root://eosatlas.cern.ch//eos/atlas/ntuples/*.root:reco",
-    ["jet_pt"],
-)
-```
-
-### Write ROOT files
-
-Uproot now writes RNTuples by default when using the dict-like syntax. Use
-`mkrntuple` to write an RNTuple (supports any structure representable as an
-Awkward Array, including jagged and nested fields). Use `mktree` to explicitly
-write a TTree (flat and one-level-jagged branches only).
-
-```python
-import uproot, numpy as np, awkward as ak, hist
-
-# Write an RNTuple (default, modern format — supports jagged/nested structures)
-with uproot.recreate("output.root") as f:
-    n = 10_000
-    data = {
-        "jet_pt":    ak.Array([np.random.exponential(50_000, np.random.randint(0, 6)) for _ in range(n)]),
-        "weight_mc": np.ones(n),
-    }
-    rntuple = f.mkrntuple("reco", data)
-    # or since it is default via dict-like
-    # f["reco"] = data
-
-# Write a TTree (legacy format — flat and one-level-jagged branches only)
-with uproot.recreate("output_ttree.root") as f:
-    n = 10_000
-    tree = f.mktree("reco", {"jet_pt": "f4", "weight_mc": "f8"})
-    tree.extend({"jet_pt": np.random.exponential(50_000, n).astype("f4"),
-                 "weight_mc": np.ones(n)})
-
-# Write a histogram
-h = hist.Hist(hist.axis.Regular(40, 0, 200))
-h.fill(np.random.normal(100, 15, 5000))
-with uproot.recreate("hists.root") as f:
-    f["h_mass"] = h  # uproot can write hist.Hist directly
-```
-
-## Worked Example: Full NTuple → histogram pipeline
-
-```python
-import uproot, awkward as ak, hist, numpy as np
-import vector; vector.register_awkward()
-
-h_jet_pt = hist.Hist(
-    hist.axis.Regular(50, 0, 1000, name="pt", label=r"Leading jet $p_T$ [GeV]"),
-    storage=hist.storage.Weight(),
-)
-
-for batch in uproot.iterate(
-    "ntuples/*.root:reco",
-    ["jet_pt", "weight_mc", "weight_pileup", "weight_bTagSF_77"],
-    step_size=200_000,
-):
-    # combined event weight
-    w = batch["weight_mc"] * batch["weight_pileup"] * batch["weight_bTagSF_77"]
-
-    # safe leading jet pT in GeV
-    lj_pt = ak.firsts(batch["jet_pt"]) / 1000.0   # MeV → GeV
-    mask  = ~ak.is_none(lj_pt)                     # drop events with 0 jets
-
-    h_jet_pt.fill(pt=ak.to_numpy(lj_pt[mask]), weight=ak.to_numpy(w[mask]))
-
-import mplhep as hep, matplotlib.pyplot as plt
-fig, ax = plt.subplots()
-hep.histplot(h_jet_pt, ax=ax)
-hep.atlas.label(ax=ax, data=False, lumi=139)
-fig.savefig("leading_jet_pt.pdf")
-```
-
-## Troubleshooting
-
-| Issue                         | Cause                                                      | Fix                                                      |
-| ----------------------------- | ---------------------------------------------------------- | -------------------------------------------------------- |
-| `KeyError: "reco"`            | Tree name wrong; file has cycle `reco;1`                   | `f.keys()` to inspect; or `f["reco;1"]` explicitly       |
-| `IndexError` on `array[:, 0]` | Some events have zero jets                                 | Replace with `ak.firsts(array)`                          |
-| `NotAnNumpyCompatible`        | Branch is jagged (variable-length)                         | Use `library="ak"` (default) or iterate                  |
-| `MemoryError`                 | File too large for single load                             | Switch to `uproot.iterate` with `step_size`              |
-| Wrong branch shape            | Systematic tree (e.g. `reco_JES__1up`) has extra dimension | Read the correct tree by name                            |
-| Remote file stalls            | XRootD not installed                                       | `pip install uproot[xrootd]` or `fsspec-xrootd`          |
-| `UnicodeDecodeError`          | ROOT string branch with non-UTF8 content                   | Use `branch.array(interpretation=uproot.AsStrings(...))` |
-| `None` values in awkward      | `ak.firsts` returns `None` for empty events                | Use `mask = ~ak.is_none(arr)` before numpy conversion    |
-
 ## Gotchas
 
 - **ATLAS energy/momentum values are in MeV**: divide by 1000 before GeV-scale
@@ -336,6 +147,22 @@ fig.savefig("leading_jet_pt.pdf")
   NanoAOD-style processors.
 - **fsspec-xrootd**: Mount EOS or grid storage so that uproot `root://` paths
   work transparently.
+
+## Reference Files
+
+For deeper detail beyond what this skill covers, read the reference files in
+`references/`:
+
+- **`references/read-recipes.md`** — Expression-based cuts and aliases,
+  RNTuple-specific reads, histogram extraction
+  (`to_numpy`/`to_boost`/`to_hist`), numpy/pandas export, multi-file
+  concatenation, glob/remote (XRootD) file access, and a full worked NTuple →
+  histogram pipeline. Read when the basic inspect/filter/read-into-awkward
+  workflow above doesn't cover the case.
+- **`references/writing-and-troubleshooting.md`** — Writing RNTuples, TTrees,
+  and histograms back to ROOT files, plus a table of common uproot errors (key
+  errors, jagged-array pitfalls, memory errors, remote-file stalls) and their
+  fixes. Read when writing ROOT output or debugging an uproot exception.
 
 ## Docs
 

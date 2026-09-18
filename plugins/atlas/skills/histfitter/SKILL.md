@@ -203,166 +203,28 @@ bkg.addSystematic(Systematic("ucb", configMgr.weights,
 directly from numbers. Use `"cuts"` as the variable for a single-bin channel
 with `addChannel("cuts", ["SR"], 1, 0.5, 1.5)`.
 
-## CLI Reference
-
-```bash
-HistFitter.py [options] configFile.py
-```
-
-| Flag             | Action                                          |
-| ---------------- | ----------------------------------------------- |
-| `-t`             | Build histograms from TTrees                    |
-| `-w`             | Create RooWorkspace from histograms             |
-| `-f`             | Fit the workspace                               |
-| `-p`             | Run exclusion hypothesis test (CLs)             |
-| `-z`             | Run discovery hypothesis test (p₀)              |
-| `-l`             | Upper limit scan                                |
-| `-d`             | Draw before/after plots                         |
-| `-D <plots>`     | Specific plots: before, after, corrMatrix,      |
-|                  | separateComponents, likelihood, systematics,    |
-|                  | plotInterpolation                               |
-| `-F <type>`      | Fit type: bkg, excl, disc                       |
-| `-x`             | Write XML then call hist2workspace              |
-| `-j`             | Write JSON workspace from XML output            |
-| `-i`             | Stay in interactive Python after running        |
-| `-a`             | Use Asimov dataset                              |
-| `-m <params>`    | Run MINOS (asymmetric errors); use ALL for all  |
-| `-C <p1:v1,...>` | Fix parameters to constant values               |
-| `-g <points>`    | Signal grid points (comma-separated)            |
-| `-r <regions>`   | Signal regions to process (comma-separated)     |
-| `-R`             | Rebin non-equidistant histograms to proxy bins  |
-| `-V`             | Include validation regions                      |
-| `-u <arg>`       | Arbitrary user argument (accessible in config)  |
-| `--pyhf`         | Use pyhf backend where possible                 |
-| `--pyhf-backend` | Backend: numpy, tensorflow, pytorch, jax        |
-| `-L <level>`     | Log level: VERBOSE, DEBUG, INFO, WARNING, ERROR |
-
-Typical workflow: `-t -w -f` (histos → workspace → fit). After first run, skip
-`-t` if cuts/weights are unchanged: `-w -f` or just `-f`.
-
 ## Reference Files
 
 For deeper detail beyond what this skill covers, read the reference files in
 `references/`:
 
-- **`systematic-types.md`** — Complete method reference table, decision
-  flowchart for choosing a type, how normalized systematics work internally,
-  one-sided/envelope variants, pruning mechanics, constraint terms. Read when
-  the user asks which systematic type to use or is debugging unexpected
-  normalization behavior.
-- **`config-api.md`** — Full configMgr properties, fitConfig/Channel/Sample/
-  Measurement methods, object hierarchy, weight/systematic propagation rules,
-  input file management. Read when constructing a config script or looking up a
-  specific API method.
-- **`helper-scripts.md`** — Detailed CLI options and Python API for
+- **`references/systematic-types.md`** — Complete method reference table,
+  decision flowchart for choosing a type, how normalized systematics work
+  internally, one-sided/envelope variants, pruning mechanics, constraint terms.
+  Read when the user asks which systematic type to use or is debugging
+  unexpected normalization behavior.
+- **`references/config-api.md`** — Full configMgr properties,
+  fitConfig/Channel/Sample/ Measurement methods, object hierarchy,
+  weight/systematic propagation rules, input file management, and the complete
+  `HistFitter.py` CLI flag reference. Read when constructing a config script,
+  looking up a specific API method, or looking up a CLI flag not covered in
+  Canonical Patterns.
+- **`references/helper-scripts.md`** — Detailed CLI options and Python API for
   YieldsTable.py, SysTable.py, SystRankingPlot.py, UpperLimitTable.py, plus
   other utility scripts and workspace file naming conventions. Read when
   producing publication tables or plots from a fitted workspace.
 
-## Systematic Types
-
-### Constructor
-
-```python
-syst = Systematic(name, nominal, high, low, type, method)
-```
-
-- **type**: `"tree"` (different TTrees), `"weight"` (different weight branches),
-  `"user"` (numeric values)
-- **method**: controls how the variation enters the likelihood
-
-### Method Reference
-
-| Method                            | Effect                                        |
-| --------------------------------- | --------------------------------------------- |
-| `overallSys`                      | Scale normalization only (no shape)           |
-| `histoSys`                        | Correlated shape + normalization              |
-| `normHistoSys`                    | Shape only (normalized to nominal integral)   |
-| `overallHistoSys`                 | Factorized: overallSys + shape-only histoSys  |
-| `overallNormHistoSys`             | overallSys + normHistoSys (uses norm regions) |
-| `shapeSys`                        | Bin-by-bin uncorrelated (sum of samples)      |
-| `shapeStat`                       | Bin-by-bin uncorrelated (single sample)       |
-| `userOverallSys`                  | User-defined numeric overall scale            |
-| `userHistoSys`                    | User-defined numeric shape + norm             |
-| `normHistoSysOneSide[Sym]`        | One-sided [symmetrized] normHistoSys          |
-| `overallNormHistoSysOneSide[Sym]` | One-sided [symmetrized] overallNormHistoSys   |
-| `histoSysEnvelopeSym`             | Envelope from vector of variations            |
-
-### Choosing a Type
-
-- Pure normalization uncertainty → `overallSys` or `userOverallSys`
-- Shape + normalization → `histoSys`
-- Shape only (using transfer factor approach) → `normHistoSys`
-- Transfer factor with factorized norm → `overallNormHistoSys` (most common for
-  backgrounds with norm factors and norm regions)
-- MC statistical uncertainty → `shapeStat` per sample
-
-"Norm" types require `sample.setNormRegions([(region, variable), ...])` to
-define which CRs to normalize against. Only use on samples that carry a
-normalization factor `mu_...`; otherwise the normalization uncertainty is lost.
-
-## Helper Scripts
-
-### Yields table
-
-```bash
-YieldsTable.py -s Top,WZ,BG -c CR_nJet,SR_cuts \
-  -w results/MyAnalysis/BkgOnly_combined_NormalMeasurement_model_afterFit.root \
-  -o yields.tex
-```
-
-Options: `-b` (show before-fit), `-S` (show sum), `-B` (blind SR), `-P` (per-bin
-yields).
-
-### Systematics breakdown table
-
-```bash
-SysTable.py -c SR_cuts \
-  -w results/MyAnalysis/BkgOnly_combined_NormalMeasurement_model_afterFit.root \
-  -o systable.tex
-```
-
-Options: `-s <sample>` (per-sample), `-%` (show percentages), `-m 2` (method 2:
-refit with parameter fixed), `-z` (shade systematic based on size).
-
-### Systematics ranking plot
-
-```bash
-SystRankingPlot.py \
-  -w results/MyAnalysis/Exclusion_combined_NormalMeasurement_model_afterFit.root \
-  -f CR,SR -p mu_SIG --max-np 20 -o plots/
-```
-
-Shows pre/post-fit impact of each nuisance parameter on the POI.
-
-### Upper limit table
-
-```bash
-UpperLimitTable.py -c SR_cuts \
-  -w results/MyAnalysis/Discovery_combined_NormalMeasurement_model_afterFit.root \
-  -l 139.0 -p mu_Discovery -o upperlimit.tex
-```
-
-Produces a table of observed/expected upper limits on visible cross-section,
-signal events, and signal strength from a model-independent (discovery) fit.
-
-### Pull / summary plot
-
-Run `YieldsTable.py` first (produces a `.pickle` file), then use
-`pullPlotUtils.makePullPlot()` from `python/pullPlotUtils.py`.
-
 ## Advanced Features
-
-### Blinding
-
-```python
-configMgr.blindSR = True   # replace SR data with total bkg estimate
-configMgr.blindCR = False
-configMgr.blindVR = False
-configMgr.useSignalInBlindedData = False  # True adds signal MC to blind data
-```
-
-Per-channel blinding: `myChannel.blind = True`.
 
 ### MINOS (asymmetric errors)
 
@@ -373,29 +235,7 @@ HistFitter.py -f -m ALL config.py                   # all params
 
 Use MINOS when profile likelihood is non-parabolic (check with `-D likelihood`).
 Errors < 1 on alpha parameters indicate the fit is constraining ("profiling")
-that systematic.
-
-### Pruning
-
-```python
-configMgr.prun = True
-configMgr.prunThreshold = 0.05   # 5% relative to nominal
-configMgr.prunMethod = 2         # 1=chi2 test, 2=bin-by-bin check
-```
-
-Removes small systematics to speed up fits. Validate that total uncertainty is
-unchanged. Pruning plots are saved to `plots/`.
-
-### Histogram recycling
-
-```python
-configMgr.useCacheToTreeFallback = True
-configMgr.useHistBackupCacheFile = True
-configMgr.histBackupCacheFile = "data/MyAnalysis_template.root"
-```
-
-Reuses previously built histograms; only rebuilds missing ones (e.g., new signal
-points). Run with `-w` (not `-t`) to activate the fallback.
+that systematic; expected if the CR has high statistics.
 
 ### Fixing parameters in a fit
 
@@ -456,16 +296,14 @@ pyhf cls workspace.json
 
 ## Troubleshooting
 
-| Problem                         | Cause / Fix                                                                |
-| ------------------------------- | -------------------------------------------------------------------------- |
-| Upper limit scan returns 0s     | Scan range too wide; set `configMgr.scanRange = (0., 1.)`                  |
-| `All fits seem to have failed`  | Check log for which fit failed; reproduce with `-f -C "mu_Sig:<val>"`      |
-| Negative yields after fit       | Over-aggressive systematic; check with `-D systematics`                    |
-| MINOS errors < 1 on alpha param | Fit is constraining ("profiling") that syst; expected if CR has high stats |
-| Pruning removes too much        | Lower `prunThreshold`; validate total uncertainty unchanged                |
-| `Cannot open workspace`         | Wrong path; check `results/` directory structure                           |
-| Histograms not found in cache   | Run with `-t` to rebuild, or check `histBackupCacheFile` path              |
-| Slow histogram building         | Use parallelization (split samples with `-u`), or histogram recycling      |
+| Problem                        | Cause / Fix                                                           |
+| ------------------------------ | --------------------------------------------------------------------- |
+| Upper limit scan returns 0s    | Scan range too wide; set `configMgr.scanRange = (0., 1.)`             |
+| `All fits seem to have failed` | Check log for which fit failed; reproduce with `-f -C "mu_Sig:<val>"` |
+| Negative yields after fit      | Over-aggressive systematic; check with `-D systematics`               |
+| `Cannot open workspace`        | Wrong path; check `results/` directory structure                      |
+| Histograms not found in cache  | Run with `-t` to rebuild, or check `histBackupCacheFile` path         |
+| Slow histogram building        | Use parallelization (split samples with `-u`), or histogram recycling |
 
 ## Gotchas
 
@@ -476,8 +314,6 @@ pyhf cls workspace.json
   sample is the modern approach
 - **Signal in bkg-only fit**: Signal samples are ignored in `-F bkg`; to see the
   SR, use it as a validation channel
-- **Norm regions required**: `overallNormHistoSys` and `normHistoSys` require
-  `sample.setNormRegions(...)` and a norm factor on the sample
 - **Contour production**: Each signal point needs its own `-p` run; use `-g` to
   select points
 - **`readFromTree` flag**: Set automatically when `-t` is used; controls whether

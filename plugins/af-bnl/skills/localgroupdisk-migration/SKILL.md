@@ -110,58 +110,24 @@ Subsequent code blocks assume the environment is already set up.
 
 ### Prerequisites (5 pre-flight checks)
 
-Before starting, run all checks. STOP and report if any fails.
-
-**Check 1 — Rucio account:**
-
-```bash
-rucio whoami 2>/dev/null
-```
-
-Record the `account` name — used as `user.<account>` scope throughout.
-
-**Check 2 — Grid proxy:**
+Before starting, run all checks below and report a summary table. STOP if any
+check is FAIL. Full detail on each check (exact failure modes, what to tell the
+user) is in `references/preflight.md` — read it when troubleshooting a FAIL.
 
 ```bash
-voms-proxy-info --all 2>&1
-```
-
-- Must have >2 hours remaining (>24h recommended). If <2h, tell user to run
-  `voms-proxy-init -voms atlas:/atlas/usatlas -valid 96:00` (the explicit group
-  is required — plain `-voms atlas` may omit `/atlas/usatlas`).
-- VOMS attributes must include `/atlas/usatlas` — **required for LOCALGROUPDISK
-  quota**. If missing, direct user to `https://atlas-auth.cern.ch/`.
-
-**Check 3 — RSE names:**
-
-```bash
-rucio list-rses 2>/dev/null | grep -i "BNL-OSG2"
-```
-
-Must show `BNL-OSG2_LOCALGROUPDISK` and `BNL-OSG2_SCRATCHDISK`.
-
-**Check 4 — Quotas:**
-
-```bash
+rucio whoami 2>/dev/null                                    # 1. account name (used as user.<account> scope)
+voms-proxy-info --all 2>&1                                   # 2. >2h remaining; VOMS must include /atlas/usatlas
+rucio list-rses 2>/dev/null | grep -i "BNL-OSG2"              # 3. expect BNL-OSG2_LOCALGROUPDISK + _SCRATCHDISK
 ACCOUNT=$(rucio whoami 2>/dev/null | grep "account" | awk '{print $2}')
-rucio list-account-limits $ACCOUNT 2>/dev/null \
-  | grep -E "BNL-OSG2_(LOCALGROUPDISK|SCRATCHDISK)"
-rucio list-account-usage $ACCOUNT 2>/dev/null \
-  | grep BNL-OSG2_SCRATCHDISK
+rucio list-account-limits $ACCOUNT 2>/dev/null | grep -E "BNL-OSG2_(LOCALGROUPDISK|SCRATCHDISK)"  # 4. quotas
+rucio list-account-usage $ACCOUNT 2>/dev/null | grep BNL-OSG2_SCRATCHDISK
+ls /pnfs/usatlas.bnl.gov/LOCALGROUPDISK/ 2>&1 | head -3        # 5. pnfs mount (not atlaslocalgroupdisk)
 ```
 
-- LOCALGROUPDISK must show a limit (default 50 TB). If missing, the user needs
-  `/atlas/usatlas` VOMS group membership.
-- SCRATCHDISK: check available space for staging the upload.
-
-**Check 5 — pnfs mount:**
-
-```bash
-ls /pnfs/usatlas.bnl.gov/LOCALGROUPDISK/ 2>&1 | head -3
-```
-
-Must be accessible at `/pnfs/usatlas.bnl.gov/LOCALGROUPDISK/` (not
-`atlaslocalgroupdisk`).
+If Check 2's proxy is <2h or missing `/atlas/usatlas`, tell the user to run
+`voms-proxy-init -voms atlas:/atlas/usatlas -valid 96:00` (the explicit group is
+required). If Check 4's LGD quota is missing, the user needs `/atlas/usatlas`
+VOMS group membership from `https://atlas-auth.cern.ch/`.
 
 **Report pre-flight results** as a summary table:
 
@@ -261,34 +227,12 @@ echo "Rule ID: $RULE_ID"
 
 **Step 5b — Wait for replication:**
 
-Poll the rule until state reaches `OK` or `STUCK`. Use the Monitor tool:
-
-```bash
-RULE_ID="<RULE_ID>"
-prev=""
-while true; do
-  info=$(rucio rule-info $RULE_ID 2>/dev/null)
-  state=$(echo "$info" | grep "^State:" | awk '{print $2}')
-  locks=$(echo "$info" | grep "^Locks" | sed 's/.*: //')
-  cur="State=$state Locks=$locks"
-  if [ "$cur" != "$prev" ]; then
-    echo "$(date '+%Y-%m-%d %H:%M:%S') $cur"
-    prev="$cur"
-  fi
-  if [ "$state" = "OK" ]; then
-    echo "REPLICATION COMPLETE"
-    exit 0
-  fi
-  if [ "$state" = "STUCK" ]; then
-    echo "REPLICATION STUCK — check: rucio rule-info $RULE_ID"
-    exit 1
-  fi
-  sleep 120
-done
-```
-
-Use `timeout: 3600000` (1 hour). If it times out, re-run — FTS queue waits of
-1–12 hours are normal. If `STUCK`, report the error and STOP.
+Poll `rucio rule-info $RULE_ID` every 2 minutes with the Monitor tool
+(`timeout: 3600000`, i.e. 1 hour, re-running on timeout) until State reaches
+`OK` or `STUCK`. The exact polling script and STUCK-recovery guidance (a STUCK
+rule doesn't always mean permanent failure — check the `Error:` field) are in
+`references/check-rule.md`. FTS queue waits of 1–12 hours before any progress
+are normal; if it reaches `STUCK`, report the error and STOP.
 
 ### Decision Points
 
@@ -656,27 +600,14 @@ grid proxy required.
 
 ## Gotchas
 
-- **Pre-existing `_orig` never stops the run**: if `${source_dir}_orig` already
-  exists from a previous migration, the skill does not stop or overwrite it — it
-  backs up to a unique `${source_dir}_orig.<timestamp>` (`$BACKUP_DIR`) instead.
-- **DID conflict**: if filenames are already registered in Rucio, the skill
-  stops even in autonomous mode — this indicates a real problem.
-- **Non-`.root` files**: the skill only uploads `.root` files. If the source
-  directory contains metadata, logs, or config files, the symlink farm will be
-  missing them. The skill warns about this.
-- **Source files are never deleted**: `rucio upload` copies files. The original
-  directory is only renamed (to `$BACKUP_DIR`) during same-path swap.
-- **Backup is never auto-deleted**: even after a passing smoke test, and even in
-  autonomous mode, the skill never removes `$BACKUP_DIR` on its own — deletion
-  is irreversible and the backup is the sole rollback path. The decision is made
-  once, in the Final step, as a plain question (the single end-of-run prompt in
-  autonomous mode).
-- **Smoke test depth**: Step 8b verifies the filename set, per-file TTree entry
-  counts, and per-file adler32 (local source vs Rucio-registered, which FTS
-  validated against the replica). adler32 + matching filenames already prove
-  byte-level content equality; it is not just an entry-count check.
+- **Only two things ever STOP the run outright** (even in autonomous mode): a
+  DID conflict (Step 2) and, at the very end, the backup-deletion question
+  (Final step) — everything else either has a default or is a WARN.
+- **The backup is never deleted automatically**, smoke test PASSED or not; see
+  `references/preflight.md` and `references/check-rule.md` for the specific
+  failure modes of the pre-flight checks and replication polling.
 
-### Rollback
+## Rollback
 
 At no point are source files modified or deleted. Full rollback:
 

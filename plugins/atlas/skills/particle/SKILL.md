@@ -108,137 +108,6 @@ p = Particle.from_evtgen_name("J/psi")
 print(p.name, p.pdgid)          # "J/psi(1S)", 443
 ```
 
-### Search / filter with keyword args
-
-```python
-# All neutral beauty hadrons (particle=True excludes antiparticles)
-Particle.findall(lambda p: p.pdgid.has_bottom and p.charge == 0, particle=True)
-
-# By PDG name (exact)
-Particle.findall(pdg_name="pi")           # pi0, pi+, pi-
-
-# By quantum numbers
-Particle.findall(J=1, P=-1)              # spin-1 negative-parity particles (vectors)
-
-# K+ and K- by glob pattern
-Particle.findall("K*")
-
-# Strange mesons with c*tau > 1 m — use hepunits for unit safety
-from hepunits import meter
-Particle.findall(
-    lambda p: p.pdgid.is_meson and p.pdgid.has_strange and p.ctau > 1 * meter,
-    particle=True,
-)
-# → [K(L)0, K+]
-
-# finditer is lazy — prefer it for large scans
-for p in Particle.finditer(lambda p: p.pdgid.has_charm):
-    print(p.name, p.mass)
-```
-
-### Antiparticles
-
-```python
-pi_plus  = Particle.from_name("pi+")
-pi_minus = pi_plus.invert()
-print(pi_minus.pdgid)           # -211
-print(pi_plus.is_self_conjugate)   # False
-print(Particle.from_name("pi0").is_self_conjugate)  # True
-```
-
-### PDGID standalone (fast, no full table load)
-
-```python
-from particle import PDGID
-
-pid = PDGID(211)
-print(pid.is_meson, pid.has_strange)  # True, False
-print(pid.is_valid)                   # True
-
-bad = PDGID(99999999)
-print(bad.is_valid)                   # False (generator-specific code)
-
-# Standalone functions mirror PDGID properties
-from particle.pdgid import is_meson, has_bottom
-print(is_meson(211))                  # True
-print(has_bottom(5122))               # True (Lambda_b)
-```
-
-### Particle and PDGID literals
-
-```python
-from particle import literals as lp
-print(lp.pi_plus)                     # <Particle: name="pi+", pdgid=211, …>
-print(lp.Lambda_b_0.J)               # 0.5
-
-from particle.pdgid import literals as lid
-print(lid.pi_plus)                    # <PDGID: 211>
-print(lid.Lambda_b_0.has_bottom)      # True
-```
-
-### MC generator ID converters
-
-```python
-from particle import Particle, Geant3ID, PythiaID, Corsika7ID
-
-# Geant3 → PDG
-g3id = Geant3ID(8)
-p = Particle.from_pdgid(g3id.to_pdgid())
-print(p.name)   # "pi+"
-
-# Pythia → PDG
-pythiaid = PythiaID(211)
-p = Particle.from_pdgid(pythiaid.to_pdgid())
-
-# Corsika7 → PDG
-cid = Corsika7ID(5)
-p = Particle.from_pdgid(cid.to_pdgid())
-print(p.name)   # "mu+"
-
-# Bidirectional map (Pythia ↔ PDG)
-from particle.converters import Pythia2PDGIDBiMap
-from particle import PDGID, PythiaID
-pyid = Pythia2PDGIDBiMap[PDGID(9010221)]
-pdgid = Pythia2PDGIDBiMap[PythiaID(10221)]
-```
-
-### Decay modes (if available)
-
-```python
-b0 = Particle.from_name("B0")
-for mode in b0.decay_modes:
-    print(mode)
-```
-
-### Use with generator truth (e.g. from pyhepmc)
-
-```python
-from particle import PDGID
-
-def classify_truth_particle(pdgid: int) -> str:
-    pid = PDGID(pdgid)
-    if not pid.is_valid:
-        return "generator_specific"
-    if pid.is_lepton:
-        return "lepton"
-    if pid.has_bottom:
-        return "b_hadron"
-    if pid.has_charm:
-        return "c_hadron"
-    return "other"
-```
-
-### Describe a particle
-
-```python
-p = Particle.from_pdgid(321)   # K+
-print(p.describe())
-# Name: K+   ID: 321   Latex: $K^{+}$
-# Mass  = 493.677 ± 0.016 MeV
-# Width = -1.0 MeV
-# Q = +   J = 0.0   P = -   …
-```
-
 ## Gotchas
 
 - **Masses in MeV, not GeV**: `p.mass` returns MeV — divide by 1000 for GeV.
@@ -249,8 +118,9 @@ print(p.describe())
   `try/except ParticleNotFound` when processing MC output, where
   generator-specific codes (e.g. `9999999`) appear. `PDGID.is_valid` and
   `PDGID.is_generator_specific` let you pre-filter without exceptions.
-- **Decay mode coverage is incomplete**: not all particles have decay modes in
-  the PDG table; `b0.decay_modes` may be an empty list.
+- **No decay-mode data on `Particle`**: identity/mass/width only — there is no
+  `decay_modes` attribute. Use the `decaylanguage` skill (`.dec` file parsing)
+  for branching fractions and decay chains.
 - **`findall` vs `finditer`**: `findall` returns a sorted list; `finditer`
   returns a lazy iterator — prefer `finditer` for large scans to avoid
   materialising the full result.
@@ -269,6 +139,19 @@ print(p.describe())
   `p.ctau > 1 * meter` works because `ctau` is in hepunits-native mm.
 - **vector / awkward**: Convert `p.mass` (MeV) to GeV before passing to
   four-vector constructors that expect GeV.
+
+## Reference Files
+
+For deeper detail beyond what this skill covers, read the reference files in
+`references/`:
+
+- **`references/advanced-usage.md`** — Filtering the PDG table by quantum
+  numbers or glob patterns, antiparticle handling, standalone `PDGID` queries,
+  MC generator ID converters (Geant3, Pythia, Corsika7), decay mode lookups, MC
+  truth classification, and full particle description printouts. Read when the
+  common `from_pdgid`/`from_name` lookups in this file aren't enough — e.g.
+  filtering the whole PDG table, converting generator-specific codes, or
+  classifying truth particles by quantum number.
 
 ## Docs
 

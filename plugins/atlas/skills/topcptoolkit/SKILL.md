@@ -174,169 +174,92 @@ Key CLI options:
 CommonServices: {}
 
 Electrons:
-  - containerName: 'AnaElectrons'
+  - containerName: "AnaElectrons"
     crackVeto: True
     WorkingPoint:
-      - selectionName: 'tight'
-        identificationWP: 'TightLH'
-        isolationWP: 'Tight_VarRad'
+      - selectionName: "tight"
+        identificationWP: "TightLH"
+        isolationWP: "Tight_VarRad"
     PtEtaSelection:
-      minPt: 27000.0        # MeV
+      minPt: 27000.0 # MeV
       maxEta: 2.47
       useClusterEta: True
 
 Muons:
-  - containerName: 'AnaMuons'
+  - containerName: "AnaMuons"
     WorkingPoint:
-      - selectionName: 'tight'
-        quality: 'Medium'
-        isolation: 'Tight_VarRad'
+      - selectionName: "tight"
+        quality: "Medium"
+        isolation: "Tight_VarRad"
     PtEtaSelection:
-      minPt: 27000.0        # MeV
+      minPt: 27000.0 # MeV
       maxEta: 2.5
 
 Jets:
-  - containerName: 'AnaJets'
-    jetCollection: 'AntiKt4EMPFlowJets'  # PHYS; use AnalysisJets for PHYSLITE
+  - containerName: "AnaJets"
+    jetCollection: "AntiKt4EMPFlowJets" # PHYS; use AnalysisJets for PHYSLITE
     runJvtSelection: True
     PtEtaSelection:
       minPt: 25000.0
       maxEta: 2.5
     FlavourTagging:
-      - btagger: 'DL1dv01'
-        btagWP: 'FixedCutBEff_77'
+      - btagger: "DL1dv01"
+        btagWP: "FixedCutBEff_77"
 
 MissingET:
-  - containerName: 'AnaMET'
-    jets: 'AnaJets.baselineJvt'
-    electrons: 'AnaElectrons.tight'
-    muons: 'AnaMuons.tight'
+  - containerName: "AnaMET"
+    jets: "AnaJets.baselineJvt"
+    electrons: "AnaElectrons.tight"
+    muons: "AnaMuons.tight"
 
 OverlapRemoval:
-  - inputLabel: 'preselectOR'
-    outputLabel: 'passesOR'
-    jets: 'AnaJets.baselineJvt'
-    electrons: 'AnaElectrons.tight'
-    muons: 'AnaMuons.tight'
+  - inputLabel: "preselectOR"
+    outputLabel: "passesOR"
+    jets: "AnaJets.baselineJvt"
+    electrons: "AnaElectrons.tight"
+    muons: "AnaMuons.tight"
 
 EventSelection:
-  - &common
-    electrons: 'AnaElectrons.tight'
-    muons: 'AnaMuons.tight'
-    jets: 'AnaJets.passesOR'
-    btagDecoration: 'ftag_select_DL1dv01_FixedCutBEff_77'
-    selectionName: 'ejets'
+  - electrons: "AnaElectrons.tight"
+    muons: "AnaMuons.tight"
+    jets: "AnaJets.passesOR"
+    btagDecoration: "ftag_select_DL1dv01_FixedCutBEff_77"
+    selectionName: "ejets"
     selectionCuts: |
       EL_N tight 27000 == 1
       MU_N tight 27000 == 0
       JET_N passesOR 25000 >= 4
       JET_N_BTAG passesOR >= 2
       SAVE
-  - << *common
-    selectionName: 'mujets'
-    selectionCuts: |
-      EL_N tight 27000 == 0
-      MU_N tight 27000 == 1
-      JET_N passesOR 25000 >= 4
-      JET_N_BTAG passesOR >= 2
-      SAVE
 
 Thinning:
-  - containerName: 'AnaJets'
-    outputName: 'OutJets'
-    selectionName: 'passesOR'
-  - containerName: 'AnaElectrons'
-    outputName: 'OutElectrons'
-    selectionName: 'tight'
-  - containerName: 'AnaMuons'
-    outputName: 'OutMuons'
-    selectionName: 'tight'
+  - containerName: "AnaJets"
+    outputName: "OutJets"
+    selectionName: "passesOR"
+  - containerName: "AnaElectrons"
+    outputName: "OutElectrons"
+    selectionName: "tight"
+  - containerName: "AnaMuons"
+    outputName: "OutMuons"
+    selectionName: "tight"
 
 Output:
-  treeName: 'reco'
+  treeName: "reco"
   containers:
-    jet_: 'OutJets'
-    el_: 'OutElectrons'
-    mu_: 'OutMuons'
-    '': 'EventInfo'
+    jet_: "OutJets"
+    el_: "OutElectrons"
+    mu_: "OutMuons"
+    "": "EventInfo"
 ```
 
 For the full `selectionCuts` keyword reference (`EL_N`, `JET_N_BTAG`,
-`GLOBALTRIGMATCH`, `IMPORT`, `SAVE`, etc.), see
+`GLOBALTRIGMATCH`, `IMPORT`, `SAVE`, etc.) and patterns for combining loose and
+tight working points with `||` (e.g. for fake-lepton estimates), see
 `references/event-selection-dsl.md`.
 
-### Multiple working points (loose + tight)
-
-When running fake-lepton estimates you need two sets of lepton selections.
-Declare multiple `WorkingPoint` entries, two `OverlapRemoval` instances, and
-combine with the `||` operator in `Thinning`/`EventSelection`:
-
-```yaml
-Electrons:
-  - containerName: "AnaElectrons"
-    WorkingPoint:
-      - selectionName: "loose"
-        identificationWP: "LooseBLayerLH"
-        isolationWP: "NonIso"
-      - selectionName: "tight"
-        identificationWP: "TightLH"
-        isolationWP: "Tight_VarRad"
-
-OverlapRemoval:
-  - inputLabel: "preselectORloose"
-    outputLabel: "passesORloose"
-    jets: "AnaJets.baselineJvt"
-    electrons: "AnaElectrons.loose"
-    jetsSelectionName: "baselineJvtLoose"
-  - inputLabel: "preselectORtight"
-    outputLabel: "passesORtight"
-    jets: "AnaJets.baselineJvt"
-    electrons: "AnaElectrons.tight"
-    jetsSelectionName: "baselineJvtTight"
-
-Thinning:
-  - containerName: "AnaElectrons"
-    outputName: "OutElectrons"
-    selectionName: "tight||loose"
-```
-
-## Reading TCT Output with uproot
-
-```python
-import uproot
-import awkward as ak
-import vector
-vector.register_awkward()
-
-# TCT NTuples use a single TTree; systematic branches use %SYS% → NOSYS for nominal
-SYS = "NOSYS"
-
-with uproot.open("output.root:reco") as tree:
-    jets = ak.zip({
-        "pt":  tree[f"jet_pt_{SYS}"].array() / 1000,   # MeV → GeV
-        "eta": tree[f"jet_eta_{SYS}"].array(),
-        "phi": tree[f"jet_phi_{SYS}"].array(),
-        "e":   tree[f"jet_e_{SYS}"].array() / 1000,
-    }, with_name="Momentum4D")
-
-    # Apply the object selection flag — required to filter valid objects per systematic
-    sel = tree[f"jet_select_passesOR_{SYS}"].array().astype(bool)
-    selected_jets = jets[sel]
-
-    # Event-level weights
-    weight = (
-        tree["weight_mc"].array()
-        * tree[f"weight_pileup_{SYS}"].array()
-        # b-tag SF branch: weight_btagSF_TAGGER_WP_%SYS% (lowercase btagSF)
-        * tree[f"weight_btagSF_DL1dv01_FixedCutBEff_77_{SYS}"].array()
-    )
-
-# Read sum of weights from CutBookkeeper for normalisation
-with uproot.open("output.root") as f:
-    # Bins: 1=nEvents, 2=sumW, 3=sumW2
-    cbk = f["CutBookkeeper_DSID_RUN_NOSYS"]
-    sum_of_weights = cbk.values()[1]
-```
+For a full worked example of reading the `reco` TTree with uproot — applying the
+object selection flag, combining event weights, and normalising via
+CutBookkeeper — see `references/troubleshooting.md`.
 
 ## Grid Submission
 
@@ -368,11 +291,6 @@ Key fields in `submitToGrid.py`:
   `AnalysisElectrons`, `AnalysisMuons`; PHYS uses `AntiKt4EMPFlowJets`,
   `Electrons`, `Muons`. The `jetCollection` key in `Jets:` must match your
   input.
-- **Object selection flags are mandatory**: Before accessing object kinematics
-  for a systematic, mask with `object_select_SELNAME_%SYS%`. Ignoring this gives
-  wrong physics results because objects can be invalid for certain systematics.
-- **Objects are not pT-sorted**: CP algorithms cannot preserve pT order across
-  systematics. Sort offline if needed.
 - **Single sample per job**: `inputs.txt` must contain files from a single DSID
   and MC campaign. Mixing DSIDs corrupts CutBookkeeper normalisation.
 - **b-tagger naming**: The current default tagger in the `Jets.FlavourTagging`
@@ -383,38 +301,11 @@ Key fields in `submitToGrid.py`:
   `weight_btagSF_GN2v01_Continuous_NOSYS`.
 - **Output tree name**: Default is `reco`. Parton-level output uses `truth`.
   Check your config's `Output.treeName` if uproot cannot find the tree.
-- **Systematic filtering**: For quick debugging runs, add to your YAML:
-  ```yaml
-  CommonServices:
-    onlySystematicsCategories:
-      - jets
-      - electrons
-  ```
-  or pass `--no-systematics` on the command line.
 
-For common crash messages, warning floods, debugging tips, and AnalysisTop
-migration notes, see `references/troubleshooting.md`.
-
-## Custom Algorithms and Config Blocks
-
-For analysis-specific logic (custom variables, ML inference), write a
-`ConfigBlock` in Python and register it with the `AddConfigBlocks` key (since
-AnalysisBase 24.2.40):
-
-```yaml
-AddConfigBlocks:
-  - modulePath: "MyPackage.MyAnalysisConfig"
-    functionName: "MyAnalysisConfig"
-    algName: "MyAnalysis"
-    pos: "Output"
-
-MyAnalysis:
-  jets: "AnaJets.passesOR"
-  myParameter: 42
-```
-
-For more complex customisation, use the
-[HowToExtendTopCPToolkit skeleton](https://gitlab.cern.ch/atlas-phys/top/HowToExtendTopCPToolkit).
+For common crash messages, warning floods, debugging tips (including limiting
+systematics to specific categories), AnalysisTop migration notes (including the
+custom-algorithm / `AddConfigBlocks` pattern for analysis-specific logic), and a
+worked uproot reading example, see `references/troubleshooting.md`.
 
 ## Interop
 
@@ -435,10 +326,22 @@ Settings reference: <https://topcptoolkit.docs.cern.ch/latest/settings/>
 
 Tutorials: <https://topcptoolkit.docs.cern.ch/latest/tutorials/setup/>
 
-**Reference files in this skill:**
+## Reference Files
 
-- `references/event-selection-dsl.md` — full `selectionCuts` keyword table
-- `references/truth-configs.md` — particle-level and parton-level blocks,
-  `PartonHistory` values, example configs
-- `references/troubleshooting.md` — common crashes, warnings, AnalysisTop
-  migration
+For deeper detail beyond what this skill covers, read the reference files in
+`references/`:
+
+- **`event-selection-dsl.md`** — Full `selectionCuts` keyword table (`EL_N`,
+  `JET_N_BTAG`, `GLOBALTRIGMATCH`, `IMPORT`, `SAVE`, etc.), subregion/`IMPORT`
+  region patterns, per-region b-tag overrides, trigger-matching postfixes, and
+  combining loose/tight working points with `||`. Read when writing or debugging
+  an `EventSelection` block's `selectionCuts` DSL.
+- **`truth-configs.md`** — Particle-level (`PL_*`) and parton-level config
+  blocks, the full `PartonHistory` value table, example `particle.yaml`/
+  `parton.yaml` configs, and `TtbarNNLO`/`TtbarHOC` reweighting. Read when
+  configuring a particle- or parton-level analysis.
+- **`troubleshooting.md`** — Common crash messages, warning floods,
+  unexpected-output symptoms, AnalysisTop migration notes (including the
+  `CustomEventSaver`/`AddConfigBlocks` equivalent), a worked uproot reading
+  example, and debugging tips. Read when a TCT job crashes, prints unexpected
+  warnings, or produces unexpected output.

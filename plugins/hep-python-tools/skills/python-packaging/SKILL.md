@@ -18,8 +18,8 @@ projects should use **pixi** (preferred) or **uv**.
 
 The Scientific Python community maintains a template (
 [scientific-python/cookie](https://github.com/scientific-python/cookie)) and
-checker ([sp-repo-review](https://github.com/scientific-python/sp-repo-review))
-that encode these recommendations. Use them as a reference for new projects.
+checker ([sp-repo-review](https://pypi.org/project/sp-repo-review/)) that encode
+these recommendations. Use them as a reference for new projects.
 
 ## When to Use
 
@@ -177,12 +177,12 @@ Run with `uv run pytest` or `uv sync --group dev`.
 - **scientific-python/cookie**: template with all conventions pre-configured;
   see <https://github.com/scientific-python/cookie>
 - **sp-repo-review**: audit an existing repo against the guidelines; see
-  <https://github.com/scientific-python/sp-repo-review>
+  <https://pypi.org/project/sp-repo-review/>
 
 ## Docs
 
 - Scientific Python packaging guide:
-  https://learn.scientific-python.org/development/pages/guides/packaging-simple/
+  https://learn.scientific-python.org/development/guides/packaging-simple/
 - PyPA packaging tutorial:
   https://packaging.python.org/tutorials/packaging-projects/
 - Hatchling: https://hatch.pypa.io/latest/

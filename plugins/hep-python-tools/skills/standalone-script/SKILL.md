@@ -154,7 +154,9 @@ uv run --script --frozen analysis.py input.root
 ## Interop
 
 - **cli-creator**: Combine PEP 723 header + Typer app for a complete
-  self-contained CLI script
+  self-contained CLI script — copy `assets/pep723_typer_script.py` as a starting
+  template (PEP 723 header + a minimal Typer app with a `-v`/ `--verbose` count
+  option already wired to logging level).
 - **uv**: `uv run --script` is the primary runner; also works with `pixi run`
 - **pixi**: `pixi run python script.py` works if deps are in the pixi
   environment; PEP 723 is not needed in that case

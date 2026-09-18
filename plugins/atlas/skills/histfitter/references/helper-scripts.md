@@ -77,6 +77,12 @@ creates `SR1SR2_cuts`.
 - A `.tex` file with the yields table
 - A `.pickle` file (same basename) containing the numerical data for pull plots
 
+### Pull / summary plot
+
+Run `YieldsTable.py` first (produces the `.pickle` file above), then use
+`pullPlotUtils.makePullPlot()` from `python/pullPlotUtils.py` to render the
+pull/summary plot from that pickle file.
+
 ## SysTable.py
 
 Produces a LaTeX table of systematic uncertainty breakdown per source.
@@ -103,6 +109,7 @@ SysTable.py -c <channel> -w <workspace.root> -o <output.tex> [options]
 | `-%`          | Show relative uncertainties as percentages |
 | `-m 2`        | Use Method 2 (refit with parameter fixed)  |
 | `-b`          | Use before-fit result instead of after-fit |
+| `-z`          | Shade systematic based on size             |
 
 ### Two methods
 

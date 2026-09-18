@@ -97,6 +97,43 @@ GLOBALTRIGMATCH tight    # uses trigger matching setup with postfix='tight'
 GLOBALTRIGMATCH loose    # uses trigger matching setup with postfix='loose'
 ```
 
+### Multiple working points (loose + tight)
+
+When running fake-lepton estimates you need two sets of lepton selections.
+Declare multiple `WorkingPoint` entries, two `OverlapRemoval` instances, and
+combine with the `||` operator in `Thinning`/`EventSelection`:
+
+```yaml
+Electrons:
+  - containerName: "AnaElectrons"
+    WorkingPoint:
+      - selectionName: "loose"
+        identificationWP: "LooseBLayerLH"
+        isolationWP: "NonIso"
+      - selectionName: "tight"
+        identificationWP: "TightLH"
+        isolationWP: "Tight_VarRad"
+
+OverlapRemoval:
+  - inputLabel: "preselectORloose"
+    outputLabel: "passesORloose"
+    jets: "AnaJets.baselineJvt"
+    electrons: "AnaElectrons.loose"
+    jetsSelectionName: "baselineJvtLoose"
+    electronsSelectionName: "loose"
+  - inputLabel: "preselectORtight"
+    outputLabel: "passesORtight"
+    jets: "AnaJets.baselineJvt"
+    electrons: "AnaElectrons.tight"
+    jetsSelectionName: "baselineJvtTight"
+    electronsSelectionName: "tight"
+
+Thinning:
+  - containerName: "AnaElectrons"
+    outputName: "OutElectrons"
+    selectionName: "tight||loose"
+```
+
 ## Docs
 
 <https://topcptoolkit.docs.cern.ch/latest/settings/eventselection/>

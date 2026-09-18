@@ -118,22 +118,11 @@ XMLReader -x config/top.xml -v               # verbose debug output
 ```
 
 For blinded analysis set `Blind="true"` and add `BlindRange` to each `Data` node
-(see [Blinded Analysis](#blinded-analysis)).
-
-#### Asimov action keywords
-
-| Keyword           | Meaning                                                         |
-| ----------------- | --------------------------------------------------------------- |
-| `fit`             | Maximum likelihood fit                                          |
-| `genasimov`       | Generate Asimov dataset (once per line)                         |
-| `savesnapshot`    | Save parameter snapshot (once per line)                         |
-| `matchglob`       | Match global observables to NP values; always pair with `reset` |
-| `reset`           | Reset to state before current action list                       |
-| `raw`             | Reset to state before any actions                               |
-| `fixsyst`         | Fix all constrained NPs                                         |
-| `fixall`          | Fix all NPs                                                     |
-| `float`           | Float NPs fixed by `fixsyst` or `Setup`                         |
-| `<snapshot name>` | Load a saved snapshot                                           |
+(full example in `references/advanced-configurations.md`). The `Action`
+attribute takes a colon-separated list of keywords (`fit`, `genasimov`,
+`savesnapshot`, `matchglob`, `reset`, `raw`, `fixsyst`, `fixall`, `float`, or a
+snapshot name) — see `references/xml-schema-reference.md` for the full keyword
+table.
 
 ### Category-Level Card
 
@@ -167,63 +156,14 @@ For blinded analysis set `Blind="true"` and add `BlindRange` to each `Data` node
 </Channel>
 ```
 
-#### Data node attributes
-
-| Attribute     | Description                                           |
-| ------------- | ----------------------------------------------------- |
-| `InputFile`   | Data file path (text, ROOT ntuple, or histogram)      |
-| `FileType`    | `ascii` (default), `root`, or `histogram`             |
-| `TreeName`    | TTree name (ROOT ntuple only)                         |
-| `VarName`     | Branch name (ROOT ntuple only)                        |
-| `HistName`    | Histogram name (histogram mode only)                  |
-| `Observable`  | `name:[lo,hi]` — name and range of observable         |
-| `Binning`     | Number of bins for Asimov and pseudo-binned dataset   |
-| `InjectGhost` | `true`: inject weight-1e-9 ghost events per empty bin |
-| `NumData`     | Number of observed events (counting experiments only) |
-| `BlindRange`  | Range to veto, e.g. `120,130`                         |
-
-Choose fine enough `Binning` — typically 10× smaller than detector resolution.
-The pseudo-binned dataset introduces bias if bins are too coarse.
-
-#### Systematic node attributes
-
-| Attribute      | Description                                                        |
-| -------------- | ------------------------------------------------------------------ |
-| `Name`         | Nuisance parameter name (same name = correlated across categories) |
-| `Constr`       | Constraint type: `gaus`, `logn`, `asym`, `dfd`                     |
-| `CentralValue` | Nominal response value (usually `1`; use `0` for additive)         |
-| `Mag`          | Uncertainty magnitude; for `asym`: `upper,lower`                   |
-| `WhereTo`      | `yield` (auto-applied) or `shape` (user must place `response::`)   |
-| `Process`      | Group name for routing to specific samples via `ImportSyst`        |
-
-**Constraint types and response functions:**
-
-| Type   | Response function                                              |
-| ------ | -------------------------------------------------------------- |
-| `gaus` | `CentralValue + NP × Mag`                                      |
-| `logn` | `(1 + Mag/CentralValue)^NP`                                    |
-| `asym` | Polynomial interp within ±1σ, log-normal extrapolation outside |
-| `dfd`  | Double-Fermi-Dirac box (for ill-defined uncertainties)         |
-
-Signs in `Mag` matter — always follow the sign convention of the upstream tool.
-For `asym`, only the sign of the upper uncertainty is used.
-
-#### Sample node attributes
-
-| Attribute                      | Description                                                                           |
-| ------------------------------ | ------------------------------------------------------------------------------------- |
-| `Name`                         | Process name (unique within category)                                                 |
-| `InputFile`                    | Path to pdf-level XML card                                                            |
-| `ImportSyst`                   | Comma-separated common systematic groups; `:common:` = all ungrouped; `:self:` = none |
-| `MultiplyLumi`                 | Whether to multiply `Lumi` to yield                                                   |
-| `SharePdf`                     | All processes with the same value share a single PDF                                  |
-| `Norm`, `XSection`, `BR`, etc. | Pre-defined constant scale factors on yield                                           |
-
-#### NormFactor and ShapeFactor
-
-- `NormFactor`: multiplied automatically to process yield.
-- `ShapeFactor`: available as a building block but not auto-multiplied; user
-  must incorporate it explicitly.
+`Data`, `Systematic`, and `Sample` each take many attributes (file types,
+constraint types, lumi/norm scale factors, `NormFactor`/`ShapeFactor`
+distinction) — see `references/xml-schema-reference.md` for the full attribute
+tables. Two attributes to know up front: choose `Data Binning` finely (~10×
+smaller than detector resolution) since the pseudo-binned dataset is biased when
+bins are coarse, and `Systematic Constr` selects the constraint type (`gaus`,
+`logn`, `asym`, `dfd`) whose sign convention in `Mag` must match the upstream
+tool.
 
 ### PDF-Level Card
 
@@ -240,46 +180,19 @@ For `asym`, only the sign of the upper uncertainty is used.
 </Model>
 ```
 
-For an externally provided PDF (e.g. from HistFactory):
+## Reference Files
 
-```xml
-<Model Type="External" Input="bkg.root" WSName="combined"
-  ModelName="channel_model" ObservableName="obs_x_channel"/>
-```
+For deeper detail beyond what this skill covers, read the reference files in
+`references/`:
 
-Keep observable name consistent with HistFactory when importing external PDFs.
-
-### Counting Experiments
-
-```xml
-<Channel Name="sr" Type="counting" Lumi="20.3">
-  <Data NumData="9" Observable="obs_sr[0,1]"/>
-  <Sample Name="signal" Norm="0.5" ImportSyst=":common:" SharePdf="counting">
-  </Sample>
-</Channel>
-```
-
-- `Type="counting"` creates a `RooUniform` PDF per process.
-- `Binning` is always 1 and is ignored if provided.
-- `NumData` attribute sets event count directly without a data file.
-
-### Blinded Analysis
-
-```xml
-<!-- Top-level: enable blinding -->
-<Combination ... Blind="true">
-
-<!-- Category-level: specify blinded range -->
-<Data ... BlindRange="120,130"/>
-```
-
-Events in `BlindRange` are vetoed. Side-band fits use:
-
-```cpp
-pdf->createNLL(*data, ..., Range("SBLo,SBHi"), SplitRange())
-```
-
-Remove `SBLo` or `SBHi` if the blinded range touches the observable boundary.
+- **`xml-schema-reference.md`** — Full attribute tables for `Data`,
+  `Systematic`, and `Sample` nodes, the constraint-type/response-function table,
+  and the `Asimov` `Action` keyword table. Read when looking up a specific XML
+  attribute or choosing a constraint type.
+- **`advanced-configurations.md`** — Full XML examples for importing an external
+  HistFactory PDF, counting-experiment channels, and blinded-analysis side-band
+  fits. Read when the analysis needs one of these variant configurations rather
+  than the default shape-based category.
 
 ## Gotchas
 

@@ -118,19 +118,17 @@ w["pdfs"].Add("simPdf")
 # Add a channel (RooProdPdf)
 w["pdfs/simPdf"].Add("SR").SetTitle("Signal Region")
 
-# Declare the observable and add a sample from a histogram
+# Declare the observable and add samples from histograms (bin errors trigger
+# an automatic MC-stat ShapeSys — see references/workspace-building.md)
 hBkg = XRF.TH1D("bkg", "Background;m_{T2} [GeV]", 5, 200, 700)
 hBkg.GetXaxis().SetName("mt2")   # observable name
 # ... fill histogram ...
-w["pdfs/simPdf/SR/samples"].Add(hBkg)   # bin errors → automatic MC-stat ShapeSys
+w["pdfs/simPdf/SR/samples"].Add(hBkg)
 
-# Signal sample
 hSig = XRF.TH1D("sig", "Signal;m_{T2} [GeV]", 5, 200, 700)
 hSig.GetXaxis().SetName("mt2")
 w["pdfs/simPdf/SR/samples"].Add(hSig)
-
-# Signal-strength NormFactor
-w["pdfs/simPdf/SR/samples/sig"].coefs().Multiply("mu_sig", "norm")
+w["pdfs/simPdf/SR/samples/sig"].coefs().Multiply("mu_sig", "norm")  # POI
 
 # Observed data
 hData = XRF.TH1D("obsData", "Data;m_{T2} [GeV]", 5, 200, 700)
@@ -141,11 +139,11 @@ w["pdfs/simPdf/SR"].datasets().Add(hData)
 
 ### Adding systematics
 
-```python
-# Overall (normalization) systematic — creates a NormFactor + Gaussian constraint
-w["pdfs/simPdf/SR/samples/bkg"].coefs().Multiply("mu_bkg", "norm")
-w["pdfs/simPdf"].pars()["alpha_JES"].Constrain("normal")  # adds Gaussian constraint
+Overall (normalization) systematics reuse the `coefs().Multiply()` +
+`.Constrain()` pattern shown above (see `references/workspace-building.md` for
+the Factor-vs-Sys distinction). Shape systematics vary the sample directly:
 
+```python
 # Histo (shape+norm) systematic via histograms
 hJESup = XRF.TH1D("JES=1", ...)   # name must follow convention: parName=value
 hJESdn = XRF.TH1D("JES=-1", ...)
@@ -172,7 +170,6 @@ w = XRF.xRooNode(ws)
 nll = w["pdfs/simPdf"].nll("obsData")   # construct NLL
 fr  = nll.minimize()                    # fit; returns RooFitResult
 fr.Draw()                               # post-fit parameter pulls
-fr.Draw("CORR10 COLZ TEXT")             # top-10 off-diagonal correlations
 
 # Check convergence (must have status=0, covQual=3 for a valid fit)
 print(fr.status(), fr.covQual())
@@ -198,15 +195,8 @@ fr.floatParsFinal().find("mu_sig").getErrorLo()
 | covQual=1 | Approximation only (status=2)                             |
 | covQual=0 | Unavailable (no floating parameters)                      |
 
-Tune fit hyperparameters:
-
-```python
-nll = w["pdfs/simPdf"].nll("obsData", [XRF.xRooFit.Tolerance(1),
-                                        XRF.RooFit.Strategy(2)])
-# or after construction:
-nll.fitConfig().MinimizerOptions().SetTolerance(1)
-nll.fitConfig().MinimizerOptions().SetStrategy(2)
-```
+Inspect the correlation matrix with `fr.Draw("CORR10 COLZ TEXT")` (see
+`references/fitting-diagnostics.md`).
 
 ### Profile likelihood scan
 
@@ -219,49 +209,16 @@ hs.Draw()
 ### CLs upper limits (asymptotic)
 
 ```python
-import ROOT as XRF
-
-w   = XRF.xRooNode("workspace.root")
-nll = w["pdfs/simPdf"].nll("obsData")
-hs  = nll.hypoSpace("mu_sig", XRF.xRooFit.TestStatistic.qmutilde)
-
+hs = nll.hypoSpace("mu_sig", XRF.xRooFit.TestStatistic.qmutilde)
 hs.scan("cls visualize", 0, 0, 10)   # auto-scan; visualize shows progress
-limits = hs.limits()   # dict keyed by "-2","-1","0","1","2","obs"
-print(limits)
-
-# Minimal version (POI must be pre-declared in workspace):
-print(w.nll("obsData").hypoSpace().limits())
+print(hs.limits())   # dict keyed by "-2","-1","0","1","2","obs"
 ```
 
-Available test statistics: `tmu`, `qmu`, `qmutilde` (default for upper limits),
-`q0`, `u0` (for discovery).
-
-### Discovery significance
-
-```python
-hs = nll.hypoSpace("mu_sig", XRF.xRooFit.TestStatistic.u0)
-hs.scan("pnull", 1, 0, 0)   # single point at mu=0
-
-print("Observed p0:", hs[0].pNull_asymp())
-print("Expected p0:", hs[0].pNull_asymp(0))
-# convert to significance:
-sig = XRF.Math.gaussian_quantile_c(hs[0].pNull_asymp().value(), 1)
-```
-
-### Goodness of fit
-
-```python
-nll.mainTermPgof()   # p-value (main term only, recommended for observed data)
-nll.pgof()           # p-value including constraint term (use for toys only)
-```
-
-### Uncertainty breakdown
-
-```python
-totErr  = fr.floatParsFinal().find("mu_sig").getError()
-statErr = fr.conditionalError("mu_sig", "alpha_*,gamma_*", up=True, approx=True)
-systErr = XRF.TMath.Sqrt(totErr**2 - statErr**2)
-```
+See `references/hypothesis-testing.md` for test statistic definitions (`tmu`,
+`qmu`, `qmutilde`, `q0`, `u0`), the full verbose limit-setting example, and
+discovery significance. Goodness-of-fit (`nll.pgof()`) and uncertainty
+breakdowns (`fr.conditionalError()`) are covered in
+`references/fitting-diagnostics.md`.
 
 ## Gotchas
 
@@ -299,21 +256,27 @@ systErr = XRF.TMath.Sqrt(totErr**2 - statErr**2)
 - **xRooBrowser**: Interactive ROOT GUI (`ROOT::Experimental::RooBrowser` in
   ROOT 6.28+) for exploring workspaces.
 
+## Reference Files
+
+For deeper detail beyond what this skill covers, read the reference files in
+`references/`:
+
+- **`workspace-building.md`** — Factor types (Const, Norm, Simple, Density,
+  Shape, Varied, Overall, Histo), interpolation codes, MC stat handling,
+  SetXaxis, log-normal constraints, SetBinData. Read when constructing a
+  workspace from scratch, choosing a factor type, or configuring
+  interpolation/MC-stat behavior.
+- **`fitting-diagnostics.md`** — Full fit config settings (StrategySequence,
+  HesseStrategy), impact/ranking (`fr.impact()`), conditional uncertainties
+  (Schur complement), stat/syst/mc-stat breakdown, Shifted GO method,
+  conditional fits (`fr.cfit()`). Read when tuning fit convergence, ranking
+  nuisance parameters, or computing a stat/syst uncertainty breakdown.
+- **`hypothesis-testing.md`** — Test statistic definitions (tmu, qmu, qmutilde,
+  q0, u0), full verbose limit-setting example, toy-based limits, limit
+  troubleshooting, hypoPoint methods/fits tables, limit-setting checklist. Read
+  when setting CLs upper limits, computing discovery significance, or debugging
+  NaN/failed limits.
+
 ## Docs
 
 https://xroofit.readthedocs.io/
-
-### Additional Resources
-
-For detailed content beyond this overview, consult the reference files:
-
-- **`references/workspace-building.md`** — Factor types (Const, Norm, Simple,
-  Density, Shape, Varied, Overall, Histo), interpolation codes, MC stat
-  handling, SetXaxis, log-normal constraints, SetBinData
-- **`references/fitting-diagnostics.md`** — Full fit config settings
-  (StrategySequence, HesseStrategy), impact/ranking (`fr.impact()`), conditional
-  uncertainties (Schur complement), stat/syst/mc-stat breakdown, Shifted GO
-  method, conditional fits (`fr.cfit()`)
-- **`references/hypothesis-testing.md`** — Test statistic definitions (tmu, qmu,
-  qmutilde, q0, u0), full verbose limit-setting example, toy-based limits, limit
-  troubleshooting, hypoPoint methods/fits tables, limit-setting checklist

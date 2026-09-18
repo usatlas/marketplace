@@ -119,6 +119,53 @@ Also expected: CP algorithms cannot preserve pT ordering across systematics.
 Sort offline if needed (e.g.
 `jets = jets[ak.argsort(jets.pt, ascending=False)]`).
 
+## Worked example: reading TCT output with uproot
+
+This example ties together the object-selection-flag and pT-sorting caveats
+above with a full read of the `reco` TTree, including the b-tag SF weight branch
+and CutBookkeeper-based normalisation:
+
+```python
+import uproot
+import awkward as ak
+import vector
+vector.register_awkward()
+
+# TCT NTuples use a single TTree; systematic branches use %SYS% → NOSYS for nominal
+SYS = "NOSYS"
+
+with uproot.open("output.root:reco") as tree:
+    jets = ak.zip({
+        "pt":  tree[f"jet_pt_{SYS}"].array() / 1000,   # MeV → GeV
+        "eta": tree[f"jet_eta_{SYS}"].array(),
+        "phi": tree[f"jet_phi_{SYS}"].array(),
+        "e":   tree[f"jet_e_{SYS}"].array() / 1000,
+    }, with_name="Momentum4D")
+
+    # Apply the object selection flag — required to filter valid objects per systematic
+    # (already a boolean branch; no cast needed — awkward arrays have no .astype,
+    # use ak.values_astype if a conversion is ever genuinely required)
+    sel = tree[f"jet_select_passesOR_{SYS}"].array()
+    selected_jets = jets[sel]
+
+    # Event-level weights
+    weight = (
+        tree["weight_mc"].array()
+        * tree[f"weight_pileup_{SYS}"].array()
+        # b-tag SF branch: weight_btagSF_TAGGER_WP_%SYS% (lowercase btagSF)
+        * tree[f"weight_btagSF_DL1dv01_FixedCutBEff_77_{SYS}"].array()
+    )
+
+# Read sum of weights from CutBookkeeper for normalisation
+with uproot.open("output.root") as f:
+    # Bins: 1=nEvents, 2=sumW, 3=sumW2
+    cbk = f["CutBookkeeper_DSID_RUN_NOSYS"]
+    sum_of_weights = cbk.values()[1]
+    if sum_of_weights == 0:
+        raise ValueError("sum_of_weights is 0 — check the CutBookkeeper name/DSID")
+    weight = weight / sum_of_weights
+```
+
 ## Migrating from AnalysisTop
 
 ### Where is `top-xaod`?
@@ -136,11 +183,28 @@ not work with `TTree::Draw` — use FastFrames, uproot, or coffea instead.
 
 ### Equivalent of `CustomEventSaver`
 
-Write a `ConfigBlock` in Python and register it with `AddConfigBlocks`. For a
-single large algorithm, follow the
+For analysis-specific logic (custom variables, ML inference), write a
+`ConfigBlock` in Python and register it with the `AddConfigBlocks` key (since
+AnalysisBase 24.2.40):
+
+```yaml
+AddConfigBlocks:
+  - modulePath: "MyPackage.MyAnalysisConfig"
+    functionName: "MyAnalysisConfig"
+    algName: "MyAnalysis"
+    pos: "Output"
+
+MyAnalysis:
+  jets: "AnaJets.passesOR"
+  myParameter: 42
+```
+
+For a single large algorithm, follow the
 [AnalysisSWTutorial](https://atlas-software.docs.cern.ch/analysis/analysis_tutorial/AnalysisSWTutorial/alg_basic_algorithm/)
 and add it via `AddConfigBlocks`. Split complex savers into separate
-single-purpose algorithms — it makes them easier to debug and reuse.
+single-purpose algorithms — it makes them easier to debug and reuse. For more
+complex customisation, use the
+[HowToExtendTopCPToolkit skeleton](https://gitlab.cern.ch/atlas-phys/top/HowToExtendTopCPToolkit).
 
 ### Equivalent of `CustomObjectLoader`
 
@@ -149,6 +213,19 @@ radically non-standard object type, discuss it with your PA group first — most
 cases can be handled by configuring the existing `WorkingPoint` options.
 
 ## Debugging tips
+
+### Limit systematics to specific categories
+
+`--no-systematics` skips all systematics. For finer-grained control (e.g. only
+jet and electron systematics) during quick debugging runs, add to the YAML
+config instead:
+
+```yaml
+CommonServices:
+  onlySystematicsCategories:
+    - jets
+    - electrons
+```
 
 ### Enable verbose output for a specific algorithm
 

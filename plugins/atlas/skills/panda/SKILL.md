@@ -60,55 +60,6 @@ prun --exec "echo Hello > myout.txt" \
      --outputs myout.txt
 ```
 
-### prun: process input data
-
-Use `%IN` as a placeholder for input file names injected by PanDA.
-
-```bash
-prun --exec "python analysis.py %IN" \
-     --inDS data18_13TeV.DAOD_PHYS.some_dataset/ \
-     --outDS user.$RUCIO_ACCOUNT.analysis_output \
-     --outputs hist.root \
-     --nFilesPerJob 5
-```
-
-### prun: compiled C++ with build step
-
-`--bexec` runs once before analysis jobs to compile code on the grid.
-
-```bash
-prun --exec "myanalysis %IN" \
-     --bexec "make" \
-     --inDS valid1.dataset/ \
-     --outDS user.$RUCIO_ACCOUNT.cpp_test \
-     --outputs output.root \
-     --rootVer recommended
-```
-
-### prun: container-based job
-
-```bash
-prun --containerImage docker://atlas/analysisbase:25.2.20 \
-     --exec "python analysis.py %IN" \
-     --inDS mc23.dataset/ \
-     --outDS user.$RUCIO_ACCOUNT.container_test \
-     --outputs hist.root \
-     --noBuild
-```
-
-### prun: GPU job
-
-Append `&nvidia` to `--architecture` to request GPU-enabled sites.
-
-```bash
-prun --containerImage docker://myimage:latest \
-     --exec "python train.py" \
-     --outDS user.$RUCIO_ACCOUNT.gpu_training \
-     --nJobs 1 \
-     --noBuild \
-     --architecture '&nvidia'
-```
-
 ### pathena: job options
 
 ```bash
@@ -118,38 +69,6 @@ lsetup panda
 pathena MyAnalysisAlg_jobOptions.py \
      --inDS data18_13TeV.DAOD_PHYSLITE.some_dataset/ \
      --outDS user.$RUCIO_ACCOUNT.myanalysis_output
-```
-
-### pathena: transformation
-
-Use `--trf` for Athena transform commands. Placeholders: `%IN` (input files),
-`%OUT.suffix` (output with suffix), `%MAXEVENTS`, `%SKIPEVENTS`.
-
-```bash
-pathena --trf "Reco_trf.py inputAODFile=%IN outputNTUP=%OUT.NTUP.root maxEvents=%MAXEVENTS" \
-     --inDS data18_13TeV.AOD.some_dataset/ \
-     --outDS user.$RUCIO_ACCOUNT.reco_output \
-     --nEventsPerJob 10000
-```
-
-### pathena: ComponentAccumulator config
-
-```bash
-pathena --trf "athena.py --CA MyConfig.py --evtMax=%MAXEVENTS --filesInput=%IN" \
-     --inDS mc23.DAOD_PHYSLITE.dataset/ \
-     --outDS user.$RUCIO_ACCOUNT.ca_output \
-     --nEventsPerJob 5000
-```
-
-### pathena: test with limited files
-
-Always limit files first to validate the workflow before full-scale submission.
-
-```bash
-pathena jobO.py \
-     --inDS data18.DAOD_PHYSLITE.dataset/ \
-     --outDS user.$RUCIO_ACCOUNT.test_run \
-     --nFiles 2
 ```
 
 ### pbook: monitor and manage tasks
@@ -173,36 +92,6 @@ pbook kill 12345678
 # Finish a task (set remaining undone jobs as failed)
 pbook finish 12345678
 ```
-
-### prun: secondary input datasets
-
-Use `--secondaryDSs` to provide additional input datasets accessible via `%IN2`,
-`%IN3`, etc.
-
-```bash
-prun --exec "myanalysis %IN %IN2" \
-     --inDS primary.dataset/ \
-     --secondaryDSs "IN2:3:secondary.dataset/" \
-     --outDS user.$RUCIO_ACCOUNT.multi_input \
-     --outputs output.root
-```
-
-The format is `NAME:nFilesPerJob:datasetName`. `%IN2` resolves to the files from
-the secondary dataset.
-
-### prun: merge output
-
-```bash
-prun --exec "python analysis.py %IN" \
-     --inDS mc23.dataset/ \
-     --outDS user.$RUCIO_ACCOUNT.merged_output \
-     --outputs hist.root \
-     --nFilesPerJob 10 \
-     --mergeOutput
-```
-
-`%OUT` is available inside `--mergeScript` to reference the merged output
-filename.
 
 ## Worked Example: Grid analysis with prun
 
@@ -292,6 +181,27 @@ pbook retry <taskID>
 - **ServiceX**: for column-level data extraction without grid jobs, consider
   ServiceX as a lighter alternative to running prun/pathena for simple
   selections.
+
+## Reference Files
+
+For the full CLI option reference beyond the canonical patterns above, read the
+files in `references/`:
+
+- **`references/prun-options.md`** — Complete `prun` option tables (execution,
+  input/output, job sizing, site/resource, ROOT/software, sandbox) and the full
+  placeholder-variable table (`%IN`, `%IN2`/`%IN3`, `%OUT`, `%RNDM:base`,
+  `%SKIPEVENTS`, `%MAXEVENTS`), plus worked examples for every submission style
+  not shown above (Python with input data, C++ build, Docker container, GPU,
+  secondary datasets, random seeds, merge output, site selection). Read when you
+  need an exact flag name or a submission variant beyond the hello-world
+  example.
+- **`references/pathena-options.md`** — Complete `pathena` option tables
+  (input/output, job sizing, build, site/resource, Athena-specific, production,
+  event picking) and the placeholder-variable table, plus worked examples not
+  shown above (transformation with event splitting, ComponentAccumulator config,
+  multi-core, event picking, group production, `--noBuild`, destination SE).
+  Read when you need an exact flag name or a submission variant beyond the basic
+  job-options example.
 
 ## Docs
 

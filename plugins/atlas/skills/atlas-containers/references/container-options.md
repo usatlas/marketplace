@@ -44,6 +44,44 @@ keywords that modify container behavior:
 | ------------ | -------------------------------------------------------------------- |
 | `dockerJoin` | Attach to an existing Docker container instead of starting a new one |
 
+```bash
+export ALRB_CONT_CONDUCT="dockerJoin"
+setupATLAS -c <container>
+```
+
+Warning: exiting a joined session kills only that session, not the original
+container. Processes started in the joined session terminate on exit. The
+dependency runs the other way too: a joined session is a `docker exec` into the
+original container, so stopping or exiting the _original_ container ends every
+session joined to it.
+
+## Force a specific container runtime
+
+```bash
+# Force Docker on a Linux system that has both Apptainer and Docker
+setupATLAS -c el9 --swtype docker
+
+# Force Podman
+setupATLAS -c el9 --swtype podman
+```
+
+Or set the environment variable before entering:
+
+```bash
+export ALRB_CONT_SWTYPE=docker
+setupATLAS -c el9
+```
+
+## Pre/post setup hooks
+
+```bash
+# Run commands before setupATLAS runs inside the container
+setupATLAS -c el9 --presetup "export MY_VAR=foo"
+
+# Run commands after setupATLAS completes inside the container
+setupATLAS -c el9 --postsetup "source ~/mysetup.sh"
+```
+
 ## Image name syntax
 
 | Form                      | Example                                                             |

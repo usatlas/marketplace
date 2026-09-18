@@ -33,8 +33,8 @@ The canonical, tool-agnostic authoring guidance lives at
 [agentskills.io](https://agentskills.io/llms.txt). The most relevant pages:
 
 - [Specification](https://agentskills.io/specification) — frontmatter fields,
-  directory structure, progressive disclosure, and the `skills-ref` validator
-  (run it here via `pixi run validate-skills`).
+  directory structure, progressive disclosure, and spec validation (this repo
+  runs `skill-validator` for that, via `pixi run validate-skills`).
 - [Best practices](https://agentskills.io/skill-creation/best-practices) —
   scoping, calibrating control, gotchas/template/checklist patterns.
 - [Optimizing descriptions](https://agentskills.io/skill-creation/optimizing-descriptions)
@@ -48,7 +48,7 @@ The canonical, tool-agnostic authoring guidance lives at
 2. No changes to `marketplace.json` are needed — skills are discovered
    automatically from the `"skills": "./skills/"` path declared per plugin.
 3. Stage the new files.
-4. Run `pixi run pre-commit` to catch JSON/YAML/Markdown formatting issues.
+4. Run `pixi run prek` to catch JSON/YAML/Markdown formatting issues.
 5. Run `pixi run check-skills` to catch updates needed from new skills.
 
 **Skill frontmatter** (per the
@@ -81,8 +81,12 @@ description: >-
 
 - Section order: Overview → When to Use → Key Concepts → Canonical Patterns →
   Gotchas → Interop → Docs.
-- Deep skills (uproot, coffea, pyhf, histfitter) add a Worked Example and
-  Troubleshooting table (~300–500 lines). Medium skills target ~150–250 lines.
+- Target ~150–250 lines for SKILL.md, even for skills covering a large or deep
+  API surface (uproot, coffea, pyhf, histfitter, and similar). A Worked Example
+  or Troubleshooting table belongs in `references/`, not inline — see
+  "Progressive disclosure" below. A skill this size that still exceeds ~300
+  lines is a sign that detail belongs in a reference file, not evidence that the
+  skill needs more room.
 - All ATLAS energy/momentum values are in MeV — note this in Gotchas.
 - End with a `## Docs` section linking the canonical upstream documentation URL.
 - No `attribution:` or vendoring comments inside skill files. Legal attribution
@@ -113,7 +117,14 @@ one-line description of its content and **when to read it** (e.g., "Read when
 the user asks which systematic type to use"). This lets the model decide at
 runtime whether loading the reference is worthwhile.
 
-Good examples of this pattern: `awkward`, `xroofit`, `histfitter`.
+**This section is mandatory, not optional, whenever a skill has a `references/`
+directory.** A `references/*.md` file with no pointer anywhere in its skill's
+SKILL.md is a bug — the content is unreachable to the model no matter how good
+it is. Run `pixi run check-skills` after adding or editing a `references/` file
+to catch this.
+
+Good examples of this pattern: `xroofit`, `histfitter`, `topcptoolkit`, `panda`,
+`uproot`.
 
 **Writing style for skills:**
 
@@ -202,10 +213,16 @@ structure), run the spec validator over all skills:
 pixi run validate-skills
 ```
 
-This wraps the [`skills-ref`](https://pypi.org/project/skills-ref/) reference
-library (a `pypi-dependency` in `pixi.toml`, so `pixi install` provides it). The
-library's CLI is installed as `agentskills`, so a single skill can be checked
-directly with `pixi run agentskills validate plugins/<plugin>/skills/<name>`.
+This wraps
+[`skill-validator`](https://github.com/agent-ecosystem/skill-validator) (a Go
+binary, not a pixi/conda dependency — `scripts/validate_skills.py` falls back to
+running it via the `.pre-commit-config.yaml` hook, which `prek` builds in its
+own isolated environment, if it isn't already on `PATH`). It also does
+orphan-file reachability analysis: a `references/*.md` file not linked from its
+skill's SKILL.md is a hard error, not just a lint nit. To check a single
+plugin's skills directly: `skill-validator check plugins/<plugin>/skills` (it
+only looks one level deep for `SKILL.md` files, so point it at a `skills/`
+directory, not an individual skill or the repo root).
 
 `validate-skills` complements `pixi run lint-skills` (this repo's section
 ordering) and is included in `pixi run check-skills` alongside the README sync.
@@ -272,8 +289,13 @@ for page discovery → WebFetch the hosted URL for authoritative content.
 
 ## Pre-commit / formatting
 
+Hooks run via [`prek`](https://github.com/j178/prek), a Rust reimplementation of
+pre-commit — same `.pre-commit-config.yaml`, same hook ecosystem, much faster,
+and it manages its own Go/Node/Rust/etc. toolchains per hook (needed for the
+`skill-validator` hook below).
+
 ```bash
-pixi run pre-commit     # run all hooks on all files
+pixi run prek     # run all hooks on all files
 ```
 
 Hooks enforce: JSON/YAML validity, trailing whitespace, mixed line endings,

@@ -51,3 +51,27 @@ repos:
       - id: zizmor
         files: "^\\.github"
         args: [--persona=pedantic]
+
+  - repo: https://github.com/agent-ecosystem/skill-validator
+    rev: 0e0290d354eda9c6b9cb3b4d82a1716a8ecd03bf # frozen: v1.6.1
+    hooks:
+      # The platform-specific hook ids (skill-validator-claude, etc.) assume a
+      # flat .claude/skills/ layout; this repo's skills live under
+      # plugins/<plugin>/skills/, and the tool only looks one level deep for
+      # SKILL.md files, so it must be pointed at each plugin's skills/ dir
+      # separately via the generic hook id. `--skip links` disables external
+      # URL reachability checks: those depend on third-party uptime/network
+      # policy (e.g. twiki.atlas-canada.ca refusing connections from CI
+      # runners), not on skill content, so they shouldn't gate this hook.
+      - id: skill-validator
+        name: skill-validator (af-bnl)
+        args: ["check", "--skip", "links", "plugins/af-bnl/skills"]
+      - id: skill-validator
+        name: skill-validator (af-uchicago)
+        args: ["check", "--skip", "links", "plugins/af-uchicago/skills"]
+      - id: skill-validator
+        name: skill-validator (atlas)
+        args: ["check", "--skip", "links", "plugins/atlas/skills"]
+      - id: skill-validator
+        name: skill-validator (hep-python-tools)
+        args: ["check", "--skip", "links", "plugins/hep-python-tools/skills"]
