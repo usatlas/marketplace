@@ -7,11 +7,12 @@ platforms = ["linux-64", "linux-aarch64", "osx-64", "osx-arm64", "win-64"]
 version = "0.2.2"
 
 [tasks]
-pre-commit = { cmd = "pre-commit run --all-files", description = "Run pre-commit hooks on all files" }
-sync-skills = { cmd = "python scripts/sync_skills.py && (pre-commit run prettier --files README.md &> /dev/null || true)", description = "Sync README with current plugins/skills and reformat" }
+prek = { cmd = "prek run --all-files", description = "Run pre-commit hooks (via prek) on all files" }
+sync-skills = { cmd = "python scripts/sync_skills.py && (prek run prettier --files README.md &> /dev/null || true)", description = "Sync README with current plugins/skills and reformat" }
 lint-skills = { cmd = "python scripts/lint_skills.py", description = "Check SKILL.md section ordering" }
-validate-skills = { cmd = "python scripts/validate_skills.py", description = "Validate every SKILL.md against the Agent Skills spec (skill-validator, must be on PATH)" }
-check-skills = { cmd = "(pre-commit run -a || true) && git diff --exit-code", depends-on = [ "lint-skills", "validate-skills", "sync-skills" ], description = "CI: validate/lint skills and verify README is up to date" }
+skill-validator-setup = { cmd = "prek run skill-validator --all-files &> /dev/null || true", description = "Build/cache the skill-validator binary via prek (ignores hook pass/fail)" }
+validate-skills = { cmd = "python scripts/validate_skills.py", depends-on = [ "skill-validator-setup" ], description = "Validate every SKILL.md against the Agent Skills spec" }
+check-skills = { cmd = "(prek run --all-files || true) && git diff --exit-code", depends-on = [ "lint-skills", "validate-skills", "sync-skills" ], description = "CI: validate/lint skills and verify README is up to date" }
 tbump = { cmd = "tbump", description = "Bump the top-level workspace/marketplace version: pixi run tbump <new_version>" }
 tbump-af-bnl = { cmd = "tbump -c plugins/af-bnl/tbump.toml", description = "Bump the af-bnl plugin version: pixi run tbump-af-bnl <new_version>" }
 tbump-af-uchicago = { cmd = "tbump -c plugins/af-uchicago/tbump.toml", description = "Bump the af-uchicago plugin version: pixi run tbump-af-uchicago <new_version>" }
@@ -19,6 +20,6 @@ tbump-atlas = { cmd = "tbump -c plugins/atlas/tbump.toml", description = "Bump t
 tbump-hep-python-tools = { cmd = "tbump -c plugins/hep-python-tools/tbump.toml", description = "Bump the hep-python-tools plugin version: pixi run tbump-hep-python-tools <new_version>" }
 
 [dependencies]
-pre-commit = ">=4.5.1,<5"
+prek = ">=0.5.0,<0.6"
 python = ">=3.9"
 tbump = ">=6.9.0,<7"

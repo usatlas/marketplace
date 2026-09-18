@@ -59,16 +59,19 @@ repos:
       # flat .claude/skills/ layout; this repo's skills live under
       # plugins/<plugin>/skills/, and the tool only looks one level deep for
       # SKILL.md files, so it must be pointed at each plugin's skills/ dir
-      # separately via the generic hook id.
+      # separately via the generic hook id. `--skip links` disables external
+      # URL reachability checks: those depend on third-party uptime/network
+      # policy (e.g. twiki.atlas-canada.ca refusing connections from CI
+      # runners), not on skill content, so they shouldn't gate this hook.
       - id: skill-validator
         name: skill-validator (af-bnl)
-        args: ["check", "plugins/af-bnl/skills"]
+        args: ["check", "--skip", "links", "plugins/af-bnl/skills"]
       - id: skill-validator
         name: skill-validator (af-uchicago)
-        args: ["check", "plugins/af-uchicago/skills"]
+        args: ["check", "--skip", "links", "plugins/af-uchicago/skills"]
       - id: skill-validator
         name: skill-validator (atlas)
-        args: ["check", "plugins/atlas/skills"]
+        args: ["check", "--skip", "links", "plugins/atlas/skills"]
       - id: skill-validator
         name: skill-validator (hep-python-tools)
-        args: ["check", "plugins/hep-python-tools/skills"]
+        args: ["check", "--skip", "links", "plugins/hep-python-tools/skills"]

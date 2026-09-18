@@ -48,7 +48,7 @@ The canonical, tool-agnostic authoring guidance lives at
 2. No changes to `marketplace.json` are needed — skills are discovered
    automatically from the `"skills": "./skills/"` path declared per plugin.
 3. Stage the new files.
-4. Run `pixi run pre-commit` to catch JSON/YAML/Markdown formatting issues.
+4. Run `pixi run prek` to catch JSON/YAML/Markdown formatting issues.
 5. Run `pixi run check-skills` to catch updates needed from new skills.
 
 **Skill frontmatter** (per the
@@ -216,8 +216,8 @@ pixi run validate-skills
 This wraps
 [`skill-validator`](https://github.com/agent-ecosystem/skill-validator) (a Go
 binary, not a pixi/conda dependency — `scripts/validate_skills.py` falls back to
-running it via the `.pre-commit-config.yaml` hook, which pre-commit builds in
-its own isolated environment, if it isn't already on `PATH`). It also does
+running it via the `.pre-commit-config.yaml` hook, which `prek` builds in its
+own isolated environment, if it isn't already on `PATH`). It also does
 orphan-file reachability analysis: a `references/*.md` file not linked from its
 skill's SKILL.md is a hard error, not just a lint nit. To check a single
 plugin's skills directly: `skill-validator check plugins/<plugin>/skills` (it
@@ -289,8 +289,13 @@ for page discovery → WebFetch the hosted URL for authoritative content.
 
 ## Pre-commit / formatting
 
+Hooks run via [`prek`](https://github.com/j178/prek), a Rust reimplementation of
+pre-commit — same `.pre-commit-config.yaml`, same hook ecosystem, much faster,
+and it manages its own Go/Node/Rust/etc. toolchains per hook (needed for the
+`skill-validator` hook below).
+
 ```bash
-pixi run pre-commit     # run all hooks on all files
+pixi run prek     # run all hooks on all files
 ```
 
 Hooks enforce: JSON/YAML validity, trailing whitespace, mixed line endings,
