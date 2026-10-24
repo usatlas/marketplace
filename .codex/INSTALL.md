@@ -2,6 +2,14 @@
 
 Enable USATLAS skills in Codex via native skill discovery.
 
+The `atlas` and `hep-python-tools` plugins depend on skills
+(`analysis-spec-builder`, `awkward-array`, `cli-creator`, `hist`, `servicex`,
+`standalone-script`, `vector-awkward`) provided by the `iris-hep` plugin,
+referenced from [iris-hep/marketplace](https://github.com/iris-hep/marketplace)
+rather than vendored here. Codex has no equivalent of Claude Code's plugin
+`dependencies` resolution, so clone that repository too and symlink its
+`iris-hep/skills` directory the same way as below if you need those skills.
+
 ## Prerequisites
 
 - Git
@@ -44,7 +52,26 @@ Enable USATLAS skills in Codex via native skill discovery.
    cmd /c mklink /J "$target\af-bnl"           "$base\af-bnl\skills"
    ```
 
-3. **Restart Codex** (quit and relaunch the CLI) to discover the skills.
+3. **Optional: enable `iris-hep` skills** (needed by `atlas` and
+   `hep-python-tools`) by cloning
+   [iris-hep/marketplace](https://github.com/iris-hep/marketplace) alongside
+   this repository and symlinking its `iris-hep/skills` directory:
+
+   ```bash
+   git clone https://github.com/iris-hep/marketplace.git ~/iris-hep-marketplace
+
+   ln -s ~/iris-hep-marketplace/iris-hep/skills \
+         ~/.agents/skills/iris-hep
+   ```
+
+   **Windows (PowerShell):**
+
+   ```powershell
+   git clone https://github.com/iris-hep/marketplace.git "$env:USERPROFILE\iris-hep-marketplace"
+   cmd /c mklink /J "$target\iris-hep" "$env:USERPROFILE\iris-hep-marketplace\iris-hep\skills"
+   ```
+
+4. **Restart Codex** (quit and relaunch the CLI) to discover the skills.
 
 ## Verify
 
@@ -61,12 +88,19 @@ Get-ChildItem $env:USERPROFILE\.agents\skills
 ```
 
 You should see four symlinks: `atlas`, `af-uchicago`, `af-bnl`,
-`hep-python-tools`.
+`hep-python-tools`. If you also enabled `iris-hep` skills, you should see a
+fifth symlink named `iris-hep`.
 
 ## Updating
 
 ```bash
 cd ~/usatlas-marketplace && git pull
+```
+
+If you cloned `iris-hep/marketplace`, refresh it too:
+
+```bash
+cd ~/iris-hep-marketplace && git pull
 ```
 
 Skills update instantly through the symlinks.
