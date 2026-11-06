@@ -57,7 +57,7 @@
       "name": "atlas",
       "description": "ATLAS analysis plugin: grid/catalog tools (Rucio, AMI, ATLAS Open Data), statistics (pyhf, cabinetry, HistFitter, TRExFitter, RooUnfold, pyhs3), analysis frameworks (TopCPToolkit, FastFrames, ServiceX), and Scikit-HEP tools.",
       "source": "./plugins/atlas",
-      "version": "2.0.0",
+      "version": "2.0.1",
       "skills": "./skills/",
       "keywords": [
         "ATLAS",
