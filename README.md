@@ -37,7 +37,7 @@ transparent, proxy-free analysis on SDCC nodes.
 ### `af-uchicago`
 
 Skills for the UChicago ATLAS Analysis Facility (af.uchicago.edu): HTCondor
-batch jobs, JupyterLab, XCache, Rucio, ServiceX, Coffea Casa, Triton ML
+batch jobs, BinderHub notebooks, XCache, Rucio, ServiceX, Coffea Casa, Triton ML
 inference, and the AF MCP Platform.
 
 **Skills:**
@@ -50,7 +50,7 @@ inference, and the AF MCP Platform.
 
 | Server     | Launch command / URL              | Purpose                                                                                                  |
 | ---------- | --------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| `atlas-af` | `https://mcp.af.uchicago.edu/mcp` | AF MCP Platform: credential-brokered access to Rucio, AMI, HTCondor, JupyterLab, and AF filesystem tools |
+| `atlas-af` | `https://mcp.af.uchicago.edu/mcp` | AF MCP Platform: credential-brokered access to Rucio, AMI, HTCondor, JupyterHub, and AF filesystem tools |
 
 ---
 

@@ -2,7 +2,8 @@
 name: af-uchicago
 description: >-
   Use when working with the UChicago ATLAS Analysis Facility, submitting
-  HTCondor batch jobs at UChicago, accessing JupyterLab at af.uchicago.edu,
+  HTCondor batch jobs at UChicago, launching notebooks with BinderHub at
+  binderhub.af.uchicago.edu (or asking about the retired AF Portal JupyterLab),
   using XCache or Rucio for ATLAS data at UChicago, deploying ML models on
   Triton at UChicago AF, setting up ServiceX or Coffea Casa, or troubleshooting
   SSH access to login.af.uchicago.edu
@@ -13,15 +14,15 @@ description: >-
 ## Overview
 
 The UChicago ATLAS Analysis Facility (UChicago AF) provides ATLAS physicists
-with interactive nodes (SSH + JupyterLab), HTCondor batch computing, GPU
-resources, and advanced data services (XCache, Rucio, ServiceX, Coffea Casa,
+with interactive nodes (SSH + BinderHub notebooks), HTCondor batch computing,
+GPU resources, and advanced data services (XCache, Rucio, ServiceX, Coffea Casa,
 Triton). It is part of the MWT2 Tier-2 center supporting US ATLAS computing.
 
 ## When to Use
 
 - Setting up access to login.af.uchicago.edu or af.uchicago.edu
 - Submitting HTCondor batch jobs for ATLAS analysis
-- Launching JupyterLab sessions with CPU/GPU resources
+- Launching BinderHub notebook servers with CPU/GPU resources
 - Accessing ATLAS data via XCache or Rucio
 - Using ServiceX for data delivery or Coffea Casa for columnar analysis
 - Deploying ML models on Triton Inference Server
@@ -32,7 +33,7 @@ Triton). It is part of the MWT2 Tier-2 center supporting US ATLAS computing.
 | Resource          | Value                                                    |
 | ----------------- | -------------------------------------------------------- |
 | SSH Login         | `login.af.uchicago.edu`                                  |
-| JupyterLab        | `https://af.uchicago.edu`                                |
+| BinderHub         | `https://binderhub.af.uchicago.edu`                      |
 | XCache            | `root://xcache.af.uchicago.edu:1094//`                   |
 | ServiceX (Uproot) | `uproot-atlas.servicex.af.uchicago.edu`                  |
 | ServiceX (xAOD)   | `xaod.servicex.af.uchicago.edu`                          |
@@ -165,29 +166,38 @@ Tier-2 pool when the local AF pool is full.
 Use `condor_watch_q` for live monitoring — do **not** run `watch condor_q` (it
 hammers the schedd).
 
-## JupyterLab
+## BinderHub Notebooks
 
-Access JupyterLab at `https://af.uchicago.edu/jupyterlab` (requires ATLAS
-AuthZ).
+Launch notebooks from BinderHub at `https://binderhub.af.uchicago.edu`. The AF
+Portal JupyterLab (`https://af.uchicago.edu/jupyterlab`) is retired; point users
+to BinderHub instead.
 
-**Resource Limits**:
-
-- CPU: 1-16 cores
-- Memory: 1-32 GB RAM
-- GPU: 0-7 GPUs (A100 with MIG partitioning up to 28 instances)
-- Session Duration: Up to 72 hours
+- Pick an image under **Curated Repositories** (`ml-platform:latest` is the
+  recommended default), or launch from a Git repository.
+- Set resources in **Advanced setting**: site (UC AF, ssl, nrp), GPU model and
+  count, CPU, memory, and **QoS → Guaranteed** to reserve exactly what is
+  requested.
+- Servers are JupyterHub named servers at
+  `https://jupyterhub.af.uchicago.edu/user/<username>/<server-name>/`.
+- On the UC AF site, notebooks start in `/home/<username>` with `/data` and
+  `/cvmfs` mounted; files saved elsewhere are lost when the server stops.
+- Idle servers are stopped after 24 hours; relaunch to continue.
 
 **GPU Specs**:
 
-- 4x NVIDIA A100 40GB GPUs
-- MIG (Multi-Instance GPU) partitioning available
-- Up to 28 MIG instances across all A100s
+- Models include NVIDIA A100 SXM4 40GB (full and MIG slices), H200 NVL (MIG
+  slices), Tesla V100, RTX 2080 Ti, and GTX 1080 Ti; pick one under **Advanced
+  setting**, which shows free/total counts, or choose "Any"
+- For current per-node models and counts, see
+  `https://usatlas.github.io/af-docs/uchicago/hardware/`
 
 **Docker Images**:
 
-- `ml_platform`: TensorFlow, PyTorch, scikit-learn
-- `AB-stable`: AnalysisBase stable release
-- `AB-dev`: AnalysisBase development release
+- `ml-platform:latest`: TensorFlow, PyTorch, scikit-learn (recommended)
+- `ml-platform-cpu:<release>` / `ml-platform-gpu:<release>`: CPU or GPU builds,
+  `latest` or a pinned release such as `2026.11.4`
+- `AB-STABLE`: AnalysisBase stable release
+- `AB-DEV`: AnalysisBase development release
 
 ## Data Access
 
@@ -338,19 +348,22 @@ models.
 
 ## VSCode Integration
 
-Connect local VSCode to JupyterLab kernels:
+Connect local VSCode to a BinderHub notebook server's kernel:
 
-1. Start JupyterLab session at `https://af.uchicago.edu/jupyterlab`
-2. In VSCode, install Jupyter extension
-3. Select "Existing Jupyter Server" and enter the JupyterLab URL
-4. Authenticate with ATLAS credentials
-5. Select remote kernel from UChicago AF JupyterLab
+1. Launch a server from `https://binderhub.af.uchicago.edu`
+2. Create a JupyterHub API token at
+   `https://jupyterhub.af.uchicago.edu/hub/token` with the `access:servers`
+   scope
+3. In VSCode, install the Jupyter extension, then select "Existing Jupyter
+   Server" and enter
+   `https://jupyterhub.af.uchicago.edu/user/<username>/<server-name>/?token=<token>`
+4. Select the remote kernel; after a relaunch, the same token reconnects
 
 ## MCP Platform
 
 UChicago AF runs the AF MCP Platform, a credential-brokered
 [Model Context Protocol](https://modelcontextprotocol.io/) gateway that exposes
-Rucio, AMI, HTCondor, JupyterLab, and AF filesystem tools to LLM clients such as
+Rucio, AMI, HTCondor, JupyterHub, and AF filesystem tools to LLM clients such as
 Claude Code and Claude Desktop.
 
 - **MCP endpoint**: `https://mcp.af.uchicago.edu/mcp` — point an MCP-over-HTTP
@@ -371,21 +384,28 @@ Claude Code and Claude Desktop.
   `https://mcp-portal.af.uchicago.edu/identities/` — required before the broker
   can mint per-user Rucio/AMI/x509 credentials on your behalf.
 
-The `atlas-af` server's tools are namespaced by backend: `af_*` (identity —
-`af_whoami`, `af_list_identities`, `af_link_identity`, `af_usage`),
-`rucio-atlas_*` (e.g. `rucio-atlas_rucio_list_dids`,
-`rucio-atlas_rucio_get_did`, `rucio-atlas_rucio_list_files`), `ami_*` (e.g.
-`ami_search_by_hashtags`, `ami_get_dataset_hashtags`, `ami_get_physics_params`,
-`ami_get_ami_tag`), `jlab_*` (e.g. `jlab_nb_list_files`, `jlab_nb_list_kernels`,
-`jlab_nb_use_notebook`), and `fs_*` (e.g. `fs_list`, `fs_stat`, `fs_read`).
-Check `/mcp` for the current full list — it changes as backends are added.
+The `atlas-af` server's tools are named `<prefix>_<tool>`, one prefix per
+backend service (Rucio, AMI, HTCondor, JupyterHub, ServiceX, filesystem, ATLAS
+search, ...). Services and their prefixes change as backends are added or
+renamed, so do not hard-code tool names — discover them at run time:
+
+- `af_list_mcp_servers` — every configured service, its tool-name prefix, the
+  identity it needs, and its availability to the caller. Availability is the
+  broker's last-known status, not a live probe of the backend, so it can lag a
+  recovery or an outage; if a service shows unavailable but its tools are
+  listed, try a read-only call before concluding it is down.
+- `af_whoami` / `af_list_identities` — the caller's permissions and which
+  identities are linked; `af_link_identity` starts linking a missing one.
+
+The gateway's own `af_*` tools are the stable entry point; use them first when
+an expected tool is missing or a call fails.
 
 This overlaps with domains the `atlas` plugin also covers via CLI (Rucio in the
 setupatlas, eiclient, panda, servicex, and centralpage skills; AMI/pyAMI in
 setupatlas and centralpage). When both plugins are installed, prefer the
-`rucio-atlas_*`/`ami_*` MCP tools above over those skills' CLI commands when
-available — the MCP path needs no `lsetup`/VOMS-proxy setup, but only works once
-the user has linked their identity (check with `af_whoami`).
+Rucio/AMI MCP tools above over those skills' CLI commands when available — the
+MCP path needs no `lsetup`/VOMS-proxy setup, but only works once the user has
+linked their identity (check with `af_whoami`).
 
 ## Hardware Summary
 
@@ -405,14 +425,14 @@ the user has linked their identity (check with `af_whoami`).
 
 ## Common Issues
 
-| Issue                         | Cause                                   | Solution                                      |
-| ----------------------------- | --------------------------------------- | --------------------------------------------- |
-| SSH login rejected            | Deprecated key (DSA / RSA SHA-1)        | Generate ed25519 or ecdsa key                 |
-| Grid commands fail            | Expired X509 proxy                      | Regenerate with `voms-proxy-init -voms atlas` |
-| Cannot write files            | `$HOME` quota exceeded                  | Clean up old files or use `$DATA`             |
-| Job outputs lost              | Used `$SCRATCH`                         | Use `$DATA` for persistent storage            |
-| EOS mount not found on worker | EOS only on login nodes                 | Use `xrdcp` with full EOS URL on workers      |
-| JupyterLab session killed     | Exceeded resource limits or 72h timeout | Reduce resource request or split work         |
+| Issue                         | Cause                            | Solution                                                  |
+| ----------------------------- | -------------------------------- | --------------------------------------------------------- |
+| SSH login rejected            | Deprecated key (DSA / RSA SHA-1) | Generate ed25519 or ecdsa key                             |
+| Grid commands fail            | Expired X509 proxy               | Regenerate with `voms-proxy-init -voms atlas`             |
+| Cannot write files            | `$HOME` quota exceeded           | Clean up old files or use `$DATA`                         |
+| Job outputs lost              | Used `$SCRATCH`                  | Use `$DATA` for persistent storage                        |
+| EOS mount not found on worker | EOS only on login nodes          | Use `xrdcp` with full EOS URL on workers                  |
+| Notebook server stopped       | Idle for 24 hours                | Relaunch from BinderHub; files in `/home`/`/data` persist |
 
 ## Support
 
