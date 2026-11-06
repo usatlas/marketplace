@@ -25,8 +25,8 @@ server — the AF MCP Platform at UChicago exposes Rucio and AMI tools directly,
 named `rucio-atlas_*` (e.g. `rucio-atlas_rucio_list_dids`,
 `rucio-atlas_rucio_get_did`) and `ami_*` (e.g. `ami_search_by_hashtags`,
 `ami_get_physics_params`) under that server (see the af-uchicago skill for the
-full tool set, which also covers HTCondor, JupyterLab, and filesystem access).
-Prefer those over the CLI tools below when they're available: no
+full tool set, which also covers HTCondor, JupyterHub notebooks, and filesystem
+access). Prefer those over the CLI tools below when they're available: no
 `setupATLAS`/`lsetup`, local VOMS proxy, or `~/.pyami/pyami.cfg` needed. They
 only work for a user who has linked their ATLAS/CERN identity — the same
 server's `af_whoami`/`af_list_identities` tools can check that. If a Rucio/AMI
