@@ -185,9 +185,11 @@ to BinderHub instead.
 
 **GPU Specs**:
 
-- 4x NVIDIA A100 40GB GPUs
-- MIG (Multi-Instance GPU) partitioning available
-- Up to 28 MIG instances across all A100s
+- Models include NVIDIA A100 SXM4 40GB (full and MIG slices), H200 NVL (MIG
+  slices), Tesla V100, RTX 2080 Ti, and GTX 1080 Ti; pick one under **Advanced
+  setting**, which shows free/total counts, or choose "Any"
+- For current per-node models and counts, see
+  `https://usatlas.github.io/af-docs/uchicago/hardware/`
 
 **Docker Images**:
 
@@ -382,21 +384,25 @@ Claude Code and Claude Desktop.
   `https://mcp-portal.af.uchicago.edu/identities/` — required before the broker
   can mint per-user Rucio/AMI/x509 credentials on your behalf.
 
-The `atlas-af` server's tools are namespaced by backend: `af_*` (identity —
-`af_whoami`, `af_list_identities`, `af_link_identity`, `af_usage`),
-`rucio-atlas_*` (e.g. `rucio-atlas_rucio_list_dids`,
-`rucio-atlas_rucio_get_did`, `rucio-atlas_rucio_list_files`), `ami_*` (e.g.
-`ami_search_by_hashtags`, `ami_get_dataset_hashtags`, `ami_get_physics_params`,
-`ami_get_ami_tag`), `jlab_*` (e.g. `jlab_nb_list_files`, `jlab_nb_list_kernels`,
-`jlab_nb_use_notebook`), and `fs_*` (e.g. `fs_list`, `fs_stat`, `fs_read`).
-Check `/mcp` for the current full list — it changes as backends are added.
+The `atlas-af` server's tools are named `<prefix>_<tool>`, one prefix per
+backend service (Rucio, AMI, HTCondor, JupyterHub, ServiceX, filesystem, ATLAS
+search, ...). Services and their prefixes change as backends are added or
+renamed, so do not hard-code tool names — discover them at run time:
+
+- `af_list_mcp_servers` — every configured service, its tool-name prefix, the
+  identity it needs, and whether it is available to the caller right now.
+- `af_whoami` / `af_list_identities` — the caller's permissions and which
+  identities are linked; `af_link_identity` starts linking a missing one.
+
+The gateway's own `af_*` tools are the stable entry point; use them first when
+an expected tool is missing or a call fails.
 
 This overlaps with domains the `atlas` plugin also covers via CLI (Rucio in the
 setupatlas, eiclient, panda, servicex, and centralpage skills; AMI/pyAMI in
 setupatlas and centralpage). When both plugins are installed, prefer the
-`rucio-atlas_*`/`ami_*` MCP tools above over those skills' CLI commands when
-available — the MCP path needs no `lsetup`/VOMS-proxy setup, but only works once
-the user has linked their identity (check with `af_whoami`).
+Rucio/AMI MCP tools above over those skills' CLI commands when available — the
+MCP path needs no `lsetup`/VOMS-proxy setup, but only works once the user has
+linked their identity (check with `af_whoami`).
 
 ## Hardware Summary
 
