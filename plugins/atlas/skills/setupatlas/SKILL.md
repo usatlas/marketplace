@@ -215,11 +215,12 @@ See `references/tools.md` for the full utility command list (`showVersions`,
   ATLAS AF-US, AF-UK, and SWAN; tier-3 sites that mount `/cvmfs/atlas.cern.ch`
   work identically.
 - **af-uchicago MCP**: If the af-uchicago plugin is also installed, its bundled
-  AF MCP Platform server (`atlas-af`) can serve Rucio (`rucio-atlas_*` tools),
-  AMI (`ami_*` tools), and HTCondor queries directly — no `lsetup`/local VOMS
-  proxy needed. Check `/mcp` first; it only works for users who have linked
-  their identity at `https://mcp-portal.af.uchicago.edu/identities/` (see the
-  af-uchicago skill), otherwise fall back to the CLI patterns above.
+  AF MCP Platform server (`atlas-af`) can serve Rucio, AMI, and HTCondor queries
+  directly (its `af_list_mcp_servers` tool lists each service's current
+  tool-name prefix) — no `lsetup`/local VOMS proxy needed. Check `/mcp` first;
+  it only works for users who have linked their identity at
+  `https://mcp-portal.af.uchicago.edu/identities/` (see the af-uchicago skill),
+  otherwise fall back to the CLI patterns above.
 
 | Domain                                        | Mailing list                        |
 | --------------------------------------------- | ----------------------------------- |

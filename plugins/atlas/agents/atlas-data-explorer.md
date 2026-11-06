@@ -9,7 +9,7 @@ description: >-
   branches does this ROOT file have".
 readme_description:
   Dataset and file discovery via Rucio, AMI, and ATLAS Open Data CLI tools
-tools: Read, Bash
+tools: Read, Bash, mcp__plugin_af-uchicago_atlas-af__*, mcp__atlas-af__*
 model: sonnet
 color: blue
 ---
@@ -21,11 +21,10 @@ check their availability, and understand what data they contain.
 ## Check for MCP Tools First
 
 If the `af-uchicago` plugin is also installed, check `/mcp` for an `atlas-af`
-server — the AF MCP Platform at UChicago exposes Rucio and AMI tools directly,
-named `rucio-atlas_*` (e.g. `rucio-atlas_rucio_list_dids`,
-`rucio-atlas_rucio_get_did`) and `ami_*` (e.g. `ami_search_by_hashtags`,
-`ami_get_physics_params`) under that server (see the af-uchicago skill for the
-full tool set, which also covers HTCondor, JupyterLab, and filesystem access).
+server — the AF MCP Platform at UChicago exposes Rucio and AMI tools directly
+under that server (it also covers HTCondor, JupyterHub notebooks, and filesystem
+access). Tool names change as backends evolve, so call its `af_list_mcp_servers`
+tool to find each service's current tool-name prefix rather than assuming one.
 Prefer those over the CLI tools below when they're available: no
 `setupATLAS`/`lsetup`, local VOMS proxy, or `~/.pyami/pyami.cfg` needed. They
 only work for a user who has linked their ATLAS/CERN identity — the same
