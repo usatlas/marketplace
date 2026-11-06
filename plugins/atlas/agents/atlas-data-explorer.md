@@ -9,7 +9,7 @@ description: >-
   branches does this ROOT file have".
 readme_description:
   Dataset and file discovery via Rucio, AMI, and ATLAS Open Data CLI tools
-tools: Read, Bash
+tools: Read, Bash, mcp__plugin_af-uchicago_atlas-af__*, mcp__atlas-af__*
 model: sonnet
 color: blue
 ---

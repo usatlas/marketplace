@@ -390,7 +390,10 @@ search, ...). Services and their prefixes change as backends are added or
 renamed, so do not hard-code tool names — discover them at run time:
 
 - `af_list_mcp_servers` — every configured service, its tool-name prefix, the
-  identity it needs, and whether it is available to the caller right now.
+  identity it needs, and its availability to the caller. Availability is the
+  broker's last-known status, not a live probe of the backend, so it can lag a
+  recovery or an outage; if a service shows unavailable but its tools are
+  listed, try a read-only call before concluding it is down.
 - `af_whoami` / `af_list_identities` — the caller's permissions and which
   identities are linked; `af_link_identity` starts linking a missing one.
 
