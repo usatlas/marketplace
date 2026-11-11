@@ -166,6 +166,33 @@ Tier-2 pool when the local AF pool is full.
 Use `condor_watch_q` for live monitoring — do **not** run `watch condor_q` (it
 hammers the schedd).
 
+**Linked credentials in jobs**: jobs can receive the credentials the user linked
+on the MCP Platform (VOMS proxy, CERN Kerberos ticket, ServiceX token) without
+anyone copying them around. Request each with `use_oauth_services`; HTCondor
+delivers and refreshes it on the worker as `$_CONDOR_CREDS/af_<kind>.use`.
+
+- Call `af_list_identities` first: each linked identity usable in jobs carries a
+  `job_credential` with the `service` to request, the file `path`, its `format`,
+  and the `env` assignment tools read it from. Do not guess kinds.
+- Never `cat`, `echo`, or `base64` these files — job output is returned
+  verbatim. Reference them only through the environment variables.
+- If a kind is missing, route the user to `af_link_identity` or the portal.
+- `klist` is not in the worker image; check a krb5 cache with
+  `od -An -tx1 -N2 "$_CONDOR_CREDS/af_krb5.use"` (`05 04` is valid).
+- Login nodes already set `CREDD_HOST`, so `condor_submit` there works too.
+
+```condor
+use_oauth_services = af_x509, af_krb5
+```
+
+```bash
+#!/bin/bash
+# job.sh: set env vars after any setup that may override them (e.g. lsetup emi)
+export X509_USER_PROXY="$_CONDOR_CREDS/af_x509.use"
+export KRB5CCNAME="FILE:$_CONDOR_CREDS/af_krb5.use"
+voms-proxy-info --timeleft
+```
+
 ## BinderHub Notebooks
 
 Launch notebooks from BinderHub at `https://binderhub.af.uchicago.edu`. The AF
