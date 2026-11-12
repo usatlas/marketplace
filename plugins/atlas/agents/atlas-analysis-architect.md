@@ -161,7 +161,7 @@ exclusion, profile likelihood for measurement).
 
 ### Step 10: Produce Specification
 
-Invoke `atlas:analysis-spec-builder` to structure the output into
+Invoke `iris-hep:analysis-spec-builder` to structure the output into
 `specification.md`, covering: physics motivation, dataset containers
 (AMI-verified), framework and software version, object selection tables, region
 definitions, background methods, systematics list, fit model, unblinding

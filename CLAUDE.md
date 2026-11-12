@@ -11,10 +11,16 @@ plugins/
     agents/<name>.md             # subagent definitions
     skills/<name>/SKILL.md       # skill definitions
 .claude-plugin/marketplace.json  # Claude Code registry of all plugins
+.agents/plugins/marketplace.json # symlink to the file above (deepagents CLI discovery)
 .codex/INSTALL.md                # Codex native skill discovery instructions
 ```
 
 The root `skills/` directory is unused — all skills live under `plugins/`.
+
+The `iris-hep` entry in `marketplace.json` has no `plugins/iris-hep/` directory
+— it's sourced directly from
+[iris-hep/marketplace](https://github.com/iris-hep/marketplace) (see
+[Depending on an external plugin](#depending-on-an-external-plugin-iris-hep)).
 
 ## Skills for skill authoring
 
@@ -227,6 +233,43 @@ directory, not an individual skill or the repo root).
 `validate-skills` complements `pixi run lint-skills` (this repo's section
 ordering) and is included in `pixi run check-skills` alongside the README sync.
 
+## Depending on an external plugin (iris-hep)
+
+`marketplace.json`'s `plugins` array can reference a plugin hosted in another
+repository instead of a local `./plugins/<name>` path, using an object `source`
+(`github`, `git-subdir`, `url`, `npm`, or `archive` — see the
+[plugin marketplaces reference](https://code.claude.com/docs/en/plugin-marketplaces#plugin-sources)).
+The `iris-hep` entry uses this to reference
+[iris-hep/marketplace](https://github.com/iris-hep/marketplace)'s `iris-hep`
+plugin (a `git-subdir` source pointing at `./iris-hep` in that repo) instead of
+vendoring copies of its skills.
+
+A plugin in this marketplace pulls in `iris-hep`'s skills by declaring a
+`dependencies` entry in its own `plugin.json`:
+
+```json
+"dependencies": ["iris-hep"]
+```
+
+Installing that plugin then auto-installs `iris-hep` from the same marketplace
+(see
+[Constrain plugin dependency versions](https://code.claude.com/docs/en/plugin-dependencies)).
+`atlas` and `hep-python-tools` both depend on `iris-hep` this way. When a skill
+or agent needs to invoke one of `iris-hep`'s skills by name, prefix it with
+`iris-hep:` (e.g. `iris-hep:servicex`), not `atlas:` or `hep-python-tools:`.
+
+Because `scripts/sync_skills.py` only introspects local `plugins/<name>/`
+directories, it special-cases any marketplace entry whose `source` is not a
+plain string (i.e. an externally-sourced plugin like `iris-hep`) and renders it
+from the marketplace entry's own `description` alone, skipping the
+agents/skills/MCP tables and the Repository Layout tree.
+
+**Caveat:** Cursor (`.cursor-plugin/plugin.json`) and Codex
+(`.codex/INSTALL.md`'s skill symlinks) have no equivalent of Claude Code's
+plugin `dependencies` resolution. Users of those tools who need `iris-hep`'s
+skills must add [iris-hep/marketplace](https://github.com/iris-hep/marketplace)
+separately.
+
 ## Version bumping
 
 Versions are independent per component, each with its own
@@ -319,8 +362,17 @@ No `Co-Authored-By` lines in commit messages.
 
 ## Vendored content (IRIS-HEP)
 
-Skills adapted from the IRIS-HEP marketplace (Gordon Watts, Ben Galewsky) are
-listed in `plugins/atlas/VENDORED-LICENSES.md`. Individual skill files carry no
-attribution markers — the license file satisfies BSD 3-Clause requirements. When
-updating a vendored skill, rewrite from expert knowledge rather than copying
-upstream verbatim.
+This marketplace no longer vendors copies of IRIS-HEP marketplace skills —
+`analysis-spec-builder`, `awkward-array`, `cli-creator`, `hist`, `servicex`,
+`standalone-script`, and `vector-awkward` are consumed live from the `iris-hep`
+plugin dependency (see
+[Depending on an external plugin](#depending-on-an-external-plugin-iris-hep)).
+Do not re-vendor a copy of one of these skills; extend the `dependencies` field
+of the relevant `plugin.json` instead.
+
+`plugins/atlas/VENDORED-LICENSES.md` still lists the `atlas-analysis-architect`
+and `atlas-analysis-coder` agents and the (now-removed) `atlas-plan` command as
+adapted, substantially-rewritten content from IRIS-HEP marketplace (Gordon
+Watts, Ben Galewsky) — that attribution stays even though the skills it used to
+also cover are gone. Individual agent files carry no attribution markers — the
+license file satisfies BSD 3-Clause requirements.

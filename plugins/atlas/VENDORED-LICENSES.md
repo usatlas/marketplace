@@ -2,15 +2,14 @@
 
 ## IRIS-HEP Marketplace
 
-The following skills were vendored from the
-[IRIS-HEP marketplace](https://github.com/iris-hep/iris-hep-marketplace) and
-adapted for the ATLAS plugin:
-
-- `skills/analysis-spec-builder/`
-- `skills/awkward/` (originally `awkward-array`)
-- `skills/hist/`
-- `skills/servicex/`
-- `skills/vector/` (originally `vector-awkward`)
+This plugin previously vendored copies of `analysis-spec-builder`,
+`awkward-array`, `hist`, `servicex`, and `vector-awkward` from the
+[IRIS-HEP marketplace](https://github.com/iris-hep/marketplace). Those copies
+have been removed; the atlas plugin now declares a `dependencies` entry on the
+`iris-hep` plugin (see the top-level `.claude-plugin/marketplace.json`) so those
+skills are installed from upstream instead. See
+[iris-hep/marketplace#5](https://github.com/iris-hep/marketplace/pull/5) for the
+improvements contributed back before this switch.
 
 The following agents were adapted from iris-hep-marketplace:
 

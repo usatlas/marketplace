@@ -2,7 +2,11 @@
 
 Claude Code plugin marketplace for ATLAS physics analysis. Four plugins cover
 USATLAS Analysis Facilities, BNL LOCALGROUPDISK storage migration, the full
-ATLAS software and analysis stack, and generic HEP Python tooling.
+ATLAS software and analysis stack, and generic HEP Python tooling. The `atlas`
+and `hep-python-tools` plugins depend on the `iris-hep` plugin (referenced
+directly from [iris-hep/marketplace](https://github.com/iris-hep/marketplace)
+rather than vendored) for ServiceX, Awkward Array, Hist, Vector, and a couple of
+Python-tooling skills; installing either one installs `iris-hep` automatically.
 
 ## Installation
 
@@ -15,6 +19,12 @@ ATLAS software and analysis stack, and generic HEP Python tooling.
 ```
 
 Then install whichever plugins you need from the marketplace browser.
+
+`.claude-plugin/marketplace.json` is the canonical marketplace catalog;
+`.agents/plugins/marketplace.json` is a symlink to it, kept only so that
+non-Claude-Code tooling (e.g. LangChain's `deepagents` CLI) that looks for a
+catalog under `.agents/plugins/` finds the same file without a second copy to
+maintain.
 
 <!-- UPDATE:START -->
 
@@ -73,51 +83,46 @@ software orientation.
 
 **Skills:**
 
-| Skill                   | Description                                                                     |
-| ----------------------- | ------------------------------------------------------------------------------- |
-| `acm`                   | Building ATLAS software with acm (AtlasACM)                                     |
-| `analysis-spec-builder` | Producing a structured ATLAS analysis specification document                    |
-| `art`                   | Running or writing ART (ATLAS Release Tester) validation tests for ATLAS        |
-| `astyle`                | Creating ATLAS publication-quality plots with the official ATLAS ROOT style     |
-| `atlantis`              | Visualizing ATLAS detector events with the Atlantis event display               |
-| `atlas-containers`      | Running ATLAS software inside containers via setupATLAS -c, choosing between    |
-| `atlas-software`        | A question involves ATLAS software concepts                                     |
-| `awkward`               | Working with jagged or variable-length arrays in Python HEP analysis            |
-| `cabinetry`             | Building an ATLAS statistical analysis with cabinetry                           |
-| `centralpage`           | Searching for ATLAS Monte Carlo or data samples                                 |
-| `coffea`                | Writing a columnar ATLAS analysis with coffea                                   |
-| `cpp-bindings`          | Writing Python bindings for C++ HEP code with nanobind or pybind11              |
-| `decaylanguage`         | Working with particle decay chains in Python                                    |
-| `eiclient`              | Working with the ATLAS Event Index                                              |
-| `fastframes`            | You need a supported RDataFrame-based framework to process CP-algorithm NTuples |
-| `fastjet`               | Running jet clustering in Python with the Scikit-HEP fastjet package            |
-| `fsspec-xrootd`         | Accessing ROOT files on EOS, WLCG grid storage, or any XRootD endpoint from     |
-| `hepunits`              | Writing unit-safe HEP code in Python                                            |
-| `hist`                  | Creating, filling, slicing, or plotting histograms with the scikit-hep hist     |
-| `histfitter`            | Setting up, running, or debugging a HistFitter statistical analysis             |
-| `iminuit`               | You need to minimize a scalar cost function in Python using MINUIT2 via iminuit |
-| `lcgenv`                | Setting up standalone LCG (CERN SFT) software packages via lcgenv or views:     |
-| `managetier3sw`         | Installing, updating, or removing ATLAS software on a local Tier-3 cluster      |
-| `mplhep`                | Creating ATLAS publication-quality plots with matplotlib using mplhep           |
-| `panda`                 | Submitting ATLAS grid jobs with prun or pathena, monitoring tasks with pbook or |
-| `particle`              | Looking up particle properties                                                  |
-| `pyhepmc`               | Reading or writing HepMC3 event records in Python                               |
-| `pyhf`                  | You need HistFactory statistical modeling, profile-likelihood fits, CLs limits  |
-| `pyhs3`                 | Reading, writing, or validating binned and/or unbinned statistical models in    |
-| `pylhe`                 | Reading or writing Les Houches Event XML (LHE) or HDF5 (LHEH5) files in Python: |
-| `quickfit`              | Fitting a RooWorkspace dataset with quickFit, generating an Asimov dataset with |
-| `roounfold`             | Performing statistical unfolding for an ATLAS cross-section measurement:        |
-| `servicex`              | Querying ATLAS data remotely via ServiceX                                       |
-| `setupatlas`            | Setting up the ATLAS software environment with setupATLAS or                    |
-| `statanalysis`          | Setting up the ATLAS StatAnalysis software release with asetup, choosing the    |
-| `topcptoolkit`          | Using TopCPToolkit (TCT) to produce ATLAS analysis NTuples from DAOD files:     |
-| `trexfitter`            | Setting up or running a TRExFitter statistical analysis                         |
-| `uproot`                | Reading or writing ROOT files in Python without a ROOT installation, or when    |
-| `vector`                | Computing 4-vector quantities in Python                                         |
-| `workspacecombiner`     | Combining multiple RooFit workspaces with workspaceCombiner, editing workspace  |
-| `xcache`                | Setting up a local XCache disk caching proxy for XRootD root:// protocol        |
-| `xmlanawsbuilder`       | Building a RooFit workspace from XML cards with xmlAnaWSBuilder or XMLReader    |
-| `xroofit`               | Building RooFit statistical models with xRooFit, constructing workspaces with   |
+| Skill               | Description                                                                     |
+| ------------------- | ------------------------------------------------------------------------------- |
+| `acm`               | Building ATLAS software with acm (AtlasACM)                                     |
+| `art`               | Running or writing ART (ATLAS Release Tester) validation tests for ATLAS        |
+| `astyle`            | Creating ATLAS publication-quality plots with the official ATLAS ROOT style     |
+| `atlantis`          | Visualizing ATLAS detector events with the Atlantis event display               |
+| `atlas-containers`  | Running ATLAS software inside containers via setupATLAS -c, choosing between    |
+| `atlas-software`    | A question involves ATLAS software concepts                                     |
+| `cabinetry`         | Building an ATLAS statistical analysis with cabinetry                           |
+| `centralpage`       | Searching for ATLAS Monte Carlo or data samples                                 |
+| `coffea`            | Writing a columnar ATLAS analysis with coffea                                   |
+| `cpp-bindings`      | Writing Python bindings for C++ HEP code with nanobind or pybind11              |
+| `decaylanguage`     | Working with particle decay chains in Python                                    |
+| `eiclient`          | Working with the ATLAS Event Index                                              |
+| `fastframes`        | You need a supported RDataFrame-based framework to process CP-algorithm NTuples |
+| `fastjet`           | Running jet clustering in Python with the Scikit-HEP fastjet package            |
+| `fsspec-xrootd`     | Accessing ROOT files on EOS, WLCG grid storage, or any XRootD endpoint from     |
+| `hepunits`          | Writing unit-safe HEP code in Python                                            |
+| `histfitter`        | Setting up, running, or debugging a HistFitter statistical analysis             |
+| `iminuit`           | You need to minimize a scalar cost function in Python using MINUIT2 via iminuit |
+| `lcgenv`            | Setting up standalone LCG (CERN SFT) software packages via lcgenv or views:     |
+| `managetier3sw`     | Installing, updating, or removing ATLAS software on a local Tier-3 cluster      |
+| `mplhep`            | Creating ATLAS publication-quality plots with matplotlib using mplhep           |
+| `panda`             | Submitting ATLAS grid jobs with prun or pathena, monitoring tasks with pbook or |
+| `particle`          | Looking up particle properties                                                  |
+| `pyhepmc`           | Reading or writing HepMC3 event records in Python                               |
+| `pyhf`              | You need HistFactory statistical modeling, profile-likelihood fits, CLs limits  |
+| `pyhs3`             | Reading, writing, or validating binned and/or unbinned statistical models in    |
+| `pylhe`             | Reading or writing Les Houches Event XML (LHE) or HDF5 (LHEH5) files in Python: |
+| `quickfit`          | Fitting a RooWorkspace dataset with quickFit, generating an Asimov dataset with |
+| `roounfold`         | Performing statistical unfolding for an ATLAS cross-section measurement:        |
+| `setupatlas`        | Setting up the ATLAS software environment with setupATLAS or                    |
+| `statanalysis`      | Setting up the ATLAS StatAnalysis software release with asetup, choosing the    |
+| `topcptoolkit`      | Using TopCPToolkit (TCT) to produce ATLAS analysis NTuples from DAOD files:     |
+| `trexfitter`        | Setting up or running a TRExFitter statistical analysis                         |
+| `uproot`            | Reading or writing ROOT files in Python without a ROOT installation, or when    |
+| `workspacecombiner` | Combining multiple RooFit workspaces with workspaceCombiner, editing workspace  |
+| `xcache`            | Setting up a local XCache disk caching proxy for XRootD root:// protocol        |
+| `xmlanawsbuilder`   | Building a RooFit workspace from XML cards with xmlAnaWSBuilder or XMLReader    |
+| `xroofit`           | Building RooFit statistical models with xRooFit, constructing workspaces with   |
 
 ---
 
@@ -130,12 +135,19 @@ pixi/uv/Hatch, and PEP-723 standalone scripts.
 
 | Skill                | Description                                                                 |
 | -------------------- | --------------------------------------------------------------------------- |
-| `cli-creator`        | Building a Python command-line interface with Typer                         |
 | `code-quality-tools` | Setting up code quality tooling for a HEP Python project                    |
 | `pytest-speedup`     | A pytest suite is slow and needs speeding up                                |
 | `python-packaging`   | Creating a new Python package, adding pyproject.toml to an existing project |
 | `python-testing`     | Writing or configuring tests for a HEP Python project with pytest           |
-| `standalone-script`  | Generating a self-contained Python script with PEP 723 inline dependency    |
+
+---
+
+### `iris-hep` (external)
+
+Upstream IRIS-HEP marketplace plugin, referenced directly rather than vendored:
+analysis-spec-builder, awkward-array, cli-creator, hist, servicex,
+standalone-script, and vector-awkward skills for HEP analysis. Depended on by
+the atlas and hep-python-tools plugins.
 
 ## Repository Layout
 
@@ -151,13 +163,13 @@ plugins/
   atlas/
     .claude-plugin/plugin.json
     agents/  # 5 subagents
-    skills/  # 43 skills
+    skills/  # 38 skills
     VENDORED-LICENSES.md
   hep-python-tools/
     .claude-plugin/plugin.json
-    skills/  # 6 skills
-    VENDORED-LICENSES.md
+    skills/  # 4 skills
 .claude-plugin/marketplace.json
+.agents/plugins/marketplace.json  # symlink to the file above
 ```
 
 <!-- UPDATE:END -->

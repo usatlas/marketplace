@@ -33,38 +33,38 @@ write boilerplate or guess at APIs.
 
 ## Choosing the Data Access Pattern
 
-| Situation                                      | Pattern                                  | Skills to invoke                      |
-| ---------------------------------------------- | ---------------------------------------- | ------------------------------------- |
-| Local ROOT NTuple files                        | `uproot` → `awkward`                     | `atlas:uproot`, `atlas:awkward`       |
-| Remote ROOT via XRootD/CVMFS                   | `uproot` + `fsspec-xrootd` URI           | `atlas:uproot`, `atlas:fsspec-xrootd` |
-| ATLAS xAOD (DAOD_PHYS/PHYSLITE) query          | ServiceX + `func_adl`                    | `atlas:servicex`                      |
-| ATLAS Open Data                                | `atlasopenmagic` for URLs, then `uproot` | `atlas:uproot`                        |
-| Large-scale columnar (many files, distributed) | `coffea` processor                       | `atlas:coffea`                        |
+| Situation                                      | Pattern                                  | Skills to invoke                         |
+| ---------------------------------------------- | ---------------------------------------- | ---------------------------------------- |
+| Local ROOT NTuple files                        | `uproot` → `awkward`                     | `atlas:uproot`, `iris-hep:awkward-array` |
+| Remote ROOT via XRootD/CVMFS                   | `uproot` + `fsspec-xrootd` URI           | `atlas:uproot`, `atlas:fsspec-xrootd`    |
+| ATLAS xAOD (DAOD_PHYS/PHYSLITE) query          | ServiceX + `func_adl`                    | `iris-hep:servicex`                      |
+| ATLAS Open Data                                | `atlasopenmagic` for URLs, then `uproot` | `atlas:uproot`                           |
+| Large-scale columnar (many files, distributed) | `coffea` processor                       | `atlas:coffea`                           |
 
 ## Mandatory Skill Invocation
 
 Before writing code that uses these libraries, invoke the corresponding skill
 and report the guidance received:
 
-| Library                         | Invoke skill          |
-| ------------------------------- | --------------------- |
-| uproot (any file I/O)           | `atlas:uproot`        |
-| awkward (any `ak.*` operations) | `atlas:awkward`       |
-| hist (any histogram creation)   | `atlas:hist`          |
-| vector (any 4-vector / deltaR)  | `atlas:vector`        |
-| ServiceX / func_adl             | `atlas:servicex`      |
-| coffea processors               | `atlas:coffea`        |
-| fsspec-xrootd remote access     | `atlas:fsspec-xrootd` |
-| iminuit / fitting               | `atlas:iminuit`       |
+| Library                         | Invoke skill              |
+| ------------------------------- | ------------------------- |
+| uproot (any file I/O)           | `atlas:uproot`            |
+| awkward (any `ak.*` operations) | `iris-hep:awkward-array`  |
+| hist (any histogram creation)   | `iris-hep:hist`           |
+| vector (any 4-vector / deltaR)  | `iris-hep:vector-awkward` |
+| ServiceX / func_adl             | `iris-hep:servicex`       |
+| coffea processors               | `atlas:coffea`            |
+| fsspec-xrootd remote access     | `atlas:fsspec-xrootd`     |
+| iminuit / fitting               | `atlas:iminuit`           |
 
 ## Code Standards
 
 **Script format**: Use PEP 723 inline metadata (invoke
-`hep-python-tools:standalone-script`) so the script is self-contained and
-runnable with `uv run --script <file>` without a separate environment.
+`iris-hep:standalone-script`) so the script is self-contained and runnable with
+`uv run --script <file>` without a separate environment.
 
 **CLI**: For scripts accepting user parameters (nfiles, dataset, output
-directory), invoke `hep-python-tools:cli-creator` for a proper Typer interface.
+directory), invoke `iris-hep:cli-creator` for a proper Typer interface.
 
 **Physics conventions**:
 
@@ -76,7 +76,7 @@ directory), invoke `hep-python-tools:cli-creator` for a proper Typer interface.
 - Apply event weights (`weight_mc * weight_pileup * SF_*`) consistently.
   Document which weights are applied.
 
-**Histogram standards** (from `atlas:hist`):
+**Histogram standards** (from `iris-hep:hist`):
 
 - Use `mplhep.style.ATLAS` for all plots.
 - Label axes with units: `p_{T}` [GeV], `m_{jj}` [GeV].
